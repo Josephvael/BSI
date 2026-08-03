@@ -10,7 +10,7 @@ import {
   ModalSubmitInteraction,
 } from "discord.js";
 import { appendFiling } from "../sheets";
-import { getAllowedUsers, checkAccess } from "../access";
+import { getAllowedRoles, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
 
 export const filingCommand = new SlashCommandBuilder()
@@ -20,7 +20,7 @@ export const filingCommand = new SlashCommandBuilder()
 export async function handleFilingCommand(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
-  const allowed = await getAllowedUsers();
+  const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
     await interaction.reply({
       content: "You do not have access to this command.",

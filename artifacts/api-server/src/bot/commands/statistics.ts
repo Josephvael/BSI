@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, MessageFlags, ChatInputCommandInteraction } from "discord.js";
 import { getFilings, getSheetUrl } from "../sheets";
-import { getAllowedUsers, checkAccess } from "../access";
+import { getAllowedRoles, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
 
 export const statisticsCommand = new SlashCommandBuilder()
@@ -10,7 +10,7 @@ export const statisticsCommand = new SlashCommandBuilder()
 export async function handleStatisticsCommand(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
-  const allowed = await getAllowedUsers();
+  const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
     await interaction.reply({
       content: "You do not have access to this command.",

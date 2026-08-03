@@ -75697,38 +75697,45 @@ var import_discord = __toESM(require_src(), 1);
 import { readFile as readFile2, writeFile as writeFile2, mkdir as mkdir2 } from "node:fs/promises";
 import { existsSync as existsSync2 } from "node:fs";
 var ACCESS_FILE = "./.bot-data/access.json";
-async function loadUsers() {
+async function loadRoles() {
   if (!existsSync2(ACCESS_FILE)) return /* @__PURE__ */ new Set();
   const raw = await readFile2(ACCESS_FILE, "utf-8");
   const data = JSON.parse(raw);
-  return new Set(data.users);
+  return new Set(data.roles ?? data.users ?? []);
 }
-async function saveUsers(users) {
+async function saveRoles(roles) {
   await mkdir2("./.bot-data", { recursive: true });
-  await writeFile2(ACCESS_FILE, JSON.stringify({ users: [...users] }, null, 2));
+  await writeFile2(ACCESS_FILE, JSON.stringify({ roles: [...roles] }, null, 2));
 }
-async function grantAccess(userId) {
-  const users = await loadUsers();
-  users.add(userId);
-  await saveUsers(users);
+async function grantRoleAccess(roleId) {
+  const roles = await loadRoles();
+  roles.add(roleId);
+  await saveRoles(roles);
 }
-async function revokeAccess(userId) {
-  const users = await loadUsers();
-  users.delete(userId);
-  await saveUsers(users);
+async function revokeRoleAccess(roleId) {
+  const roles = await loadRoles();
+  roles.delete(roleId);
+  await saveRoles(roles);
 }
-async function getAllowedUsers() {
-  return loadUsers();
+async function getAllowedRoles() {
+  return loadRoles();
 }
-function checkAccess(interaction, allowedUsers) {
+function checkAccess(interaction, allowedRoles) {
   const isAdmin = interaction.memberPermissions?.has(import_discord.PermissionFlagsBits.Administrator) ?? false;
-  return isAdmin || allowedUsers.has(interaction.user.id);
+  if (isAdmin) return true;
+  const memberRoles = interaction.member?.roles;
+  if (!memberRoles) return false;
+  if (memberRoles instanceof Array) {
+    return memberRoles.some((id) => allowedRoles.has(id));
+  }
+  const roleManager = memberRoles;
+  return [...allowedRoles].some((id) => roleManager.cache.has(id));
 }
 
 // src/bot/commands/filing.ts
 var filingCommand = new import_discord2.SlashCommandBuilder().setName("filing").setDescription("File a new record \u2014 enter Username, License Plate, Date, Officer, and Notes");
 async function handleFilingCommand(interaction) {
-  const allowed = await getAllowedUsers();
+  const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
     await interaction.reply({
       content: "You do not have access to this command.",
@@ -75788,7 +75795,7 @@ async function handleFilingModal(interaction) {
 var import_discord3 = __toESM(require_src(), 1);
 var statisticsCommand = new import_discord3.SlashCommandBuilder().setName("statistics").setDescription("Show filing statistics \u2014 total count, top possessions, and recent entries");
 async function handleStatisticsCommand(interaction) {
-  const allowed = await getAllowedUsers();
+  const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
     await interaction.reply({
       content: "You do not have access to this command.",
@@ -75836,45 +75843,45 @@ async function handleStatisticsCommand(interaction) {
 
 // src/bot/commands/access.ts
 var import_discord4 = __toESM(require_src(), 1);
-var accessCommand = new import_discord4.SlashCommandBuilder().setName("access").setDescription("Manage who can use bot commands").setDefaultMemberPermissions(import_discord4.PermissionFlagsBits.Administrator).addSubcommand(
-  (sub) => sub.setName("give").setDescription("Grant a user access to bot commands").addUserOption(
-    (opt) => opt.setName("user").setDescription("User to grant access to").setRequired(true)
+var accessCommand = new import_discord4.SlashCommandBuilder().setName("access").setDescription("Manage which roles can use bot commands").setDefaultMemberPermissions(import_discord4.PermissionFlagsBits.Administrator).addSubcommand(
+  (sub) => sub.setName("give").setDescription("Grant a role access to bot commands").addRoleOption(
+    (opt) => opt.setName("role").setDescription("Role to grant access to").setRequired(true)
   )
 ).addSubcommand(
-  (sub) => sub.setName("remove").setDescription("Revoke a user's access to bot commands").addUserOption(
-    (opt) => opt.setName("user").setDescription("User to revoke access from").setRequired(true)
+  (sub) => sub.setName("remove").setDescription("Revoke a role's access to bot commands").addRoleOption(
+    (opt) => opt.setName("role").setDescription("Role to revoke access from").setRequired(true)
   )
 ).addSubcommand(
-  (sub) => sub.setName("list").setDescription("List all users who have been granted access")
+  (sub) => sub.setName("list").setDescription("List all roles that have been granted access")
 );
 async function handleAccessCommand(interaction) {
   const sub = interaction.options.getSubcommand();
   try {
     if (sub === "give") {
-      const user = interaction.options.getUser("user", true);
-      await grantAccess(user.id);
+      const role = interaction.options.getRole("role", true);
+      await grantRoleAccess(role.id);
       await interaction.reply({
-        content: `Access granted to ${user.tag}.`,
+        content: `Access granted to <@&${role.id}>.`,
         flags: import_discord4.MessageFlags.Ephemeral
       });
     } else if (sub === "remove") {
-      const user = interaction.options.getUser("user", true);
-      await revokeAccess(user.id);
+      const role = interaction.options.getRole("role", true);
+      await revokeRoleAccess(role.id);
       await interaction.reply({
-        content: `Access revoked from ${user.tag}.`,
+        content: `Access revoked from <@&${role.id}>.`,
         flags: import_discord4.MessageFlags.Ephemeral
       });
     } else if (sub === "list") {
-      const users = await getAllowedUsers();
-      if (users.size === 0) {
+      const roles = await getAllowedRoles();
+      if (roles.size === 0) {
         await interaction.reply({
-          content: "No users have been explicitly granted access. Server administrators always have access.",
+          content: "No roles have been granted access. Server administrators always have access.",
           flags: import_discord4.MessageFlags.Ephemeral
         });
       } else {
-        const list = [...users].map((id) => `<@${id}>`).join(", ");
+        const list = [...roles].map((id) => `<@&${id}>`).join(", ");
         await interaction.reply({
-          content: `Users with access: ${list}
+          content: `Roles with access: ${list}
 
 Server administrators always have access regardless of this list.`,
           flags: import_discord4.MessageFlags.Ephemeral
@@ -76000,7 +76007,7 @@ var robloxCommand = new import_discord5.SlashCommandBuilder().setName("roblox").
 async function handleRobloxCommand(interaction) {
   const sub = interaction.options.getSubcommand();
   if (["verify", "unverify"].includes(sub)) {
-    const allowed = await getAllowedUsers();
+    const allowed = await getAllowedRoles();
     if (!checkAccess(interaction, allowed)) {
       await interaction.reply({
         content: "You do not have access to this command.",
@@ -76171,7 +76178,7 @@ var groupsCommand = new import_discord6.SlashCommandBuilder().setName("groups").
 async function handleGroupsCommand(interaction) {
   const sub = interaction.options.getSubcommand();
   if (sub === "add" || sub === "remove") {
-    const allowed = await getAllowedUsers();
+    const allowed = await getAllowedRoles();
     if (!checkAccess(interaction, allowed)) {
       await interaction.reply({
         content: "You do not have access to this command.",
@@ -76308,7 +76315,7 @@ var import_discord8 = __toESM(require_src(), 1);
 var PANEL_BUTTON_ID = "panel_file_report";
 var panelCommand = new import_discord8.SlashCommandBuilder().setName("panel").setDescription("Post the DSI Filing Center panel in this channel").setDefaultMemberPermissions(import_discord8.PermissionFlagsBits.Administrator);
 async function handlePanelButton(interaction) {
-  const allowed = await getAllowedUsers();
+  const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
     await interaction.reply({
       content: "You do not have access to submit a filing.",

@@ -4,31 +4,31 @@ import {
   MessageFlags,
   PermissionFlagsBits,
 } from "discord.js";
-import { grantAccess, revokeAccess, getAllowedUsers } from "../access";
+import { grantRoleAccess, revokeRoleAccess, getAllowedRoles } from "../access";
 import { logger } from "../../lib/logger";
 
 export const accessCommand = new SlashCommandBuilder()
   .setName("access")
-  .setDescription("Manage who can use bot commands")
+  .setDescription("Manage which roles can use bot commands")
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
   .addSubcommand((sub) =>
     sub
       .setName("give")
-      .setDescription("Grant a user access to bot commands")
-      .addUserOption((opt) =>
-        opt.setName("user").setDescription("User to grant access to").setRequired(true),
+      .setDescription("Grant a role access to bot commands")
+      .addRoleOption((opt) =>
+        opt.setName("role").setDescription("Role to grant access to").setRequired(true),
       ),
   )
   .addSubcommand((sub) =>
     sub
       .setName("remove")
-      .setDescription("Revoke a user's access to bot commands")
-      .addUserOption((opt) =>
-        opt.setName("user").setDescription("User to revoke access from").setRequired(true),
+      .setDescription("Revoke a role's access to bot commands")
+      .addRoleOption((opt) =>
+        opt.setName("role").setDescription("Role to revoke access from").setRequired(true),
       ),
   )
   .addSubcommand((sub) =>
-    sub.setName("list").setDescription("List all users who have been granted access"),
+    sub.setName("list").setDescription("List all roles that have been granted access"),
   );
 
 export async function handleAccessCommand(
@@ -38,31 +38,30 @@ export async function handleAccessCommand(
 
   try {
     if (sub === "give") {
-      const user = interaction.options.getUser("user", true);
-      await grantAccess(user.id);
+      const role = interaction.options.getRole("role", true);
+      await grantRoleAccess(role.id);
       await interaction.reply({
-        content: `Access granted to ${user.tag}.`,
+        content: `Access granted to <@&${role.id}>.`,
         flags: MessageFlags.Ephemeral,
       });
     } else if (sub === "remove") {
-      const user = interaction.options.getUser("user", true);
-      await revokeAccess(user.id);
+      const role = interaction.options.getRole("role", true);
+      await revokeRoleAccess(role.id);
       await interaction.reply({
-        content: `Access revoked from ${user.tag}.`,
+        content: `Access revoked from <@&${role.id}>.`,
         flags: MessageFlags.Ephemeral,
       });
     } else if (sub === "list") {
-      const users = await getAllowedUsers();
-      if (users.size === 0) {
+      const roles = await getAllowedRoles();
+      if (roles.size === 0) {
         await interaction.reply({
-          content:
-            "No users have been explicitly granted access. Server administrators always have access.",
+          content: "No roles have been granted access. Server administrators always have access.",
           flags: MessageFlags.Ephemeral,
         });
       } else {
-        const list = [...users].map((id) => `<@${id}>`).join(", ");
+        const list = [...roles].map((id) => `<@&${id}>`).join(", ");
         await interaction.reply({
-          content: `Users with access: ${list}\n\nServer administrators always have access regardless of this list.`,
+          content: `Roles with access: ${list}\n\nServer administrators always have access regardless of this list.`,
           flags: MessageFlags.Ephemeral,
         });
       }

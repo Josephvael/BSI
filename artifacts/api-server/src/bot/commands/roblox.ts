@@ -13,7 +13,7 @@ import {
   profileUrl,
 } from "../roblox";
 import { setVerification, getVerification, removeVerification } from "../verifications";
-import { getAllowedUsers, checkAccess } from "../access";
+import { getAllowedRoles, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
 
 export const robloxCommand = new SlashCommandBuilder()
@@ -73,7 +73,7 @@ export async function handleRobloxCommand(
 
   // verify, unverify, whois require access; lookup and group are open
   if (["verify", "unverify"].includes(sub)) {
-    const allowed = await getAllowedUsers();
+    const allowed = await getAllowedRoles();
     if (!checkAccess(interaction, allowed)) {
       await interaction.reply({
         content: "You do not have access to this command.",

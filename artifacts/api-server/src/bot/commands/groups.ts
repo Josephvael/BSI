@@ -1,6 +1,6 @@
 import { SlashCommandBuilder, EmbedBuilder, MessageFlags, ChatInputCommandInteraction } from "discord.js";
 import { addGroup, removeGroup, getGroups } from "../groupRegistry";
-import { getAllowedUsers, checkAccess } from "../access";
+import { getAllowedRoles, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
 
 export const groupsCommand = new SlashCommandBuilder()
@@ -39,7 +39,7 @@ export async function handleGroupsCommand(
 
   // add and remove require access; list is open
   if (sub === "add" || sub === "remove") {
-    const allowed = await getAllowedUsers();
+    const allowed = await getAllowedRoles();
     if (!checkAccess(interaction, allowed)) {
       await interaction.reply({
         content: "You do not have access to this command.",

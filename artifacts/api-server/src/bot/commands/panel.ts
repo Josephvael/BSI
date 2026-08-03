@@ -12,7 +12,7 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
-import { getAllowedUsers, checkAccess } from "../access";
+import { getAllowedRoles, checkAccess } from "../access";
 
 export const PANEL_BUTTON_ID = "panel_file_report";
 
@@ -51,7 +51,7 @@ export async function handlePanelCommand(
 export async function handlePanelButton(
   interaction: ButtonInteraction,
 ): Promise<void> {
-  const allowed = await getAllowedUsers();
+  const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
     await interaction.reply({
       content: "You do not have access to submit a filing.",
