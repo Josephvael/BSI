@@ -75756,12 +75756,11 @@ async function handleFilingModal(interaction) {
       licensePlate,
       profession: possession
     });
-    const sheetUrl = await getSheetUrl();
     const embed = new import_discord2.EmbedBuilder().setColor(5763719).setTitle("Filing Submitted").addFields(
       { name: "Username", value: username, inline: true },
       { name: "License Plate", value: licensePlate, inline: true },
       { name: "Possession", value: possession, inline: true }
-    ).setFooter({ text: `Filed by ${interaction.user.tag} | View spreadsheet: ${sheetUrl}` }).setTimestamp();
+    ).setFooter({ text: `Filed by ${interaction.user.tag}` }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
   } catch (err) {
     logger.error({ err }, "Failed to save filing");

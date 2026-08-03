@@ -84,8 +84,6 @@ export async function handleFilingModal(
       profession: possession,
     });
 
-    const sheetUrl = await getSheetUrl();
-
     const embed = new EmbedBuilder()
       .setColor(0x57f287)
       .setTitle("Filing Submitted")
@@ -94,7 +92,7 @@ export async function handleFilingModal(
         { name: "License Plate", value: licensePlate, inline: true },
         { name: "Possession", value: possession, inline: true },
       )
-      .setFooter({ text: `Filed by ${interaction.user.tag} | View spreadsheet: ${sheetUrl}` })
+      .setFooter({ text: `Filed by ${interaction.user.tag}` })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
