@@ -40,9 +40,9 @@ export async function handleFilingCommand(
 
   const professionInput = new TextInputBuilder()
     .setCustomId("profession")
-    .setLabel("Profession")
+    .setLabel("Possession")
     .setStyle(TextInputStyle.Short)
-    .setPlaceholder("e.g. Engineer")
+    .setPlaceholder("e.g. Vehicle, Weapon, Item")
     .setRequired(true)
     .setMaxLength(100);
 
@@ -81,7 +81,7 @@ export async function handleFilingModal(
       .addFields(
         { name: "Username", value: username, inline: true },
         { name: "License Plate", value: licensePlate, inline: true },
-        { name: "Profession", value: profession, inline: true },
+        { name: "Possession", value: profession, inline: true },
       )
       .setFooter({ text: `Filed by ${interaction.user.tag} · View spreadsheet: ${sheetUrl}` })
       .setTimestamp();

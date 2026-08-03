@@ -58,12 +58,12 @@ export async function handleStatisticsCommand(
       .addFields(
         { name: "📁 Total Filings", value: `**${filings.length}**`, inline: true },
         {
-          name: "🏷️ Unique Professions",
+          name: "🏷️ Unique Possessions",
           value: `**${Object.keys(professionCounts).length}**`,
           inline: true,
         },
         { name: "\u200B", value: "\u200B", inline: true },
-        { name: "🏆 Top Professions", value: topProfessions },
+        { name: "🏆 Top Possessions", value: topProfessions },
         { name: "🕐 Recent Filings", value: recent },
       )
       .setFooter({ text: `Click the title to open the full spreadsheet` })

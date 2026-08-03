@@ -48,7 +48,7 @@ async function createSpreadsheet(): Promise<string> {
     {
       method: "PUT",
       body: JSON.stringify({
-        values: [["Timestamp", "Discord User", "Username", "License Plate", "Profession"]],
+        values: [["Timestamp", "Discord User", "Username", "License Plate", "Possession"]],
       }),
     },
   );
