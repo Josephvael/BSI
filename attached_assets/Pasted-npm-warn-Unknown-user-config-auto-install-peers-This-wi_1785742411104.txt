@@ -1,0 +1,28 @@
+npm warn Unknown user config "auto-install-peers". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "strict-peer-dependencies". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+[Panel]: Running NodeJS Version: v24.16.0
+[DiscordBot-Setup]: Ensuring NPM is up to date..
+npm warn Unknown user config "auto-install-peers". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "strict-peer-dependencies". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+changed 10 packages in 2s
+15 packages are looking for funding
+  run `npm fund` for details
+[DiscordBot-Setup]: Pulling updates from the remote repository...
+remote: Enumerating objects: 17, done.
+remote: Counting objects: 100% (17/17), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 9 (delta 6), reused 9 (delta 6), pack-reused 0 (from 0)
+Unpacking objects: 100% (9/9), 1.50 KiB | 18.00 KiB/s, done.
+From https://github.com/Josephvael/BSI
+   1c7c328..a9cd90b  main       -> origin/main
+HEAD is now at a9cd90b Auto-recover from stale sheet ID (404) by creating a fresh spreadsheet
+[DiscordBot-Setup]: Installing packages from package.json...
+npm warn Unknown user config "auto-install-peers". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn Unknown user config "strict-peer-dependencies". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm notice run workspace@0.0.0 preinstall
+npm notice run sh -c 'rm -f package-lock.json yarn.lock; case "$npm_config_user_agent" in pnpm/*) ;; *) echo "Warning: Use pnpm instead of npm in this monorepo" >&2 ;; esac'
+Warning: Use pnpm instead of npm in this monorepo
+up to date, audited 4 packages in 472ms
+1 package is looking for funding
+  run `npm fund` for details
+found 0 vulnerabilities
