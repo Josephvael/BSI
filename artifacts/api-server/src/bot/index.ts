@@ -12,12 +12,16 @@ import { filingCommand, handleFilingCommand, handleFilingModal } from "./command
 import { statisticsCommand, handleStatisticsCommand } from "./commands/statistics";
 import { accessCommand, handleAccessCommand } from "./commands/access";
 import { robloxCommand, handleRobloxCommand } from "./commands/roblox";
+import { groupsCommand, handleGroupsCommand } from "./commands/groups";
+import { searchCommand, handleSearchCommand } from "./commands/search";
 
 const commands = [
   filingCommand.toJSON(),
   statisticsCommand.toJSON(),
   accessCommand.toJSON(),
   robloxCommand.toJSON(),
+  groupsCommand.toJSON(),
+  searchCommand.toJSON(),
 ];
 
 function buildInviteUrl(clientId: string): string {
@@ -89,6 +93,10 @@ export async function startBot(): Promise<void> {
           await handleAccessCommand(interaction);
         } else if (interaction.commandName === "roblox") {
           await handleRobloxCommand(interaction);
+        } else if (interaction.commandName === "groups") {
+          await handleGroupsCommand(interaction);
+        } else if (interaction.commandName === "search") {
+          await handleSearchCommand(interaction);
         }
       } else if (interaction.isModalSubmit()) {
         if (interaction.customId === "filing_modal") {
