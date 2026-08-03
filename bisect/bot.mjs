@@ -75473,12 +75473,24 @@ var require_src = __commonJS({
 var import_discord8 = __toESM(require_src(), 1);
 
 // src/lib/logger-stub.ts
-var fmt = (obj) => obj ? " " + JSON.stringify(obj) : "";
+function fmt(obj) {
+  return " " + JSON.stringify(obj, (_key, val) => {
+    if (val instanceof Error) return { message: val.message, stack: val.stack };
+    return val;
+  });
+}
+function log(level, obj, msg) {
+  if (typeof obj === "string") {
+    console.log(`[${level}]`, obj);
+  } else {
+    console.log(`[${level}]`, msg ?? "", fmt(obj));
+  }
+}
 var logger = {
-  info: (obj, msg) => console.log(`[INFO]`, typeof obj === "string" ? obj : msg ?? "", typeof obj === "object" ? fmt(obj) : ""),
-  warn: (obj, msg) => console.warn(`[WARN]`, typeof obj === "string" ? obj : msg ?? "", typeof obj === "object" ? fmt(obj) : ""),
-  error: (obj, msg) => console.error(`[ERROR]`, typeof obj === "string" ? obj : msg ?? "", typeof obj === "object" ? fmt(obj) : ""),
-  debug: (obj, msg) => console.debug(`[DEBUG]`, typeof obj === "string" ? obj : msg ?? "", typeof obj === "object" ? fmt(obj) : ""),
+  info: (obj, msg) => log("INFO", obj, msg),
+  warn: (obj, msg) => log("WARN", obj, msg),
+  error: (obj, msg) => log("ERROR", obj, msg),
+  debug: (obj, msg) => log("DEBUG", obj, msg),
   child: (_bindings) => logger
 };
 
