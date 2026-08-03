@@ -46,7 +46,7 @@ async function buildBisect() {
   await mkdir(bisectDir, { recursive: true });
 
   await esbuild({
-    entryPoints: [path.resolve(artifactDir, "src/bot-standalone.ts")],
+    entryPoints: { bot: path.resolve(artifactDir, "src/bot-standalone.ts") },
     platform: "node",
     bundle: true,
     format: "esm",
@@ -76,7 +76,7 @@ async function buildBisect() {
     version: "1.0.0",
     type: "module",
     scripts: {
-      start: "node bot-standalone.mjs",
+      start: "node bot.mjs",
     },
     engines: { node: ">=20" },
   };
