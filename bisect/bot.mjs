@@ -75623,7 +75623,7 @@ async function createSpreadsheet() {
 }
 async function appendFiling(record) {
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:E");
+  const range = encodeURIComponent("Sheet1!A:G");
   const body = JSON.stringify({
     values: [[
       record.timestamp,
@@ -75645,7 +75645,7 @@ async function appendFiling(record) {
     });
     sheetId = await createSpreadsheet();
     res = await sheetsRequest(
-      `/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
+      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:G")}:append?valueInputOption=USER_ENTERED`,
       { method: "POST", body }
     );
   }
@@ -75690,6 +75690,28 @@ async function getFilings() {
 async function getSheetUrl() {
   const sheetId = await getSheetId();
   return `https://docs.google.com/spreadsheets/d/${sheetId}`;
+}
+async function syncGroupsSheet(groups) {
+  const sheetId = await getSheetId();
+  await sheetsRequest(`/v4/spreadsheets/${sheetId}:batchUpdate`, {
+    method: "POST",
+    body: JSON.stringify({
+      requests: [{ addSheet: { properties: { title: "Groups" } } }]
+    })
+  });
+  const range = encodeURIComponent("Groups!A1:D");
+  const values = [
+    ["Group ID", "Label", "Added By", "Added At"],
+    ...groups.map((g) => [String(g.id), g.label, g.addedBy, g.addedAt])
+  ];
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
+    { method: "PUT", body: JSON.stringify({ values }) }
+  );
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Groups sheet sync failed (${res.status}): ${err}`);
+  }
 }
 
 // src/bot/access.ts
@@ -76149,15 +76171,19 @@ async function addGroup(id, label, addedBy) {
   const groups = await load2();
   const existing = groups.find((g) => g.id === id);
   if (existing) return { added: false, existing };
-  groups.push({ id, label, addedBy, addedAt: (/* @__PURE__ */ new Date()).toISOString() });
-  await save2(groups);
+  const updated = [...groups, { id, label, addedBy, addedAt: (/* @__PURE__ */ new Date()).toISOString() }];
+  await save2(updated);
+  syncGroupsSheet(updated).catch(() => {
+  });
   return { added: true };
 }
 async function removeGroup(id) {
   const groups = await load2();
-  const next = groups.filter((g) => g.id !== id);
-  if (next.length === groups.length) return false;
-  await save2(next);
+  const updated = groups.filter((g) => g.id !== id);
+  if (updated.length === groups.length) return false;
+  await save2(updated);
+  syncGroupsSheet(updated).catch(() => {
+  });
   return true;
 }
 

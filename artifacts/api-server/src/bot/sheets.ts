@@ -199,7 +199,7 @@ async function createSpreadsheet(): Promise<string> {
 
 export async function appendFiling(record: FilingRecord): Promise<void> {
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:E");
+  const range = encodeURIComponent("Sheet1!A:G");
   const body = JSON.stringify({
     values: [[
       record.timestamp,
@@ -223,7 +223,7 @@ export async function appendFiling(record: FilingRecord): Promise<void> {
     await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(() => {});
     sheetId = await createSpreadsheet();
     res = await sheetsRequest(
-      `/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
+      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:G")}:append?valueInputOption=USER_ENTERED`,
       { method: "POST", body },
     );
   }
@@ -278,4 +278,44 @@ export async function getFilings(): Promise<FilingRecord[]> {
 export async function getSheetUrl(): Promise<string> {
   const sheetId = await getSheetId();
   return `https://docs.google.com/spreadsheets/d/${sheetId}`;
+}
+
+export interface GroupRecord {
+  id: number;
+  label: string;
+  addedBy: string;
+  addedAt: string;
+}
+
+/**
+ * Writes all registered groups to a "Groups" tab in the same spreadsheet.
+ * Creates the tab if it doesn't exist yet.
+ */
+export async function syncGroupsSheet(groups: GroupRecord[]): Promise<void> {
+  const sheetId = await getSheetId();
+
+  // Try to create the Groups tab — ignore error if it already exists
+  await sheetsRequest(`/v4/spreadsheets/${sheetId}:batchUpdate`, {
+    method: "POST",
+    body: JSON.stringify({
+      requests: [{ addSheet: { properties: { title: "Groups" } } }],
+    }),
+  });
+
+  // Clear + rewrite the whole tab
+  const range = encodeURIComponent("Groups!A1:D");
+  const values: string[][] = [
+    ["Group ID", "Label", "Added By", "Added At"],
+    ...groups.map((g) => [String(g.id), g.label, g.addedBy, g.addedAt]),
+  ];
+
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
+    { method: "PUT", body: JSON.stringify({ values }) },
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Groups sheet sync failed (${res.status}): ${err}`);
+  }
 }

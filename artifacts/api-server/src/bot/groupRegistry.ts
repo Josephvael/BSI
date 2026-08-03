@@ -1,5 +1,6 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { syncGroupsSheet } from "./sheets";
 
 const FILE = "./.bot-data/groups.json";
 
@@ -34,15 +35,19 @@ export async function addGroup(
   const existing = groups.find((g) => g.id === id);
   if (existing) return { added: false, existing };
 
-  groups.push({ id, label, addedBy, addedAt: new Date().toISOString() });
-  await save(groups);
+  const updated = [...groups, { id, label, addedBy, addedAt: new Date().toISOString() }];
+  await save(updated);
+  // Sync to Google Sheets in background — don't block the Discord reply
+  syncGroupsSheet(updated).catch(() => {});
   return { added: true };
 }
 
 export async function removeGroup(id: number): Promise<boolean> {
   const groups = await load();
-  const next = groups.filter((g) => g.id !== id);
-  if (next.length === groups.length) return false;
-  await save(next);
+  const updated = groups.filter((g) => g.id !== id);
+  if (updated.length === groups.length) return false;
+  await save(updated);
+  // Sync to Google Sheets in background
+  syncGroupsSheet(updated).catch(() => {});
   return true;
 }
