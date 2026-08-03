@@ -75498,7 +75498,7 @@ var logger = {
 var import_discord2 = __toESM(require_src(), 1);
 
 // src/bot/sheets.ts
-import { createSign } from "node:crypto";
+import { webcrypto } from "node:crypto";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 var SHEET_ID_FILE = "./.bot-data/sheet-id.json";
@@ -75541,9 +75541,21 @@ async function getAccessToken() {
     iat: now
   })).toString("base64url");
   const sigInput = `${header}.${payload}`;
-  const sign = createSign("RSA-SHA256");
-  sign.update(sigInput);
-  const signature = sign.sign(sa.private_key, "base64url");
+  const pemBody = sa.private_key.replace(/-----BEGIN PRIVATE KEY-----/, "").replace(/-----END PRIVATE KEY-----/, "").replace(/\s+/g, "");
+  const keyBuffer = Buffer.from(pemBody, "base64");
+  const cryptoKey = await webcrypto.subtle.importKey(
+    "pkcs8",
+    keyBuffer,
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sigBuffer = await webcrypto.subtle.sign(
+    "RSASSA-PKCS1-v1_5",
+    cryptoKey,
+    Buffer.from(sigInput)
+  );
+  const signature = Buffer.from(sigBuffer).toString("base64url");
   const jwt = `${sigInput}.${signature}`;
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
