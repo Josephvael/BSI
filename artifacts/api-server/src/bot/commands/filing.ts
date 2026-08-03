@@ -9,13 +9,13 @@ import {
   ChatInputCommandInteraction,
   ModalSubmitInteraction,
 } from "discord.js";
-import { appendFiling, getSheetUrl } from "../sheets";
+import { appendFiling } from "../sheets";
 import { getAllowedUsers, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
 
 export const filingCommand = new SlashCommandBuilder()
   .setName("filing")
-  .setDescription("File a new record — enter Username, License Plate, and Possession");
+  .setDescription("File a new record — enter Username, License Plate, Date, Officer, and Notes");
 
 export async function handleFilingCommand(
   interaction: ChatInputCommandInteraction,
@@ -49,18 +49,36 @@ export async function handleFilingCommand(
     .setRequired(true)
     .setMaxLength(20);
 
-  const possessionInput = new TextInputBuilder()
-    .setCustomId("profession")
-    .setLabel("Possession")
+  const dateInput = new TextInputBuilder()
+    .setCustomId("date_of_incident")
+    .setLabel("Date of Incident")
     .setStyle(TextInputStyle.Short)
-    .setPlaceholder("e.g. Vehicle, Weapon, Item")
+    .setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024")
+    .setRequired(true)
+    .setMaxLength(50);
+
+  const officerInput = new TextInputBuilder()
+    .setCustomId("peace_officer")
+    .setLabel("Name of Peace Officer")
+    .setStyle(TextInputStyle.Short)
+    .setPlaceholder("e.g. Officer Smith")
     .setRequired(true)
     .setMaxLength(100);
+
+  const notesInput = new TextInputBuilder()
+    .setCustomId("notes")
+    .setLabel("Notes & Evidence (optional)")
+    .setStyle(TextInputStyle.Paragraph)
+    .setPlaceholder("Any additional notes or evidence links")
+    .setRequired(false)
+    .setMaxLength(1000);
 
   modal.addComponents(
     new ActionRowBuilder<TextInputBuilder>().addComponents(usernameInput),
     new ActionRowBuilder<TextInputBuilder>().addComponents(licensePlateInput),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(possessionInput),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(dateInput),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(officerInput),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(notesInput),
   );
 
   await interaction.showModal(modal);
@@ -73,7 +91,9 @@ export async function handleFilingModal(
 
   const username = interaction.fields.getTextInputValue("username");
   const licensePlate = interaction.fields.getTextInputValue("license_plate");
-  const possession = interaction.fields.getTextInputValue("profession");
+  const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
+  const peaceOfficer = interaction.fields.getTextInputValue("peace_officer");
+  const notes = interaction.fields.getTextInputValue("notes") || "";
 
   try {
     await appendFiling({
@@ -81,7 +101,9 @@ export async function handleFilingModal(
       discordUser: interaction.user.tag,
       username,
       licensePlate,
-      profession: possession,
+      dateOfIncident,
+      peaceOfficer,
+      notes,
     });
 
     const embed = new EmbedBuilder()
@@ -90,7 +112,9 @@ export async function handleFilingModal(
       .addFields(
         { name: "Username", value: username, inline: true },
         { name: "License Plate", value: licensePlate, inline: true },
-        { name: "Possession", value: possession, inline: true },
+        { name: "Date of Incident", value: dateOfIncident, inline: true },
+        { name: "Peace Officer", value: peaceOfficer, inline: true },
+        ...(notes ? [{ name: "Notes & Evidence", value: notes, inline: false }] : []),
       )
       .setFooter({ text: `Filed by ${interaction.user.tag}` })
       .setTimestamp();

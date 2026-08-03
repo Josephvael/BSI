@@ -75603,13 +75603,13 @@ async function createSpreadsheet() {
   });
   const data = await res.json();
   const sheetId = data.spreadsheetId;
-  const range = encodeURIComponent("Sheet1!A1:E1");
+  const range = encodeURIComponent("Sheet1!A1:G1");
   await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
     {
       method: "PUT",
       body: JSON.stringify({
-        values: [["Timestamp", "Discord User", "Username", "License Plate", "Possession"]]
+        values: [["Timestamp", "Discord User", "Username", "License Plate", "Date of Incident", "Peace Officer", "Notes & Evidence"]]
       })
     }
   );
@@ -75630,7 +75630,9 @@ async function appendFiling(record) {
       record.discordUser,
       record.username,
       record.licensePlate,
-      record.profession
+      record.dateOfIncident,
+      record.peaceOfficer,
+      record.notes
     ]]
   });
   let res = await sheetsRequest(
@@ -75680,7 +75682,9 @@ async function getFilings() {
     discordUser: row[1] ?? "",
     username: row[2] ?? "",
     licensePlate: row[3] ?? "",
-    profession: row[4] ?? ""
+    dateOfIncident: row[4] ?? "",
+    peaceOfficer: row[5] ?? "",
+    notes: row[6] ?? ""
   }));
 }
 async function getSheetUrl() {
@@ -75722,7 +75726,7 @@ function checkAccess(interaction, allowedUsers) {
 }
 
 // src/bot/commands/filing.ts
-var filingCommand = new import_discord2.SlashCommandBuilder().setName("filing").setDescription("File a new record \u2014 enter Username, License Plate, and Possession");
+var filingCommand = new import_discord2.SlashCommandBuilder().setName("filing").setDescription("File a new record \u2014 enter Username, License Plate, Date, Officer, and Notes");
 async function handleFilingCommand(interaction) {
   const allowed = await getAllowedUsers();
   if (!checkAccess(interaction, allowed)) {
@@ -75735,11 +75739,15 @@ async function handleFilingCommand(interaction) {
   const modal = new import_discord2.ModalBuilder().setCustomId("filing_modal").setTitle("File a Record");
   const usernameInput = new import_discord2.TextInputBuilder().setCustomId("username").setLabel("Username").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. JohnDoe").setRequired(true).setMaxLength(100);
   const licensePlateInput = new import_discord2.TextInputBuilder().setCustomId("license_plate").setLabel("License Plate").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. ABC-1234").setRequired(true).setMaxLength(20);
-  const possessionInput = new import_discord2.TextInputBuilder().setCustomId("profession").setLabel("Possession").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. Vehicle, Weapon, Item").setRequired(true).setMaxLength(100);
+  const dateInput = new import_discord2.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50);
+  const officerInput = new import_discord2.TextInputBuilder().setCustomId("peace_officer").setLabel("Name of Peace Officer").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. Officer Smith").setRequired(true).setMaxLength(100);
+  const notesInput = new import_discord2.TextInputBuilder().setCustomId("notes").setLabel("Notes & Evidence (optional)").setStyle(import_discord2.TextInputStyle.Paragraph).setPlaceholder("Any additional notes or evidence links").setRequired(false).setMaxLength(1e3);
   modal.addComponents(
     new import_discord2.ActionRowBuilder().addComponents(usernameInput),
     new import_discord2.ActionRowBuilder().addComponents(licensePlateInput),
-    new import_discord2.ActionRowBuilder().addComponents(possessionInput)
+    new import_discord2.ActionRowBuilder().addComponents(dateInput),
+    new import_discord2.ActionRowBuilder().addComponents(officerInput),
+    new import_discord2.ActionRowBuilder().addComponents(notesInput)
   );
   await interaction.showModal(modal);
 }
@@ -75747,19 +75755,25 @@ async function handleFilingModal(interaction) {
   await interaction.deferReply({ flags: import_discord2.MessageFlags.Ephemeral });
   const username = interaction.fields.getTextInputValue("username");
   const licensePlate = interaction.fields.getTextInputValue("license_plate");
-  const possession = interaction.fields.getTextInputValue("profession");
+  const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
+  const peaceOfficer = interaction.fields.getTextInputValue("peace_officer");
+  const notes = interaction.fields.getTextInputValue("notes") || "";
   try {
     await appendFiling({
       timestamp: (/* @__PURE__ */ new Date()).toISOString(),
       discordUser: interaction.user.tag,
       username,
       licensePlate,
-      profession: possession
+      dateOfIncident,
+      peaceOfficer,
+      notes
     });
     const embed = new import_discord2.EmbedBuilder().setColor(5763719).setTitle("Filing Submitted").addFields(
       { name: "Username", value: username, inline: true },
       { name: "License Plate", value: licensePlate, inline: true },
-      { name: "Possession", value: possession, inline: true }
+      { name: "Date of Incident", value: dateOfIncident, inline: true },
+      { name: "Peace Officer", value: peaceOfficer, inline: true },
+      ...notes ? [{ name: "Notes & Evidence", value: notes, inline: false }] : []
     ).setFooter({ text: `Filed by ${interaction.user.tag}` }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
   } catch (err) {
@@ -75790,25 +75804,25 @@ async function handleStatisticsCommand(interaction) {
       await interaction.editReply({ embeds: [embed2] });
       return;
     }
-    const possessionCounts = {};
+    const officerCounts = {};
     for (const f of filings) {
-      const key = f.profession.trim() || "Unknown";
-      possessionCounts[key] = (possessionCounts[key] ?? 0) + 1;
+      const key = f.peaceOfficer.trim() || "Unknown";
+      officerCounts[key] = (officerCounts[key] ?? 0) + 1;
     }
-    const topPossessions = Object.entries(possessionCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([possession, count]) => `${possession} \u2014 ${count} filing${count !== 1 ? "s" : ""}`).join("\n");
+    const topOfficers = Object.entries(officerCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([officer, count]) => `${officer} \u2014 ${count} filing${count !== 1 ? "s" : ""}`).join("\n");
     const recent = filings.slice(-5).reverse().map((f) => {
-      const date = f.timestamp ? new Date(f.timestamp).toLocaleDateString() : "?";
-      return `${f.username} | ${f.licensePlate} | ${f.profession} | ${date}`;
+      const date = f.dateOfIncident || (f.timestamp ? new Date(f.timestamp).toLocaleDateString() : "?");
+      return `${f.username} | ${f.licensePlate} | ${date} | ${f.peaceOfficer}`;
     }).join("\n");
     const embed = new import_discord3.EmbedBuilder().setColor(5793266).setTitle("Filing Statistics").setURL(sheetUrl).addFields(
       { name: "Total Filings", value: `${filings.length}`, inline: true },
       {
-        name: "Unique Possessions",
-        value: `${Object.keys(possessionCounts).length}`,
+        name: "Unique Officers",
+        value: `${Object.keys(officerCounts).length}`,
         inline: true
       },
       { name: "\u200B", value: "\u200B", inline: true },
-      { name: "Top Possessions", value: topPossessions },
+      { name: "Top Officers", value: topOfficers },
       { name: "Recent Filings", value: recent }
     ).setFooter({ text: "Click the title to open the full spreadsheet" }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });

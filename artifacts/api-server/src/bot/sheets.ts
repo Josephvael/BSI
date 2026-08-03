@@ -26,7 +26,9 @@ export interface FilingRecord {
   discordUser: string;
   username: string;
   licensePlate: string;
-  profession: string;
+  dateOfIncident: string;
+  peaceOfficer: string;
+  notes: string;
 }
 
 interface ServiceAccount {
@@ -173,13 +175,13 @@ async function createSpreadsheet(): Promise<string> {
   const sheetId = data.spreadsheetId;
 
   // Write header row
-  const range = encodeURIComponent("Sheet1!A1:E1");
+  const range = encodeURIComponent("Sheet1!A1:G1");
   await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
     {
       method: "PUT",
       body: JSON.stringify({
-        values: [["Timestamp", "Discord User", "Username", "License Plate", "Possession"]],
+        values: [["Timestamp", "Discord User", "Username", "License Plate", "Date of Incident", "Peace Officer", "Notes & Evidence"]],
       }),
     },
   );
@@ -204,7 +206,9 @@ export async function appendFiling(record: FilingRecord): Promise<void> {
       record.discordUser,
       record.username,
       record.licensePlate,
-      record.profession,
+      record.dateOfIncident,
+      record.peaceOfficer,
+      record.notes,
     ]],
   });
 
@@ -265,7 +269,9 @@ export async function getFilings(): Promise<FilingRecord[]> {
     discordUser: row[1] ?? "",
     username: row[2] ?? "",
     licensePlate: row[3] ?? "",
-    profession: row[4] ?? "",
+    dateOfIncident: row[4] ?? "",
+    peaceOfficer: row[5] ?? "",
+    notes: row[6] ?? "",
   }));
 }
 
