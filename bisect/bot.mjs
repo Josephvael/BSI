@@ -75622,35 +75622,53 @@ async function createSpreadsheet() {
   return sheetId;
 }
 async function appendFiling(record) {
-  const sheetId = await getSheetId();
+  let sheetId = await getSheetId();
   const range = encodeURIComponent("Sheet1!A:E");
-  const res = await sheetsRequest(
+  const body = JSON.stringify({
+    values: [[
+      record.timestamp,
+      record.discordUser,
+      record.username,
+      record.licensePlate,
+      record.profession
+    ]]
+  });
+  let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        values: [[
-          record.timestamp,
-          record.discordUser,
-          record.username,
-          record.licensePlate,
-          record.profession
-        ]]
-      })
-    }
+    { method: "POST", body }
   );
+  if (res.status === 404) {
+    cachedSheetId = null;
+    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(() => {
+    });
+    sheetId = await createSpreadsheet();
+    res = await sheetsRequest(
+      `/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
+      { method: "POST", body }
+    );
+  }
   if (!res.ok) {
     const err = await res.text();
     throw new Error(`Sheets append failed (${res.status}): ${err}`);
   }
 }
 async function getFilings() {
-  const sheetId = await getSheetId();
+  let sheetId = await getSheetId();
   const range = encodeURIComponent("Sheet1!A:E");
-  const res = await sheetsRequest(
+  let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}`,
     { method: "GET" }
   );
+  if (res.status === 404) {
+    cachedSheetId = null;
+    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(() => {
+    });
+    sheetId = await createSpreadsheet();
+    res = await sheetsRequest(
+      `/v4/spreadsheets/${sheetId}/values/${range}`,
+      { method: "GET" }
+    );
+  }
   if (!res.ok) {
     const err = await res.text();
     throw new Error(`Sheets read failed (${res.status}): ${err}`);

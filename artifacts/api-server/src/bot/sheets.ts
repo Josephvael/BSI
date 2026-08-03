@@ -196,24 +196,33 @@ async function createSpreadsheet(): Promise<string> {
 }
 
 export async function appendFiling(record: FilingRecord): Promise<void> {
-  const sheetId = await getSheetId();
+  let sheetId = await getSheetId();
   const range = encodeURIComponent("Sheet1!A:E");
+  const body = JSON.stringify({
+    values: [[
+      record.timestamp,
+      record.discordUser,
+      record.username,
+      record.licensePlate,
+      record.profession,
+    ]],
+  });
 
-  const res = await sheetsRequest(
+  let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        values: [[
-          record.timestamp,
-          record.discordUser,
-          record.username,
-          record.licensePlate,
-          record.profession,
-        ]],
-      }),
-    },
+    { method: "POST", body },
   );
+
+  // Stale sheet ID — create a fresh sheet and retry once
+  if (res.status === 404) {
+    cachedSheetId = null;
+    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(() => {});
+    sheetId = await createSpreadsheet();
+    res = await sheetsRequest(
+      `/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
+      { method: "POST", body },
+    );
+  }
 
   if (!res.ok) {
     const err = await res.text();
@@ -222,13 +231,25 @@ export async function appendFiling(record: FilingRecord): Promise<void> {
 }
 
 export async function getFilings(): Promise<FilingRecord[]> {
-  const sheetId = await getSheetId();
+  let sheetId = await getSheetId();
   const range = encodeURIComponent("Sheet1!A:E");
 
-  const res = await sheetsRequest(
+  let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}`,
     { method: "GET" },
   );
+
+  // If the cached sheet ID is stale (sheet was deleted or never existed),
+  // clear it and create a fresh one.
+  if (res.status === 404) {
+    cachedSheetId = null;
+    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(() => {});
+    sheetId = await createSpreadsheet();
+    res = await sheetsRequest(
+      `/v4/spreadsheets/${sheetId}/values/${range}`,
+      { method: "GET" },
+    );
+  }
 
   if (!res.ok) {
     const err = await res.text();
