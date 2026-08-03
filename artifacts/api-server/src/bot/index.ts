@@ -11,11 +11,13 @@ import { logger } from "../lib/logger";
 import { filingCommand, handleFilingCommand, handleFilingModal } from "./commands/filing";
 import { statisticsCommand, handleStatisticsCommand } from "./commands/statistics";
 import { accessCommand, handleAccessCommand } from "./commands/access";
+import { robloxCommand, handleRobloxCommand } from "./commands/roblox";
 
 const commands = [
   filingCommand.toJSON(),
   statisticsCommand.toJSON(),
   accessCommand.toJSON(),
+  robloxCommand.toJSON(),
 ];
 
 function buildInviteUrl(clientId: string): string {
@@ -85,6 +87,8 @@ export async function startBot(): Promise<void> {
           await handleStatisticsCommand(interaction);
         } else if (interaction.commandName === "access") {
           await handleAccessCommand(interaction);
+        } else if (interaction.commandName === "roblox") {
+          await handleRobloxCommand(interaction);
         }
       } else if (interaction.isModalSubmit()) {
         if (interaction.customId === "filing_modal") {
