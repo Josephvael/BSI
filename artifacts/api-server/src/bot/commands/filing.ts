@@ -9,15 +9,25 @@ import {
   ModalSubmitInteraction,
 } from "discord.js";
 import { appendFiling, getSheetUrl } from "../sheets";
+import { getAllowedUsers, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
 
 export const filingCommand = new SlashCommandBuilder()
   .setName("filing")
-  .setDescription("File a new record — enter Username, License Plate, and Profession");
+  .setDescription("File a new record — enter Username, License Plate, and Possession");
 
 export async function handleFilingCommand(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
+  const allowed = await getAllowedUsers();
+  if (!checkAccess(interaction, allowed)) {
+    await interaction.reply({
+      content: "You do not have access to this command.",
+      ephemeral: true,
+    });
+    return;
+  }
+
   const modal = new ModalBuilder()
     .setCustomId("filing_modal")
     .setTitle("File a Record");
@@ -38,7 +48,7 @@ export async function handleFilingCommand(
     .setRequired(true)
     .setMaxLength(20);
 
-  const professionInput = new TextInputBuilder()
+  const possessionInput = new TextInputBuilder()
     .setCustomId("profession")
     .setLabel("Possession")
     .setStyle(TextInputStyle.Short)
@@ -49,7 +59,7 @@ export async function handleFilingCommand(
   modal.addComponents(
     new ActionRowBuilder<TextInputBuilder>().addComponents(usernameInput),
     new ActionRowBuilder<TextInputBuilder>().addComponents(licensePlateInput),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(professionInput),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(possessionInput),
   );
 
   await interaction.showModal(modal);
@@ -62,7 +72,7 @@ export async function handleFilingModal(
 
   const username = interaction.fields.getTextInputValue("username");
   const licensePlate = interaction.fields.getTextInputValue("license_plate");
-  const profession = interaction.fields.getTextInputValue("profession");
+  const possession = interaction.fields.getTextInputValue("profession");
 
   try {
     await appendFiling({
@@ -70,27 +80,27 @@ export async function handleFilingModal(
       discordUser: interaction.user.tag,
       username,
       licensePlate,
-      profession,
+      profession: possession,
     });
 
     const sheetUrl = await getSheetUrl();
 
     const embed = new EmbedBuilder()
       .setColor(0x57f287)
-      .setTitle("✅ Filing Submitted")
+      .setTitle("Filing Submitted")
       .addFields(
         { name: "Username", value: username, inline: true },
         { name: "License Plate", value: licensePlate, inline: true },
-        { name: "Possession", value: profession, inline: true },
+        { name: "Possession", value: possession, inline: true },
       )
-      .setFooter({ text: `Filed by ${interaction.user.tag} · View spreadsheet: ${sheetUrl}` })
+      .setFooter({ text: `Filed by ${interaction.user.tag} | View spreadsheet: ${sheetUrl}` })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
   } catch (err) {
     logger.error({ err }, "Failed to save filing");
     await interaction.editReply({
-      content: "❌ Something went wrong saving your filing. Please try again.",
+      content: "Something went wrong saving your filing. Please try again.",
     });
   }
 }

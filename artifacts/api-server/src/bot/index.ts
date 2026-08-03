@@ -10,8 +10,13 @@ import {
 import { logger } from "../lib/logger";
 import { filingCommand, handleFilingCommand, handleFilingModal } from "./commands/filing";
 import { statisticsCommand, handleStatisticsCommand } from "./commands/statistics";
+import { accessCommand, handleAccessCommand } from "./commands/access";
 
-const commands = [filingCommand.toJSON(), statisticsCommand.toJSON()];
+const commands = [
+  filingCommand.toJSON(),
+  statisticsCommand.toJSON(),
+  accessCommand.toJSON(),
+];
 
 function buildInviteUrl(clientId: string): string {
   const scopes = [OAuth2Scopes.Bot, OAuth2Scopes.ApplicationsCommands].join("%20");
@@ -30,7 +35,6 @@ async function registerCommands(
     logger.info({ commandCount: commands.length }, "Slash commands registered with Discord");
     return true;
   } catch (err) {
-    // 50001 = Missing Access — bot hasn't been added to the guild yet
     const code = (err as { code?: number }).code;
     if (code === 50001) {
       logger.warn(
@@ -62,11 +66,9 @@ export async function startBot(): Promise<void> {
 
   client.once(Events.ClientReady, async (readyClient) => {
     logger.info({ tag: readyClient.user.tag }, "Discord bot is online");
-    // Register commands now that the client is authenticated
     await registerCommands(token, clientId, guildId);
   });
 
-  // Re-register commands when the bot is added to a new guild
   client.on(Events.GuildCreate, async (guild) => {
     if (guild.id === guildId) {
       logger.info({ guildName: guild.name }, "Bot joined the target guild — registering commands");
@@ -81,6 +83,8 @@ export async function startBot(): Promise<void> {
           await handleFilingCommand(interaction);
         } else if (interaction.commandName === "statistics") {
           await handleStatisticsCommand(interaction);
+        } else if (interaction.commandName === "access") {
+          await handleAccessCommand(interaction);
         }
       } else if (interaction.isModalSubmit()) {
         if (interaction.customId === "filing_modal") {
