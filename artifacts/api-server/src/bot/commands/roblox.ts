@@ -1,6 +1,7 @@
 import {
   SlashCommandBuilder,
   EmbedBuilder,
+  MessageFlags,
   ChatInputCommandInteraction,
   PermissionFlagsBits,
 } from "discord.js";
@@ -76,7 +77,7 @@ export async function handleRobloxCommand(
     if (!checkAccess(interaction, allowed)) {
       await interaction.reply({
         content: "You do not have access to this command.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -90,7 +91,7 @@ export async function handleRobloxCommand(
     else if (sub === "whois") await handleWhois(interaction);
   } catch (err) {
     logger.error({ err }, "Error handling /roblox command");
-    const reply = { content: "Something went wrong. Please try again.", ephemeral: true };
+    const reply = { content: "Something went wrong. Please try again.", flags: MessageFlags.Ephemeral };
     if (interaction.deferred || interaction.replied) await interaction.editReply(reply);
     else await interaction.reply(reply);
   }
@@ -162,7 +163,7 @@ async function handleGroup(interaction: ChatInputCommandInteraction): Promise<vo
 }
 
 async function handleVerify(interaction: ChatInputCommandInteraction): Promise<void> {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
   const member = interaction.options.getUser("member", true);
   const username = interaction.options.getString("username", true);
 
@@ -195,12 +196,12 @@ async function handleUnverify(interaction: ChatInputCommandInteraction): Promise
   if (removed) {
     await interaction.reply({
       content: `Verification removed for <@${member.id}>.`,
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   } else {
     await interaction.reply({
       content: `<@${member.id}> has no verification on record.`,
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }

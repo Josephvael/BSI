@@ -5,6 +5,7 @@ import {
   TextInputStyle,
   ActionRowBuilder,
   EmbedBuilder,
+  MessageFlags,
   ChatInputCommandInteraction,
   ModalSubmitInteraction,
 } from "discord.js";
@@ -23,7 +24,7 @@ export async function handleFilingCommand(
   if (!checkAccess(interaction, allowed)) {
     await interaction.reply({
       content: "You do not have access to this command.",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }
@@ -68,7 +69,7 @@ export async function handleFilingCommand(
 export async function handleFilingModal(
   interaction: ModalSubmitInteraction,
 ): Promise<void> {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const username = interaction.fields.getTextInputValue("username");
   const licensePlate = interaction.fields.getTextInputValue("license_plate");

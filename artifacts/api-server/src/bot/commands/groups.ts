@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, MessageFlags, ChatInputCommandInteraction } from "discord.js";
 import { addGroup, removeGroup, getGroups } from "../groupRegistry";
 import { getAllowedUsers, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
@@ -43,7 +43,7 @@ export async function handleGroupsCommand(
     if (!checkAccess(interaction, allowed)) {
       await interaction.reply({
         content: "You do not have access to this command.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
       return;
     }
@@ -58,14 +58,14 @@ export async function handleGroupsCommand(
       if (!result.added) {
         await interaction.reply({
           content: `Group ID **${groupId}** is already registered as **${result.existing!.label}**.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
 
       await interaction.reply({
         content: `Group **${label}** (ID: ${groupId}) added. It will now be checked in every \`/search\`.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (sub === "remove") {
       const groupId = interaction.options.getInteger("group_id", true);
@@ -74,14 +74,14 @@ export async function handleGroupsCommand(
       if (!removed) {
         await interaction.reply({
           content: `Group ID **${groupId}** is not in the list.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
 
       await interaction.reply({
         content: `Group ID **${groupId}** removed from the search list.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (sub === "list") {
       const groups = await getGroups();
@@ -89,7 +89,7 @@ export async function handleGroupsCommand(
       if (groups.length === 0) {
         await interaction.reply({
           content: "No groups registered yet. Use `/groups add` to add one.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -112,7 +112,7 @@ export async function handleGroupsCommand(
     }
   } catch (err) {
     logger.error({ err }, "Error handling /groups command");
-    const reply = { content: "Something went wrong. Please try again.", ephemeral: true };
+    const reply = { content: "Something went wrong. Please try again.", flags: MessageFlags.Ephemeral };
     if (interaction.replied || interaction.deferred) await interaction.editReply(reply);
     else await interaction.reply(reply);
   }

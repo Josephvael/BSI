@@ -2103,7 +2103,7 @@ var require_request = __commonJS({
     var { headerNameLowerCasedRecord } = require_constants();
     var invalidPathRegex = /[^\u0021-\u00ff]/;
     var kHandler = /* @__PURE__ */ Symbol("handler");
-    var Request2 = class {
+    var Request = class {
       constructor(origin, {
         path,
         method,
@@ -2412,7 +2412,7 @@ var require_request = __commonJS({
         request.headers.push(key, val);
       }
     }
-    module2.exports = Request2;
+    module2.exports = Request;
   }
 });
 
@@ -7950,7 +7950,7 @@ var require_client = __commonJS({
     var http = __require("node:http");
     var util = require_util();
     var { channels } = require_diagnostics();
-    var Request2 = require_request();
+    var Request = require_request();
     var DispatcherBase = require_dispatcher_base();
     var {
       InvalidArgumentError,
@@ -8192,7 +8192,7 @@ var require_client = __commonJS({
       }
       [kDispatch](opts, handler) {
         const origin = opts.origin || this[kUrl].origin;
-        const request = new Request2(origin, opts, handler);
+        const request = new Request(origin, opts, handler);
         this[kQueue].push(request);
         if (this[kResuming]) {
         } else if (util.bodyLength(request.body) == null && util.isIterable(request.body)) {
@@ -12462,7 +12462,7 @@ var require_headers = __commonJS({
         }
       }
     };
-    var Headers2 = class _Headers {
+    var Headers = class _Headers {
       #guard;
       #headersList;
       constructor(init = void 0) {
@@ -12612,13 +12612,13 @@ var require_headers = __commonJS({
         o.#headersList = list;
       }
     };
-    var { getHeadersGuard, setHeadersGuard, getHeadersList, setHeadersList } = Headers2;
-    Reflect.deleteProperty(Headers2, "getHeadersGuard");
-    Reflect.deleteProperty(Headers2, "setHeadersGuard");
-    Reflect.deleteProperty(Headers2, "getHeadersList");
-    Reflect.deleteProperty(Headers2, "setHeadersList");
-    iteratorMixin("Headers", Headers2, kHeadersSortedMap, 0, 1);
-    Object.defineProperties(Headers2.prototype, {
+    var { getHeadersGuard, setHeadersGuard, getHeadersList, setHeadersList } = Headers;
+    Reflect.deleteProperty(Headers, "getHeadersGuard");
+    Reflect.deleteProperty(Headers, "setHeadersGuard");
+    Reflect.deleteProperty(Headers, "getHeadersList");
+    Reflect.deleteProperty(Headers, "setHeadersList");
+    iteratorMixin("Headers", Headers, kHeadersSortedMap, 0, 1);
+    Object.defineProperties(Headers.prototype, {
       append: kEnumerableProperty,
       delete: kEnumerableProperty,
       get: kEnumerableProperty,
@@ -12636,7 +12636,7 @@ var require_headers = __commonJS({
     webidl.converters.HeadersInit = function(V, prefix, argument) {
       if (webidl.util.Type(V) === "Object") {
         const iterator = Reflect.get(V, Symbol.iterator);
-        if (!util.types.isProxy(V) && iterator === Headers2.prototype.entries) {
+        if (!util.types.isProxy(V) && iterator === Headers.prototype.entries) {
           try {
             return getHeadersList(V).entriesList;
           } catch {
@@ -12657,7 +12657,7 @@ var require_headers = __commonJS({
       fill,
       // for test.
       compareHeaderName,
-      Headers: Headers2,
+      Headers,
       HeadersList,
       getHeadersGuard,
       setHeadersGuard,
@@ -12671,7 +12671,7 @@ var require_headers = __commonJS({
 var require_response = __commonJS({
   "../../node_modules/.pnpm/undici@6.28.0/node_modules/undici/lib/web/fetch/response.js"(exports2, module2) {
     "use strict";
-    var { Headers: Headers2, HeadersList, fill, getHeadersGuard, setHeadersGuard, setHeadersList } = require_headers();
+    var { Headers, HeadersList, fill, getHeadersGuard, setHeadersGuard, setHeadersList } = require_headers();
     var { extractBody, cloneBody, mixinBody, hasFinalizationRegistry, streamRegistry, bodyUnusable } = require_body();
     var util = require_util();
     var nodeUtil = __require("node:util");
@@ -12749,7 +12749,7 @@ var require_response = __commonJS({
         }
         init = webidl.converters.ResponseInit(init);
         this[kState] = makeResponse({});
-        this[kHeaders] = new Headers2(kConstruct);
+        this[kHeaders] = new Headers(kConstruct);
         setHeadersGuard(this[kHeaders], "response");
         setHeadersList(this[kHeaders], this[kState].headersList);
         let bodyWithType = null;
@@ -12993,7 +12993,7 @@ var require_response = __commonJS({
     function fromInnerResponse(innerResponse, guard) {
       const response = new Response2(kConstruct);
       response[kState] = innerResponse;
-      response[kHeaders] = new Headers2(kConstruct);
+      response[kHeaders] = new Headers(kConstruct);
       setHeadersList(response[kHeaders], innerResponse.headersList);
       setHeadersGuard(response[kHeaders], guard);
       if (hasFinalizationRegistry && innerResponse.body?.stream) {
@@ -13113,7 +13113,7 @@ var require_request2 = __commonJS({
   "../../node_modules/.pnpm/undici@6.28.0/node_modules/undici/lib/web/fetch/request.js"(exports2, module2) {
     "use strict";
     var { extractBody, mixinBody, cloneBody, bodyUnusable } = require_body();
-    var { Headers: Headers2, fill: fillHeaders, HeadersList, setHeadersGuard, getHeadersGuard, setHeadersList, getHeadersList } = require_headers();
+    var { Headers, fill: fillHeaders, HeadersList, setHeadersGuard, getHeadersGuard, setHeadersList, getHeadersList } = require_headers();
     var { FinalizationRegistry: FinalizationRegistry2 } = require_dispatcher_weakref()();
     var util = require_util();
     var nodeUtil = __require("node:util");
@@ -13169,7 +13169,7 @@ var require_request2 = __commonJS({
       }
     }
     var patchMethodWarning = false;
-    var Request2 = class _Request {
+    var Request = class _Request {
       // https://fetch.spec.whatwg.org/#dom-request
       constructor(input, init = {}) {
         webidl.util.markAsUncloneable(this);
@@ -13381,7 +13381,7 @@ var require_request2 = __commonJS({
             requestFinalizer.register(ac, { signal, abort }, abort);
           }
         }
-        this[kHeaders] = new Headers2(kConstruct);
+        this[kHeaders] = new Headers(kConstruct);
         setHeadersList(this[kHeaders], request.headersList);
         setHeadersGuard(this[kHeaders], "request");
         if (mode === "no-cors") {
@@ -13616,7 +13616,7 @@ var require_request2 = __commonJS({
         return `Request ${nodeUtil.formatWithOptions(options, properties)}`;
       }
     };
-    mixinBody(Request2);
+    mixinBody(Request);
     function makeRequest(init) {
       return {
         method: init.method ?? "GET",
@@ -13667,15 +13667,15 @@ var require_request2 = __commonJS({
       return newRequest;
     }
     function fromInnerRequest(innerRequest, signal, guard) {
-      const request = new Request2(kConstruct);
+      const request = new Request(kConstruct);
       request[kState] = innerRequest;
       request[kSignal] = signal;
-      request[kHeaders] = new Headers2(kConstruct);
+      request[kHeaders] = new Headers(kConstruct);
       setHeadersList(request[kHeaders], innerRequest.headersList);
       setHeadersGuard(request[kHeaders], guard);
       return request;
     }
-    Object.defineProperties(Request2.prototype, {
+    Object.defineProperties(Request.prototype, {
       method: kEnumerableProperty,
       url: kEnumerableProperty,
       headers: kEnumerableProperty,
@@ -13702,13 +13702,13 @@ var require_request2 = __commonJS({
       }
     });
     webidl.converters.Request = webidl.interfaceConverter(
-      Request2
+      Request
     );
     webidl.converters.RequestInfo = function(V, prefix, argument) {
       if (typeof V === "string") {
         return webidl.converters.USVString(V, prefix, argument);
       }
-      if (V instanceof Request2) {
+      if (V instanceof Request) {
         return webidl.converters.Request(V, prefix, argument);
       }
       return webidl.converters.USVString(V, prefix, argument);
@@ -13799,7 +13799,7 @@ var require_request2 = __commonJS({
         converter: webidl.converters.any
       }
     ]);
-    module2.exports = { Request: Request2, makeRequest, fromInnerRequest, cloneRequest };
+    module2.exports = { Request, makeRequest, fromInnerRequest, cloneRequest };
   }
 });
 
@@ -13815,7 +13815,7 @@ var require_fetch = __commonJS({
       fromInnerResponse
     } = require_response();
     var { HeadersList } = require_headers();
-    var { Request: Request2, cloneRequest } = require_request2();
+    var { Request, cloneRequest } = require_request2();
     var zlib = __require("node:zlib");
     var {
       bytesMatch,
@@ -13910,7 +13910,7 @@ var require_fetch = __commonJS({
       let p = createDeferredPromise();
       let requestObject;
       try {
-        requestObject = new Request2(input, init);
+        requestObject = new Request(input, init);
       } catch (e) {
         p.reject(e);
         return p.promise;
@@ -15732,7 +15732,7 @@ var require_cache = __commonJS({
     var { kEnumerableProperty, isDisturbed } = require_util();
     var { webidl } = require_webidl();
     var { Response: Response2, cloneResponse, fromInnerResponse } = require_response();
-    var { Request: Request2, fromInnerRequest } = require_request2();
+    var { Request, fromInnerRequest } = require_request2();
     var { kState } = require_symbols2();
     var { fetching } = require_fetch();
     var { urlIsHttpHttpsScheme, createDeferredPromise, readAllBytes } = require_util2();
@@ -15806,7 +15806,7 @@ var require_cache = __commonJS({
         }
         const fetchControllers = [];
         for (const request of requests) {
-          const r = new Request2(request)[kState];
+          const r = new Request(request)[kState];
           if (!urlIsHttpHttpsScheme(r.url)) {
             throw webidl.errors.exception({
               header: prefix,
@@ -15890,10 +15890,10 @@ var require_cache = __commonJS({
         request = webidl.converters.RequestInfo(request, prefix, "request");
         response = webidl.converters.Response(response, prefix, "response");
         let innerRequest = null;
-        if (request instanceof Request2) {
+        if (request instanceof Request) {
           innerRequest = request[kState];
         } else {
-          innerRequest = new Request2(request)[kState];
+          innerRequest = new Request(request)[kState];
         }
         if (!urlIsHttpHttpsScheme(innerRequest.url) || innerRequest.method !== "GET") {
           throw webidl.errors.exception({
@@ -15971,14 +15971,14 @@ var require_cache = __commonJS({
         request = webidl.converters.RequestInfo(request, prefix, "request");
         options = webidl.converters.CacheQueryOptions(options, prefix, "options");
         let r = null;
-        if (request instanceof Request2) {
+        if (request instanceof Request) {
           r = request[kState];
           if (r.method !== "GET" && !options.ignoreMethod) {
             return false;
           }
         } else {
           assert(typeof request === "string");
-          r = new Request2(request)[kState];
+          r = new Request(request)[kState];
         }
         const operations = [];
         const operation = {
@@ -16017,13 +16017,13 @@ var require_cache = __commonJS({
         options = webidl.converters.CacheQueryOptions(options, prefix, "options");
         let r = null;
         if (request !== void 0) {
-          if (request instanceof Request2) {
+          if (request instanceof Request) {
             r = request[kState];
             if (r.method !== "GET" && !options.ignoreMethod) {
               return [];
             }
           } else if (typeof request === "string") {
-            r = new Request2(request)[kState];
+            r = new Request(request)[kState];
           }
         }
         const promise = createDeferredPromise();
@@ -16189,13 +16189,13 @@ var require_cache = __commonJS({
       #internalMatchAll(request, options, maxResponses = Infinity) {
         let r = null;
         if (request !== void 0) {
-          if (request instanceof Request2) {
+          if (request instanceof Request) {
             r = request[kState];
             if (r.method !== "GET" && !options.ignoreMethod) {
               return [];
             }
           } else if (typeof request === "string") {
-            r = new Request2(request)[kState];
+            r = new Request(request)[kState];
           }
         }
         const responses = [];
@@ -16742,10 +16742,10 @@ var require_cookies = __commonJS({
     var { parseSetCookie } = require_parse();
     var { stringify } = require_util6();
     var { webidl } = require_webidl();
-    var { Headers: Headers2 } = require_headers();
+    var { Headers } = require_headers();
     function getCookies(headers) {
       webidl.argumentLengthCheck(arguments, 1, "getCookies");
-      webidl.brandCheck(headers, Headers2, { strict: false });
+      webidl.brandCheck(headers, Headers, { strict: false });
       const cookie = headers.get("cookie");
       const out = {};
       if (!cookie) {
@@ -16758,7 +16758,7 @@ var require_cookies = __commonJS({
       return out;
     }
     function deleteCookie(headers, name, attributes) {
-      webidl.brandCheck(headers, Headers2, { strict: false });
+      webidl.brandCheck(headers, Headers, { strict: false });
       const prefix = "deleteCookie";
       webidl.argumentLengthCheck(arguments, 2, prefix);
       name = webidl.converters.DOMString(name, prefix, "name");
@@ -16772,7 +16772,7 @@ var require_cookies = __commonJS({
     }
     function getSetCookies(headers) {
       webidl.argumentLengthCheck(arguments, 1, "getSetCookies");
-      webidl.brandCheck(headers, Headers2, { strict: false });
+      webidl.brandCheck(headers, Headers, { strict: false });
       const cookies = headers.getSetCookie();
       if (!cookies) {
         return [];
@@ -16781,7 +16781,7 @@ var require_cookies = __commonJS({
     }
     function setCookie(headers, cookie) {
       webidl.argumentLengthCheck(arguments, 2, "setCookie");
-      webidl.brandCheck(headers, Headers2, { strict: false });
+      webidl.brandCheck(headers, Headers, { strict: false });
       cookie = webidl.converters.Cookie(cookie);
       const str = stringify(cookie);
       if (str) {
@@ -17471,7 +17471,7 @@ var require_connection = __commonJS({
     var { CloseEvent } = require_events();
     var { makeRequest } = require_request2();
     var { fetching } = require_fetch();
-    var { Headers: Headers2, getHeadersList } = require_headers();
+    var { Headers, getHeadersList } = require_headers();
     var { getDecodeSplit } = require_util2();
     var { WebsocketFrameSend } = require_frame();
     var crypto;
@@ -17493,7 +17493,7 @@ var require_connection = __commonJS({
         redirect: "error"
       });
       if (options.headers) {
-        const headersList = getHeadersList(new Headers2(options.headers));
+        const headersList = getHeadersList(new Headers(options.headers));
         request.headersList = headersList;
       }
       const keyValue = crypto.randomBytes(16).toString("base64");
@@ -20594,23 +20594,23 @@ var require_message = __commonJS({
       MessageReferenceType2[MessageReferenceType2["Default"] = 0] = "Default";
       MessageReferenceType2[MessageReferenceType2["Forward"] = 1] = "Forward";
     })(MessageReferenceType || (exports2.MessageReferenceType = MessageReferenceType = {}));
-    var MessageFlags;
-    (function(MessageFlags2) {
-      MessageFlags2[MessageFlags2["Crossposted"] = 1] = "Crossposted";
-      MessageFlags2[MessageFlags2["IsCrosspost"] = 2] = "IsCrosspost";
-      MessageFlags2[MessageFlags2["SuppressEmbeds"] = 4] = "SuppressEmbeds";
-      MessageFlags2[MessageFlags2["SourceMessageDeleted"] = 8] = "SourceMessageDeleted";
-      MessageFlags2[MessageFlags2["Urgent"] = 16] = "Urgent";
-      MessageFlags2[MessageFlags2["HasThread"] = 32] = "HasThread";
-      MessageFlags2[MessageFlags2["Ephemeral"] = 64] = "Ephemeral";
-      MessageFlags2[MessageFlags2["Loading"] = 128] = "Loading";
-      MessageFlags2[MessageFlags2["FailedToMentionSomeRolesInThread"] = 256] = "FailedToMentionSomeRolesInThread";
-      MessageFlags2[MessageFlags2["ShouldShowLinkNotDiscordWarning"] = 1024] = "ShouldShowLinkNotDiscordWarning";
-      MessageFlags2[MessageFlags2["SuppressNotifications"] = 4096] = "SuppressNotifications";
-      MessageFlags2[MessageFlags2["IsVoiceMessage"] = 8192] = "IsVoiceMessage";
-      MessageFlags2[MessageFlags2["HasSnapshot"] = 16384] = "HasSnapshot";
-      MessageFlags2[MessageFlags2["IsComponentsV2"] = 32768] = "IsComponentsV2";
-    })(MessageFlags || (exports2.MessageFlags = MessageFlags = {}));
+    var MessageFlags6;
+    (function(MessageFlags7) {
+      MessageFlags7[MessageFlags7["Crossposted"] = 1] = "Crossposted";
+      MessageFlags7[MessageFlags7["IsCrosspost"] = 2] = "IsCrosspost";
+      MessageFlags7[MessageFlags7["SuppressEmbeds"] = 4] = "SuppressEmbeds";
+      MessageFlags7[MessageFlags7["SourceMessageDeleted"] = 8] = "SourceMessageDeleted";
+      MessageFlags7[MessageFlags7["Urgent"] = 16] = "Urgent";
+      MessageFlags7[MessageFlags7["HasThread"] = 32] = "HasThread";
+      MessageFlags7[MessageFlags7["Ephemeral"] = 64] = "Ephemeral";
+      MessageFlags7[MessageFlags7["Loading"] = 128] = "Loading";
+      MessageFlags7[MessageFlags7["FailedToMentionSomeRolesInThread"] = 256] = "FailedToMentionSomeRolesInThread";
+      MessageFlags7[MessageFlags7["ShouldShowLinkNotDiscordWarning"] = 1024] = "ShouldShowLinkNotDiscordWarning";
+      MessageFlags7[MessageFlags7["SuppressNotifications"] = 4096] = "SuppressNotifications";
+      MessageFlags7[MessageFlags7["IsVoiceMessage"] = 8192] = "IsVoiceMessage";
+      MessageFlags7[MessageFlags7["HasSnapshot"] = 16384] = "HasSnapshot";
+      MessageFlags7[MessageFlags7["IsComponentsV2"] = 32768] = "IsComponentsV2";
+    })(MessageFlags6 || (exports2.MessageFlags = MessageFlags6 = {}));
     var BaseThemeType;
     (function(BaseThemeType2) {
       BaseThemeType2[BaseThemeType2["Unset"] = 0] = "Unset";
@@ -35856,7 +35856,7 @@ var require_DataResolver = __commonJS({
 var require_MessageFlagsBitField = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/util/MessageFlagsBitField.js"(exports2, module2) {
     "use strict";
-    var { MessageFlags } = require_v106();
+    var { MessageFlags: MessageFlags6 } = require_v106();
     var BitField = require_BitField();
     var MessageFlagsBitField = class extends BitField {
       /**
@@ -35864,7 +35864,7 @@ var require_MessageFlagsBitField = __commonJS({
        * @type {MessageFlags}
        * @memberof MessageFlagsBitField
        */
-      static Flags = MessageFlags;
+      static Flags = MessageFlags6;
     };
     module2.exports = MessageFlagsBitField;
   }
@@ -49692,7 +49692,7 @@ var require_Message = __commonJS({
       InteractionType,
       ChannelType,
       MessageType,
-      MessageFlags,
+      MessageFlags: MessageFlags6,
       PermissionFlagsBits: PermissionFlagsBits5,
       MessageReferenceType
     } = require_v106();
@@ -50009,7 +50009,7 @@ var require_Message = __commonJS({
        * @readonly
        */
       get hasThread() {
-        return this.flags.has(MessageFlags.HasThread);
+        return this.flags.has(MessageFlags6.HasThread);
       }
       /**
        * The thread started by this message
@@ -50219,7 +50219,7 @@ var require_Message = __commonJS({
         const bitfield = PermissionFlagsBits5.SendMessages | (this.author.id === this.client.user.id ? PermissionsBitField2.DefaultBit : PermissionFlagsBits5.ManageMessages);
         const { channel } = this;
         return Boolean(
-          channel?.type === ChannelType.GuildAnnouncement && !this.flags.has(MessageFlags.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
+          channel?.type === ChannelType.GuildAnnouncement && !this.flags.has(MessageFlags6.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
         );
       }
       /**
@@ -50420,9 +50420,9 @@ var require_Message = __commonJS({
       suppressEmbeds(suppress = true) {
         const flags = new MessageFlagsBitField(this.flags.bitfield);
         if (suppress) {
-          flags.add(MessageFlags.SuppressEmbeds);
+          flags.add(MessageFlags6.SuppressEmbeds);
         } else {
-          flags.remove(MessageFlags.SuppressEmbeds);
+          flags.remove(MessageFlags6.SuppressEmbeds);
         }
         return this.edit({ flags });
       }
@@ -52220,7 +52220,7 @@ var require_MessagePayload = __commonJS({
     var { Buffer: Buffer2 } = __require("node:buffer");
     var { lazy, isJSONEncodable } = require_dist();
     var { DiscordSnowflake } = require_cjs();
-    var { MessageFlags, MessageReferenceType } = require_v106();
+    var { MessageFlags: MessageFlags6, MessageReferenceType } = require_v106();
     var { DiscordjsError: DiscordjsError2, DiscordjsRangeError: DiscordjsRangeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var { resolveFile } = require_DataResolver();
     var MessageFlagsBitField = require_MessageFlagsBitField();
@@ -52346,7 +52346,7 @@ var require_MessagePayload = __commonJS({
           flags = new MessageFlagsBitField(this.options.flags).bitfield;
         }
         if (isInteraction && this.options.ephemeral) {
-          flags |= MessageFlags.Ephemeral;
+          flags |= MessageFlags6.Ephemeral;
         }
         let allowedMentions = this.options.allowedMentions === void 0 ? this.target.client.options.allowedMentions : this.options.allowedMentions;
         if (allowedMentions?.repliedUser !== void 0) {
@@ -58115,7 +58115,7 @@ var require_InteractionResponses = __commonJS({
     var { deprecate } = __require("node:util");
     var { makeURLSearchParams: makeURLSearchParams2 } = require_dist5();
     var { isJSONEncodable } = require_dist();
-    var { InteractionResponseType, MessageFlags, Routes: Routes3, InteractionType } = require_v106();
+    var { InteractionResponseType, MessageFlags: MessageFlags6, Routes: Routes3, InteractionType } = require_v106();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var MessageFlagsBitField = require_MessageFlagsBitField();
     var InteractionCallbackResponse = require_InteractionCallbackResponse();
@@ -58209,7 +58209,7 @@ var require_InteractionResponses = __commonJS({
         }
         const flags = new MessageFlagsBitField(options.flags);
         if (options.ephemeral) {
-          flags.add(MessageFlags.Ephemeral);
+          flags.add(MessageFlags6.Ephemeral);
         }
         const response = await this.client.rest.post(Routes3.interactionCallback(this.id, this.token), {
           body: {
@@ -58222,7 +58222,7 @@ var require_InteractionResponses = __commonJS({
           query: makeURLSearchParams2({ with_response: options.withResponse ?? false })
         });
         this.deferred = true;
-        this.ephemeral = flags.has(MessageFlags.Ephemeral);
+        this.ephemeral = flags.has(MessageFlags6.Ephemeral);
         return options.withResponse ? new InteractionCallbackResponse(this.client, response) : options.fetchReply ? this.fetchReply() : new InteractionResponse(this);
       }
       /**
@@ -58277,7 +58277,7 @@ var require_InteractionResponses = __commonJS({
           auth: false,
           query: makeURLSearchParams2({ with_response: options.withResponse ?? false })
         });
-        this.ephemeral = Boolean(data.flags & MessageFlags.Ephemeral);
+        this.ephemeral = Boolean(data.flags & MessageFlags6.Ephemeral);
         this.replied = true;
         return options.withResponse ? new InteractionCallbackResponse(this.client, response) : options.fetchReply ? this.fetchReply() : new InteractionResponse(this);
       }
@@ -75469,296 +75469,6 @@ var require_src = __commonJS({
   }
 });
 
-// ../../node_modules/.pnpm/@replit+connectors-sdk@0.4.1/node_modules/@replit/connectors-sdk/identity.js
-var require_identity = __commonJS({
-  "../../node_modules/.pnpm/@replit+connectors-sdk@0.4.1/node_modules/@replit/connectors-sdk/identity.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.resolveAudience = resolveAudience;
-    exports2.createIdentityToken = createIdentityToken;
-    exports2.resolveIdentityToken = resolveIdentityToken;
-    exports2.resolveBaseUrl = resolveBaseUrl;
-    exports2.buildHeaders = buildHeaders;
-    var node_child_process_1 = __require("node:child_process");
-    var node_util_1 = __require("node:util");
-    var execFileAsync = (0, node_util_1.promisify)(node_child_process_1.execFile);
-    var DEFAULT_CONNECTORS_HOST = "connectors.replit.com";
-    function resolveAudience() {
-      const audience = process.env["REPLIT_CONNECTORS_AUDIENCE"];
-      if (audience) {
-        if (audience.startsWith("http://") || audience.startsWith("https://")) {
-          return audience;
-        }
-        return `https://${audience}`;
-      }
-      return `https://${DEFAULT_CONNECTORS_HOST}`;
-    }
-    async function createIdentityToken() {
-      const replitBinary = process.env["REPLIT_CLI"] || "replit";
-      const audience = resolveAudience();
-      const { stdout } = await execFileAsync(replitBinary, [
-        "identity",
-        "create",
-        "--audience",
-        audience
-      ]);
-      const token = stdout.trim();
-      if (!token) {
-        throw new Error(`replit identity create returned an empty token (audience: ${audience})`);
-      }
-      return token;
-    }
-    async function resolveIdentityToken() {
-      try {
-        const token = await createIdentityToken();
-        return token;
-      } catch {
-      }
-      const replIdentity = process.env["REPL_IDENTITY"];
-      if (replIdentity) {
-        return `repl ${replIdentity}`;
-      }
-      const deplToken = process.env["WEB_REPL_RENEWAL"];
-      if (deplToken) {
-        return `depl ${deplToken}`;
-      }
-      throw new Error("Replit identity token not found. Could not run `replit identity create` and neither REPL_IDENTITY nor WEB_REPL_RENEWAL are set in the environment. Are you running this inside a Repl?");
-    }
-    function resolveBaseUrl() {
-      const hostname = process.env["REPLIT_CONNECTORS_HOSTNAME"];
-      if (hostname) {
-        if (hostname.startsWith("http://") || hostname.startsWith("https://")) {
-          return hostname;
-        }
-        return `https://${hostname}`;
-      }
-      return `https://${DEFAULT_CONNECTORS_HOST}`;
-    }
-    async function buildHeaders() {
-      const token = await resolveIdentityToken();
-      const headers = {
-        Accept: "application/json"
-      };
-      if (token.startsWith("repl ") || token.startsWith("depl ")) {
-        headers["X-Replit-Token"] = token;
-      } else {
-        headers["Replit-Authentication"] = `Bearer ${token}`;
-      }
-      return headers;
-    }
-  }
-});
-
-// ../../node_modules/.pnpm/@replit+connectors-sdk@0.4.1/node_modules/@replit/connectors-sdk/client.js
-var require_client2 = __commonJS({
-  "../../node_modules/.pnpm/@replit+connectors-sdk@0.4.1/node_modules/@replit/connectors-sdk/client.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.ReplitConnectors = void 0;
-    var identity_1 = require_identity();
-    function resolveProxyTarget(url, proxyBase) {
-      if (url.startsWith(proxyBase)) {
-        return url;
-      }
-      if (url.startsWith("http://") || url.startsWith("https://")) {
-        const parsed = new URL(url);
-        return `${proxyBase}${parsed.pathname}${parsed.search}`;
-      }
-      return `${proxyBase}${url.startsWith("/") ? "" : "/"}${url}`;
-    }
-    function flattenHeaders(headers) {
-      if (!headers) {
-        return {};
-      }
-      const result = {};
-      if (headers instanceof Headers) {
-        headers.forEach((value, key) => {
-          result[key] = value;
-        });
-      } else if (Array.isArray(headers)) {
-        for (const pair of headers) {
-          result[pair[0]] = pair[1];
-        }
-      } else {
-        Object.assign(result, headers);
-      }
-      return result;
-    }
-    var dbxCompoundTokenStrategy = ({ baseUrl, connectorName, connectionId, rawIdentityToken }) => ({
-      host: baseUrl,
-      token: `${rawIdentityToken} dbx:${connectionId}`,
-      connectorName
-    });
-    var pathRouteStrategy = ({ baseUrl, connectorName, connectionId, rawIdentityToken }) => ({
-      host: `${baseUrl}/api/v2/cli-proxy/${connectorName}/${connectionId}`,
-      token: rawIdentityToken,
-      connectorName
-    });
-    var CLI_CONFIG_STRATEGIES = {
-      databricks: dbxCompoundTokenStrategy,
-      "databricks-m2m": dbxCompoundTokenStrategy,
-      "microsoft-fabric": pathRouteStrategy
-    };
-    var ReplitConnectors2 = class {
-      constructor(options) {
-        this.baseUrl = options?.baseUrl ?? (0, identity_1.resolveBaseUrl)();
-      }
-      async proxy(connectorName, path, options) {
-        const method = options?.method ?? "GET";
-        const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-        const url = `${this.getProxyUrl()}${normalizedPath}`;
-        const headers = {
-          ...await (0, identity_1.buildHeaders)(),
-          "Connector-Name": connectorName,
-          ...options?.headers ?? {}
-        };
-        const init = { method, headers };
-        if (options?.body !== void 0 && options.body !== null) {
-          if (typeof options.body === "string" || typeof Buffer !== "undefined" && options.body instanceof Buffer || options.body instanceof ArrayBuffer || options.body instanceof FormData || options.body instanceof URLSearchParams || options.body instanceof Blob || options.body instanceof ReadableStream) {
-            init.body = options.body;
-          } else {
-            init.body = JSON.stringify(options.body);
-            if (!headers["Content-Type"]) {
-              headers["Content-Type"] = "application/json";
-            }
-          }
-        }
-        const response = await fetch(url, init);
-        if (response.status === 401) {
-          const freshAuth = await (0, identity_1.buildHeaders)();
-          const retryResponse = await fetch(url, {
-            ...init,
-            headers: { ...headers, ...freshAuth }
-          });
-          return retryResponse;
-        }
-        return response;
-      }
-      async listConnections(options) {
-        const params = new URLSearchParams();
-        if (options?.connector_names) {
-          params.set("connector_names", options.connector_names);
-        }
-        for (const val of options?.expand ?? ["connector"]) {
-          params.append("expand", val);
-        }
-        params.set("refresh_policy", options?.refresh_policy ?? "none");
-        const qs = params.toString();
-        const url = `${this.baseUrl}/api/v2/connection${qs ? `?${qs}` : ""}`;
-        const headers = await (0, identity_1.buildHeaders)();
-        const response = await fetch(url, { method: "GET", headers });
-        if (response.status === 401) {
-          const freshHeaders = await (0, identity_1.buildHeaders)();
-          const retryResponse = await fetch(url, {
-            method: "GET",
-            headers: freshHeaders
-          });
-          if (!retryResponse.ok) {
-            throw new Error(`Failed to list connections: ${retryResponse.status} ${retryResponse.statusText}`);
-          }
-          const data2 = await retryResponse.json();
-          return data2.items ?? [];
-        }
-        if (!response.ok) {
-          throw new Error(`Failed to list connections: ${response.status} ${response.statusText}`);
-        }
-        const data = await response.json();
-        return data.items ?? [];
-      }
-      getProxyUrl() {
-        return `${this.baseUrl}/api/v2/proxy`;
-      }
-      async getProxyHeaders(connectorName) {
-        const headers = await (0, identity_1.buildHeaders)();
-        return { ...headers, "Connector-Name": connectorName };
-      }
-      async getCliConfig(connectorName) {
-        const strategy = CLI_CONFIG_STRATEGIES[connectorName];
-        if (!strategy) {
-          const supported = Object.keys(CLI_CONFIG_STRATEGIES).join(", ");
-          throw new Error(`getCliConfig() is only supported for ${supported}, got: ${connectorName}`);
-        }
-        const connections = await this.listConnections({
-          connector_names: connectorName
-        });
-        const connection = connections[0];
-        if (!connection) {
-          throw new Error(`No ${connectorName} connection found`);
-        }
-        const headers = await (0, identity_1.buildHeaders)();
-        const identityToken = headers["X-Replit-Token"] ?? headers["Replit-Authentication"];
-        if (!identityToken) {
-          throw new Error("Replit identity token not found");
-        }
-        const rawToken = identityToken.replace(/^Bearer\s+/i, "");
-        return strategy({
-          baseUrl: this.baseUrl,
-          connectorName,
-          connectionId: connection.id,
-          rawIdentityToken: rawToken
-        });
-      }
-      createProxyFetch(connectorName) {
-        const proxyBase = this.getProxyUrl();
-        return async (input, init) => {
-          const rawUrl = input instanceof Request ? input.url : String(input);
-          const targetUrl = resolveProxyTarget(rawUrl, proxyBase);
-          const authHeaders = await (0, identity_1.buildHeaders)();
-          const userHeaders = flattenHeaders(init?.headers ?? (input instanceof Request ? input.headers : void 0));
-          const headers = {
-            ...authHeaders,
-            "Connector-Name": connectorName,
-            ...userHeaders
-          };
-          const requestDefaults = input instanceof Request ? {
-            method: input.method,
-            body: input.body,
-            cache: input.cache,
-            credentials: input.credentials,
-            integrity: input.integrity,
-            keepalive: input.keepalive,
-            mode: input.mode,
-            redirect: input.redirect,
-            referrer: input.referrer,
-            referrerPolicy: input.referrerPolicy,
-            signal: input.signal,
-            // @ts-expect-error duplex is required for streaming bodies but missing from RequestInit
-            duplex: input.body ? "half" : void 0
-          } : {};
-          const fetchInit = { ...requestDefaults, ...init, headers };
-          const response = await fetch(targetUrl, fetchInit);
-          if (response.status === 401) {
-            const freshAuth = await (0, identity_1.buildHeaders)();
-            return fetch(targetUrl, {
-              ...fetchInit,
-              headers: {
-                ...freshAuth,
-                "Connector-Name": connectorName,
-                ...userHeaders
-              }
-            });
-          }
-          return response;
-        };
-      }
-    };
-    exports2.ReplitConnectors = ReplitConnectors2;
-  }
-});
-
-// ../../node_modules/.pnpm/@replit+connectors-sdk@0.4.1/node_modules/@replit/connectors-sdk/index.js
-var require_connectors_sdk = __commonJS({
-  "../../node_modules/.pnpm/@replit+connectors-sdk@0.4.1/node_modules/@replit/connectors-sdk/index.js"(exports2) {
-    "use strict";
-    Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.ReplitConnectors = void 0;
-    var client_1 = require_client2();
-    Object.defineProperty(exports2, "ReplitConnectors", { enumerable: true, get: function() {
-      return client_1.ReplitConnectors;
-    } });
-  }
-});
-
 // src/bot/index.ts
 var import_discord8 = __toESM(require_src(), 1);
 
@@ -75776,13 +75486,67 @@ var logger = {
 var import_discord2 = __toESM(require_src(), 1);
 
 // src/bot/sheets.ts
-var import_connectors_sdk = __toESM(require_connectors_sdk(), 1);
+import { createSign } from "node:crypto";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 var SHEET_ID_FILE = "./.bot-data/sheet-id.json";
+var cachedToken = null;
 var cachedSheetId = null;
+async function getAccessToken() {
+  const now = Math.floor(Date.now() / 1e3);
+  if (cachedToken && cachedToken.expiresAt > now + 60) return cachedToken.token;
+  const saJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (!saJson) {
+    throw new Error(
+      "GOOGLE_SERVICE_ACCOUNT_JSON is not set. Create a Google Service Account, download the JSON key, and paste it as this env var in BisectHosting."
+    );
+  }
+  const sa = JSON.parse(saJson);
+  const header = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
+  const payload = Buffer.from(JSON.stringify({
+    iss: sa.client_email,
+    scope: "https://www.googleapis.com/auth/spreadsheets",
+    aud: "https://oauth2.googleapis.com/token",
+    exp: now + 3600,
+    iat: now
+  })).toString("base64url");
+  const sigInput = `${header}.${payload}`;
+  const sign = createSign("RSA-SHA256");
+  sign.update(sigInput);
+  const signature = sign.sign(sa.private_key, "base64url");
+  const jwt = `${sigInput}.${signature}`;
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: jwt
+    })
+  });
+  const data = await res.json();
+  if (!data.access_token) {
+    throw new Error(`Failed to get Google access token: ${JSON.stringify(data)}`);
+  }
+  cachedToken = { token: data.access_token, expiresAt: now + (data.expires_in ?? 3600) };
+  return cachedToken.token;
+}
+async function sheetsRequest(path, options = {}) {
+  const token = await getAccessToken();
+  return fetch(`https://sheets.googleapis.com${path}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      ...options.headers ?? {}
+    }
+  });
+}
 async function getSheetId() {
   if (cachedSheetId) return cachedSheetId;
+  if (process.env.GOOGLE_SHEET_ID) {
+    cachedSheetId = process.env.GOOGLE_SHEET_ID;
+    return cachedSheetId;
+  }
   if (existsSync(SHEET_ID_FILE)) {
     const raw = await readFile(SHEET_ID_FILE, "utf-8");
     cachedSheetId = JSON.parse(raw).sheetId;
@@ -75791,18 +75555,14 @@ async function getSheetId() {
   return createSpreadsheet();
 }
 async function createSpreadsheet() {
-  const connectors = new import_connectors_sdk.ReplitConnectors();
-  const createRes = await connectors.proxy("google-sheet", "/v4/spreadsheets", {
+  const res = await sheetsRequest("/v4/spreadsheets", {
     method: "POST",
-    body: JSON.stringify({
-      properties: { title: "Discord Bot Filings" }
-    })
+    body: JSON.stringify({ properties: { title: "Discord Bot Filings" } })
   });
-  const createData = await createRes.json();
-  const sheetId = createData.spreadsheetId;
+  const data = await res.json();
+  const sheetId = data.spreadsheetId;
   const range = encodeURIComponent("Sheet1!A1:E1");
-  await connectors.proxy(
-    "google-sheet",
+  await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
     {
       method: "PUT",
@@ -75815,17 +75575,14 @@ async function createSpreadsheet() {
   await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId }));
   cachedSheetId = sheetId;
   logger.info(
-    { sheetId, url: `https://docs.google.com/spreadsheets/d/${sheetId}` },
-    "Created Google Sheet for bot filings"
+    `Created Google Sheet: https://docs.google.com/spreadsheets/d/${sheetId}`
   );
   return sheetId;
 }
 async function appendFiling(record) {
-  const connectors = new import_connectors_sdk.ReplitConnectors();
   const sheetId = await getSheetId();
   const range = encodeURIComponent("Sheet1!A:E");
-  await connectors.proxy(
-    "google-sheet",
+  const res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
     {
       method: "POST",
@@ -75840,16 +75597,22 @@ async function appendFiling(record) {
       })
     }
   );
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Sheets append failed (${res.status}): ${err}`);
+  }
 }
 async function getFilings() {
-  const connectors = new import_connectors_sdk.ReplitConnectors();
   const sheetId = await getSheetId();
   const range = encodeURIComponent("Sheet1!A:E");
-  const res = await connectors.proxy(
-    "google-sheet",
+  const res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}`,
     { method: "GET" }
   );
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Sheets read failed (${res.status}): ${err}`);
+  }
   const data = await res.json();
   const rows = data.values ?? [];
   return rows.slice(1).map((row) => ({
@@ -75905,7 +75668,7 @@ async function handleFilingCommand(interaction) {
   if (!checkAccess(interaction, allowed)) {
     await interaction.reply({
       content: "You do not have access to this command.",
-      ephemeral: true
+      flags: import_discord2.MessageFlags.Ephemeral
     });
     return;
   }
@@ -75921,7 +75684,7 @@ async function handleFilingCommand(interaction) {
   await interaction.showModal(modal);
 }
 async function handleFilingModal(interaction) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: import_discord2.MessageFlags.Ephemeral });
   const username = interaction.fields.getTextInputValue("username");
   const licensePlate = interaction.fields.getTextInputValue("license_plate");
   const possession = interaction.fields.getTextInputValue("profession");
@@ -75956,7 +75719,7 @@ async function handleStatisticsCommand(interaction) {
   if (!checkAccess(interaction, allowed)) {
     await interaction.reply({
       content: "You do not have access to this command.",
-      ephemeral: true
+      flags: import_discord3.MessageFlags.Ephemeral
     });
     return;
   }
@@ -76019,21 +75782,21 @@ async function handleAccessCommand(interaction) {
       await grantAccess(user.id);
       await interaction.reply({
         content: `Access granted to ${user.tag}.`,
-        ephemeral: true
+        flags: import_discord4.MessageFlags.Ephemeral
       });
     } else if (sub === "remove") {
       const user = interaction.options.getUser("user", true);
       await revokeAccess(user.id);
       await interaction.reply({
         content: `Access revoked from ${user.tag}.`,
-        ephemeral: true
+        flags: import_discord4.MessageFlags.Ephemeral
       });
     } else if (sub === "list") {
       const users = await getAllowedUsers();
       if (users.size === 0) {
         await interaction.reply({
           content: "No users have been explicitly granted access. Server administrators always have access.",
-          ephemeral: true
+          flags: import_discord4.MessageFlags.Ephemeral
         });
       } else {
         const list = [...users].map((id) => `<@${id}>`).join(", ");
@@ -76041,7 +75804,7 @@ async function handleAccessCommand(interaction) {
           content: `Users with access: ${list}
 
 Server administrators always have access regardless of this list.`,
-          ephemeral: true
+          flags: import_discord4.MessageFlags.Ephemeral
         });
       }
     }
@@ -76049,7 +75812,7 @@ Server administrators always have access regardless of this list.`,
     logger.error({ err }, "Failed to handle access command");
     await interaction.reply({
       content: "Something went wrong. Please try again.",
-      ephemeral: true
+      flags: import_discord4.MessageFlags.Ephemeral
     });
   }
 }
@@ -76168,7 +75931,7 @@ async function handleRobloxCommand(interaction) {
     if (!checkAccess(interaction, allowed)) {
       await interaction.reply({
         content: "You do not have access to this command.",
-        ephemeral: true
+        flags: import_discord5.MessageFlags.Ephemeral
       });
       return;
     }
@@ -76181,7 +75944,7 @@ async function handleRobloxCommand(interaction) {
     else if (sub === "whois") await handleWhois(interaction);
   } catch (err) {
     logger.error({ err }, "Error handling /roblox command");
-    const reply = { content: "Something went wrong. Please try again.", ephemeral: true };
+    const reply = { content: "Something went wrong. Please try again.", flags: import_discord5.MessageFlags.Ephemeral };
     if (interaction.deferred || interaction.replied) await interaction.editReply(reply);
     else await interaction.reply(reply);
   }
@@ -76227,7 +75990,7 @@ async function handleGroup(interaction) {
   await interaction.editReply({ embeds: [embed] });
 }
 async function handleVerify(interaction) {
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: import_discord5.MessageFlags.Ephemeral });
   const member = interaction.options.getUser("member", true);
   const username = interaction.options.getString("username", true);
   const user = await getUserByUsername(username);
@@ -76249,12 +76012,12 @@ async function handleUnverify(interaction) {
   if (removed) {
     await interaction.reply({
       content: `Verification removed for <@${member.id}>.`,
-      ephemeral: true
+      flags: import_discord5.MessageFlags.Ephemeral
     });
   } else {
     await interaction.reply({
       content: `<@${member.id}> has no verification on record.`,
-      ephemeral: true
+      flags: import_discord5.MessageFlags.Ephemeral
     });
   }
 }
@@ -76339,7 +76102,7 @@ async function handleGroupsCommand(interaction) {
     if (!checkAccess(interaction, allowed)) {
       await interaction.reply({
         content: "You do not have access to this command.",
-        ephemeral: true
+        flags: import_discord6.MessageFlags.Ephemeral
       });
       return;
     }
@@ -76352,13 +76115,13 @@ async function handleGroupsCommand(interaction) {
       if (!result.added) {
         await interaction.reply({
           content: `Group ID **${groupId}** is already registered as **${result.existing.label}**.`,
-          ephemeral: true
+          flags: import_discord6.MessageFlags.Ephemeral
         });
         return;
       }
       await interaction.reply({
         content: `Group **${label}** (ID: ${groupId}) added. It will now be checked in every \`/search\`.`,
-        ephemeral: true
+        flags: import_discord6.MessageFlags.Ephemeral
       });
     } else if (sub === "remove") {
       const groupId = interaction.options.getInteger("group_id", true);
@@ -76366,20 +76129,20 @@ async function handleGroupsCommand(interaction) {
       if (!removed) {
         await interaction.reply({
           content: `Group ID **${groupId}** is not in the list.`,
-          ephemeral: true
+          flags: import_discord6.MessageFlags.Ephemeral
         });
         return;
       }
       await interaction.reply({
         content: `Group ID **${groupId}** removed from the search list.`,
-        ephemeral: true
+        flags: import_discord6.MessageFlags.Ephemeral
       });
     } else if (sub === "list") {
       const groups = await getGroups();
       if (groups.length === 0) {
         await interaction.reply({
           content: "No groups registered yet. Use `/groups add` to add one.",
-          ephemeral: true
+          flags: import_discord6.MessageFlags.Ephemeral
         });
         return;
       }
@@ -76394,7 +76157,7 @@ async function handleGroupsCommand(interaction) {
     }
   } catch (err) {
     logger.error({ err }, "Error handling /groups command");
-    const reply = { content: "Something went wrong. Please try again.", ephemeral: true };
+    const reply = { content: "Something went wrong. Please try again.", flags: import_discord6.MessageFlags.Ephemeral };
     if (interaction.replied || interaction.deferred) await interaction.editReply(reply);
     else await interaction.reply(reply);
   }

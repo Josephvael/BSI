@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, MessageFlags, ChatInputCommandInteraction } from "discord.js";
 import { getFilings, getSheetUrl } from "../sheets";
 import { getAllowedUsers, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
@@ -14,7 +14,7 @@ export async function handleStatisticsCommand(
   if (!checkAccess(interaction, allowed)) {
     await interaction.reply({
       content: "You do not have access to this command.",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     return;
   }

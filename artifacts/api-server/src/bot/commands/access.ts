@@ -1,6 +1,7 @@
 import {
   SlashCommandBuilder,
   ChatInputCommandInteraction,
+  MessageFlags,
   PermissionFlagsBits,
 } from "discord.js";
 import { grantAccess, revokeAccess, getAllowedUsers } from "../access";
@@ -41,14 +42,14 @@ export async function handleAccessCommand(
       await grantAccess(user.id);
       await interaction.reply({
         content: `Access granted to ${user.tag}.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (sub === "remove") {
       const user = interaction.options.getUser("user", true);
       await revokeAccess(user.id);
       await interaction.reply({
         content: `Access revoked from ${user.tag}.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else if (sub === "list") {
       const users = await getAllowedUsers();
@@ -56,13 +57,13 @@ export async function handleAccessCommand(
         await interaction.reply({
           content:
             "No users have been explicitly granted access. Server administrators always have access.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       } else {
         const list = [...users].map((id) => `<@${id}>`).join(", ");
         await interaction.reply({
           content: `Users with access: ${list}\n\nServer administrators always have access regardless of this list.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }
@@ -70,7 +71,7 @@ export async function handleAccessCommand(
     logger.error({ err }, "Failed to handle access command");
     await interaction.reply({
       content: "Something went wrong. Please try again.",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }
