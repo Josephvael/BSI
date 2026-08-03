@@ -20594,23 +20594,23 @@ var require_message = __commonJS({
       MessageReferenceType2[MessageReferenceType2["Default"] = 0] = "Default";
       MessageReferenceType2[MessageReferenceType2["Forward"] = 1] = "Forward";
     })(MessageReferenceType || (exports2.MessageReferenceType = MessageReferenceType = {}));
-    var MessageFlags6;
-    (function(MessageFlags7) {
-      MessageFlags7[MessageFlags7["Crossposted"] = 1] = "Crossposted";
-      MessageFlags7[MessageFlags7["IsCrosspost"] = 2] = "IsCrosspost";
-      MessageFlags7[MessageFlags7["SuppressEmbeds"] = 4] = "SuppressEmbeds";
-      MessageFlags7[MessageFlags7["SourceMessageDeleted"] = 8] = "SourceMessageDeleted";
-      MessageFlags7[MessageFlags7["Urgent"] = 16] = "Urgent";
-      MessageFlags7[MessageFlags7["HasThread"] = 32] = "HasThread";
-      MessageFlags7[MessageFlags7["Ephemeral"] = 64] = "Ephemeral";
-      MessageFlags7[MessageFlags7["Loading"] = 128] = "Loading";
-      MessageFlags7[MessageFlags7["FailedToMentionSomeRolesInThread"] = 256] = "FailedToMentionSomeRolesInThread";
-      MessageFlags7[MessageFlags7["ShouldShowLinkNotDiscordWarning"] = 1024] = "ShouldShowLinkNotDiscordWarning";
-      MessageFlags7[MessageFlags7["SuppressNotifications"] = 4096] = "SuppressNotifications";
-      MessageFlags7[MessageFlags7["IsVoiceMessage"] = 8192] = "IsVoiceMessage";
-      MessageFlags7[MessageFlags7["HasSnapshot"] = 16384] = "HasSnapshot";
-      MessageFlags7[MessageFlags7["IsComponentsV2"] = 32768] = "IsComponentsV2";
-    })(MessageFlags6 || (exports2.MessageFlags = MessageFlags6 = {}));
+    var MessageFlags7;
+    (function(MessageFlags8) {
+      MessageFlags8[MessageFlags8["Crossposted"] = 1] = "Crossposted";
+      MessageFlags8[MessageFlags8["IsCrosspost"] = 2] = "IsCrosspost";
+      MessageFlags8[MessageFlags8["SuppressEmbeds"] = 4] = "SuppressEmbeds";
+      MessageFlags8[MessageFlags8["SourceMessageDeleted"] = 8] = "SourceMessageDeleted";
+      MessageFlags8[MessageFlags8["Urgent"] = 16] = "Urgent";
+      MessageFlags8[MessageFlags8["HasThread"] = 32] = "HasThread";
+      MessageFlags8[MessageFlags8["Ephemeral"] = 64] = "Ephemeral";
+      MessageFlags8[MessageFlags8["Loading"] = 128] = "Loading";
+      MessageFlags8[MessageFlags8["FailedToMentionSomeRolesInThread"] = 256] = "FailedToMentionSomeRolesInThread";
+      MessageFlags8[MessageFlags8["ShouldShowLinkNotDiscordWarning"] = 1024] = "ShouldShowLinkNotDiscordWarning";
+      MessageFlags8[MessageFlags8["SuppressNotifications"] = 4096] = "SuppressNotifications";
+      MessageFlags8[MessageFlags8["IsVoiceMessage"] = 8192] = "IsVoiceMessage";
+      MessageFlags8[MessageFlags8["HasSnapshot"] = 16384] = "HasSnapshot";
+      MessageFlags8[MessageFlags8["IsComponentsV2"] = 32768] = "IsComponentsV2";
+    })(MessageFlags7 || (exports2.MessageFlags = MessageFlags7 = {}));
     var BaseThemeType;
     (function(BaseThemeType2) {
       BaseThemeType2[BaseThemeType2["Unset"] = 0] = "Unset";
@@ -20677,20 +20677,20 @@ var require_message = __commonJS({
       ComponentType2[ComponentType2["Checkbox"] = 23] = "Checkbox";
       ComponentType2[ComponentType2["SelectMenu"] = 3] = "SelectMenu";
     })(ComponentType || (exports2.ComponentType = ComponentType = {}));
-    var ButtonStyle;
-    (function(ButtonStyle2) {
-      ButtonStyle2[ButtonStyle2["Primary"] = 1] = "Primary";
-      ButtonStyle2[ButtonStyle2["Secondary"] = 2] = "Secondary";
-      ButtonStyle2[ButtonStyle2["Success"] = 3] = "Success";
-      ButtonStyle2[ButtonStyle2["Danger"] = 4] = "Danger";
-      ButtonStyle2[ButtonStyle2["Link"] = 5] = "Link";
-      ButtonStyle2[ButtonStyle2["Premium"] = 6] = "Premium";
-    })(ButtonStyle || (exports2.ButtonStyle = ButtonStyle = {}));
-    var TextInputStyle2;
-    (function(TextInputStyle3) {
-      TextInputStyle3[TextInputStyle3["Short"] = 1] = "Short";
-      TextInputStyle3[TextInputStyle3["Paragraph"] = 2] = "Paragraph";
-    })(TextInputStyle2 || (exports2.TextInputStyle = TextInputStyle2 = {}));
+    var ButtonStyle2;
+    (function(ButtonStyle3) {
+      ButtonStyle3[ButtonStyle3["Primary"] = 1] = "Primary";
+      ButtonStyle3[ButtonStyle3["Secondary"] = 2] = "Secondary";
+      ButtonStyle3[ButtonStyle3["Success"] = 3] = "Success";
+      ButtonStyle3[ButtonStyle3["Danger"] = 4] = "Danger";
+      ButtonStyle3[ButtonStyle3["Link"] = 5] = "Link";
+      ButtonStyle3[ButtonStyle3["Premium"] = 6] = "Premium";
+    })(ButtonStyle2 || (exports2.ButtonStyle = ButtonStyle2 = {}));
+    var TextInputStyle3;
+    (function(TextInputStyle4) {
+      TextInputStyle4[TextInputStyle4["Short"] = 1] = "Short";
+      TextInputStyle4[TextInputStyle4["Paragraph"] = 2] = "Paragraph";
+    })(TextInputStyle3 || (exports2.TextInputStyle = TextInputStyle3 = {}));
     var SelectMenuDefaultValueType;
     (function(SelectMenuDefaultValueType2) {
       SelectMenuDefaultValueType2["Channel"] = "channel";
@@ -31943,7 +31943,7 @@ var require_CachedManager = __commonJS({
 var require_PermissionsBitField = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/util/PermissionsBitField.js"(exports2, module2) {
     "use strict";
-    var { PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
     var BitField = require_BitField();
     var PermissionsBitField2 = class extends BitField {
       /**
@@ -31952,13 +31952,13 @@ var require_PermissionsBitField = __commonJS({
        * @memberof PermissionsBitField
        * @see {@link https://discord.com/developers/docs/topics/permissions#permissions-bitwise-permission-flags}
        */
-      static Flags = PermissionFlagsBits5;
+      static Flags = PermissionFlagsBits6;
       /**
        * Bitfield representing every permission combined
        * @type {bigint}
        * @memberof PermissionsBitField
        */
-      static All = Object.values(PermissionFlagsBits5).reduce((all, p) => all | p, 0n);
+      static All = Object.values(PermissionFlagsBits6).reduce((all, p) => all | p, 0n);
       /**
        * Bitfield representing the default permissions for users
        * @type {bigint}
@@ -31970,7 +31970,7 @@ var require_PermissionsBitField = __commonJS({
        * @type {bigint}
        * @memberof PermissionsBitField
        */
-      static StageModerator = PermissionFlagsBits5.ManageChannels | PermissionFlagsBits5.MuteMembers | PermissionFlagsBits5.MoveMembers;
+      static StageModerator = PermissionFlagsBits6.ManageChannels | PermissionFlagsBits6.MuteMembers | PermissionFlagsBits6.MoveMembers;
       /**
        * @type {bigint}
        * @memberof PermissionsBitField
@@ -31997,7 +31997,7 @@ var require_PermissionsBitField = __commonJS({
        * @returns {string[]}
        */
       missing(bits, checkAdmin = true) {
-        return checkAdmin && this.has(PermissionFlagsBits5.Administrator) ? [] : super.missing(bits);
+        return checkAdmin && this.has(PermissionFlagsBits6.Administrator) ? [] : super.missing(bits);
       }
       /**
        * Checks whether the bitfield has a permission, or any of multiple permissions.
@@ -32006,7 +32006,7 @@ var require_PermissionsBitField = __commonJS({
        * @returns {boolean}
        */
       any(permission, checkAdmin = true) {
-        return checkAdmin && super.has(PermissionFlagsBits5.Administrator) || super.any(permission);
+        return checkAdmin && super.has(PermissionFlagsBits6.Administrator) || super.any(permission);
       }
       /**
        * Checks whether the bitfield has a permission, or multiple permissions.
@@ -32015,7 +32015,7 @@ var require_PermissionsBitField = __commonJS({
        * @returns {boolean}
        */
       has(permission, checkAdmin = true) {
-        return checkAdmin && super.has(PermissionFlagsBits5.Administrator) || super.has(permission);
+        return checkAdmin && super.has(PermissionFlagsBits6.Administrator) || super.has(permission);
       }
       /**
        * Gets an {@link Array} of bitfield names based on the permissions available.
@@ -32053,7 +32053,7 @@ var require_Role = __commonJS({
     "use strict";
     var { roleMention } = require_dist7();
     var { DiscordSnowflake } = require_cjs();
-    var { PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
     var Base = require_Base();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var PermissionsBitField2 = require_PermissionsBitField();
@@ -32165,7 +32165,7 @@ var require_Role = __commonJS({
       get editable() {
         if (this.managed) return false;
         const clientMember = this.guild.members.resolve(this.client.user);
-        if (!clientMember.permissions.has(PermissionFlagsBits5.ManageRoles)) return false;
+        if (!clientMember.permissions.has(PermissionFlagsBits6.ManageRoles)) return false;
         return clientMember.roles.highest.comparePositionTo(this) > 0;
       }
       /**
@@ -32735,7 +32735,7 @@ var require_GuildChannel = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/GuildChannel.js"(exports2, module2) {
     "use strict";
     var { Snowflake } = require_cjs();
-    var { PermissionFlagsBits: PermissionFlagsBits5, ChannelType } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits6, ChannelType } = require_v106();
     var { BaseChannel } = require_BaseChannel();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var PermissionOverwriteManager = require_PermissionOverwriteManager();
@@ -32876,7 +32876,7 @@ var require_GuildChannel = __commonJS({
         }
         const roles = member.roles.cache;
         const permissions = new PermissionsBitField2(roles.map((role) => role.permissions));
-        if (checkAdmin && permissions.has(PermissionFlagsBits5.Administrator)) {
+        if (checkAdmin && permissions.has(PermissionFlagsBits6.Administrator)) {
           return new PermissionsBitField2(PermissionsBitField2.All).freeze();
         }
         const overwrites = this.overwritesFor(member, true, roles);
@@ -32891,7 +32891,7 @@ var require_GuildChannel = __commonJS({
        * @private
        */
       rolePermissions(role, checkAdmin) {
-        if (checkAdmin && role.permissions.has(PermissionFlagsBits5.Administrator)) {
+        if (checkAdmin && role.permissions.has(PermissionFlagsBits6.Administrator)) {
           return new PermissionsBitField2(PermissionsBitField2.All).freeze();
         }
         const basePermissions = new PermissionsBitField2([role.permissions, role.guild.roles.everyone.permissions]);
@@ -32917,7 +32917,7 @@ var require_GuildChannel = __commonJS({
        */
       get members() {
         return this.guild.members.cache.filter(
-          (member) => this.permissionsFor(member).has(PermissionFlagsBits5.ViewChannel, false)
+          (member) => this.permissionsFor(member).has(PermissionFlagsBits6.ViewChannel, false)
         );
       }
       /**
@@ -33051,10 +33051,10 @@ var require_GuildChannel = __commonJS({
         if (this.client.user.id === this.guild.ownerId) return true;
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
+        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
         if (this.guild.members.me.communicationDisabledUntilTimestamp > Date.now()) return false;
-        const baseBitfield = PermissionFlagsBits5.ViewChannel | PermissionFlagsBits5.ManageChannels;
-        const bitfield = VoiceBasedChannelTypes.includes(this.type) ? baseBitfield | PermissionFlagsBits5.Connect : baseBitfield;
+        const baseBitfield = PermissionFlagsBits6.ViewChannel | PermissionFlagsBits6.ManageChannels;
+        const bitfield = VoiceBasedChannelTypes.includes(this.type) ? baseBitfield | PermissionFlagsBits6.Connect : baseBitfield;
         return permissions.has(bitfield, false);
       }
       /**
@@ -33066,7 +33066,7 @@ var require_GuildChannel = __commonJS({
         if (this.client.user.id === this.guild.ownerId) return true;
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        return permissions.has(PermissionFlagsBits5.ViewChannel, false);
+        return permissions.has(PermissionFlagsBits6.ViewChannel, false);
       }
       /**
        * Deletes this channel.
@@ -35420,7 +35420,7 @@ var require_InviteGuild = __commonJS({
 var require_Invite = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/Invite.js"(exports2, module2) {
     "use strict";
-    var { RouteBases, Routes: Routes3, PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
+    var { RouteBases, Routes: Routes3, PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
     var Base = require_Base();
     var { GuildScheduledEvent } = require_GuildScheduledEvent();
     var IntegrationApplication = require_IntegrationApplication();
@@ -35554,7 +35554,7 @@ var require_Invite = __commonJS({
         if (!guild || !this.client.guilds.cache.has(guild.id)) return false;
         if (!guild.members.me) throw new DiscordjsError2(ErrorCodes2.GuildUncachedMe);
         return Boolean(
-          this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits5.ManageChannels, false) || guild.members.me.permissions.has(PermissionFlagsBits5.ManageGuild)
+          this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits6.ManageChannels, false) || guild.members.me.permissions.has(PermissionFlagsBits6.ManageGuild)
         );
       }
       /**
@@ -35856,7 +35856,7 @@ var require_DataResolver = __commonJS({
 var require_MessageFlagsBitField = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/util/MessageFlagsBitField.js"(exports2, module2) {
     "use strict";
-    var { MessageFlags: MessageFlags6 } = require_v106();
+    var { MessageFlags: MessageFlags7 } = require_v106();
     var BitField = require_BitField();
     var MessageFlagsBitField = class extends BitField {
       /**
@@ -35864,7 +35864,7 @@ var require_MessageFlagsBitField = __commonJS({
        * @type {MessageFlags}
        * @memberof MessageFlagsBitField
        */
-      static Flags = MessageFlags6;
+      static Flags = MessageFlags7;
     };
     module2.exports = MessageFlagsBitField;
   }
@@ -42916,14 +42916,14 @@ var require_dist8 = __commonJS({
     };
     var index_exports = {};
     __export2(index_exports, {
-      ActionRowBuilder: () => ActionRowBuilder2,
+      ActionRowBuilder: () => ActionRowBuilder3,
       ApplicationCommandNumericOptionMinMaxValueMixin: () => ApplicationCommandNumericOptionMinMaxValueMixin,
       ApplicationCommandOptionBase: () => ApplicationCommandOptionBase,
       ApplicationCommandOptionChannelTypesMixin: () => ApplicationCommandOptionChannelTypesMixin,
       ApplicationCommandOptionWithAutocompleteMixin: () => ApplicationCommandOptionWithAutocompleteMixin,
       ApplicationCommandOptionWithChoicesMixin: () => ApplicationCommandOptionWithChoicesMixin,
       BaseSelectMenuBuilder: () => BaseSelectMenuBuilder,
-      ButtonBuilder: () => ButtonBuilder,
+      ButtonBuilder: () => ButtonBuilder2,
       ChannelSelectMenuBuilder: () => ChannelSelectMenuBuilder,
       CheckboxAssertions: () => Assertions_exports3,
       CheckboxBuilder: () => CheckboxBuilder,
@@ -42936,7 +42936,7 @@ var require_dist8 = __commonJS({
       ContextMenuCommandAssertions: () => Assertions_exports11,
       ContextMenuCommandBuilder: () => ContextMenuCommandBuilder,
       EmbedAssertions: () => Assertions_exports,
-      EmbedBuilder: () => EmbedBuilder6,
+      EmbedBuilder: () => EmbedBuilder7,
       FileBuilder: () => FileBuilder,
       FileUploadAssertions: () => Assertions_exports4,
       FileUploadBuilder: () => FileUploadBuilder,
@@ -42946,7 +42946,7 @@ var require_dist8 = __commonJS({
       MediaGalleryItemBuilder: () => MediaGalleryItemBuilder,
       MentionableSelectMenuBuilder: () => MentionableSelectMenuBuilder,
       ModalAssertions: () => Assertions_exports9,
-      ModalBuilder: () => ModalBuilder2,
+      ModalBuilder: () => ModalBuilder3,
       RadioGroupBuilder: () => RadioGroupBuilder,
       RadioGroupOptionBuilder: () => RadioGroupOptionBuilder,
       RoleSelectMenuBuilder: () => RoleSelectMenuBuilder,
@@ -42962,7 +42962,7 @@ var require_dist8 = __commonJS({
       SlashCommandAssertions: () => Assertions_exports10,
       SlashCommandAttachmentOption: () => SlashCommandAttachmentOption,
       SlashCommandBooleanOption: () => SlashCommandBooleanOption,
-      SlashCommandBuilder: () => SlashCommandBuilder7,
+      SlashCommandBuilder: () => SlashCommandBuilder8,
       SlashCommandChannelOption: () => SlashCommandChannelOption,
       SlashCommandIntegerOption: () => SlashCommandIntegerOption,
       SlashCommandMentionableOption: () => SlashCommandMentionableOption,
@@ -42976,7 +42976,7 @@ var require_dist8 = __commonJS({
       StringSelectMenuOptionBuilder: () => StringSelectMenuOptionBuilder,
       TextDisplayBuilder: () => TextDisplayBuilder,
       TextInputAssertions: () => Assertions_exports5,
-      TextInputBuilder: () => TextInputBuilder2,
+      TextInputBuilder: () => TextInputBuilder3,
       ThumbnailBuilder: () => ThumbnailBuilder,
       UserSelectMenuBuilder: () => UserSelectMenuBuilder,
       createComponentBuilder: () => createComponentBuilder,
@@ -43065,7 +43065,7 @@ var require_dist8 = __commonJS({
       return arr;
     }
     __name(normalizeArray, "normalizeArray");
-    var EmbedBuilder6 = class {
+    var EmbedBuilder7 = class {
       static {
         __name(this, "EmbedBuilder");
       }
@@ -43489,7 +43489,7 @@ var require_dist8 = __commonJS({
     };
     var import_v1027 = require_v106();
     var import_v102 = require_v106();
-    var ButtonBuilder = class extends ComponentBuilder {
+    var ButtonBuilder2 = class extends ComponentBuilder {
       static {
         __name(this, "ButtonBuilder");
       }
@@ -44848,7 +44848,7 @@ var require_dist8 = __commonJS({
     var import_util = require_dist();
     var import_v1016 = require_v106();
     var import_fast_deep_equal = __toESM2(require_fast_deep_equal());
-    var TextInputBuilder2 = class extends ComponentBuilder {
+    var TextInputBuilder3 = class extends ComponentBuilder {
       static {
         __name(this, "TextInputBuilder");
       }
@@ -45108,7 +45108,7 @@ var require_dist8 = __commonJS({
        * @param input - A function that returns a component builder or an already built builder
        */
       setTextInputComponent(input) {
-        this.data.component = resolveBuilder(input, TextInputBuilder2);
+        this.data.component = resolveBuilder(input, TextInputBuilder3);
         return this;
       }
       /**
@@ -45271,7 +45271,7 @@ var require_dist8 = __commonJS({
     var dividerPredicate = import_shapeshift8.s.boolean();
     var spacingPredicate = import_shapeshift8.s.nativeEnum(import_v1020.SeparatorSpacingSize);
     var textDisplayContentPredicate = import_shapeshift8.s.string().lengthGreaterThanOrEqual(1).lengthLessThanOrEqual(4e3).setValidationEnabled(isValidationEnabled);
-    var accessoryPredicate = import_shapeshift8.s.instance(ButtonBuilder).or(import_shapeshift8.s.instance(ThumbnailBuilder)).setValidationEnabled(isValidationEnabled);
+    var accessoryPredicate = import_shapeshift8.s.instance(ButtonBuilder2).or(import_shapeshift8.s.instance(ThumbnailBuilder)).setValidationEnabled(isValidationEnabled);
     var containerColorPredicate = colorPredicate.nullish();
     function assertReturnOfBuilder(input, ExpectedInstanceOf) {
       import_shapeshift8.s.instance(ExpectedInstanceOf).setValidationEnabled(isValidationEnabled).parse(input);
@@ -45524,7 +45524,7 @@ var require_dist8 = __commonJS({
        */
       addActionRowComponents(...components) {
         this.components.push(
-          ...normalizeArray(components).map((component) => resolveBuilder(component, ActionRowBuilder2))
+          ...normalizeArray(components).map((component) => resolveBuilder(component, ActionRowBuilder3))
         );
         return this;
       }
@@ -45846,7 +45846,7 @@ var require_dist8 = __commonJS({
        * @param accessory - The accessory to use
        */
       setButtonAccessory(accessory) {
-        Reflect.set(this, "accessory", accessoryPredicate.parse(resolveBuilder(accessory, ButtonBuilder)));
+        Reflect.set(this, "accessory", accessoryPredicate.parse(resolveBuilder(accessory, ButtonBuilder2)));
         return this;
       }
       /**
@@ -45910,13 +45910,13 @@ var require_dist8 = __commonJS({
       }
       switch (data.type) {
         case import_v1027.ComponentType.ActionRow:
-          return new ActionRowBuilder2(data);
+          return new ActionRowBuilder3(data);
         case import_v1027.ComponentType.Button:
-          return new ButtonBuilder(data);
+          return new ButtonBuilder2(data);
         case import_v1027.ComponentType.StringSelect:
           return new StringSelectMenuBuilder(data);
         case import_v1027.ComponentType.TextInput:
-          return new TextInputBuilder2(data);
+          return new TextInputBuilder3(data);
         case import_v1027.ComponentType.UserSelect:
           return new UserSelectMenuBuilder(data);
         case import_v1027.ComponentType.RoleSelect:
@@ -45968,7 +45968,7 @@ var require_dist8 = __commonJS({
       return new Constructor(builder);
     }
     __name(resolveBuilder, "resolveBuilder");
-    var ActionRowBuilder2 = class extends ComponentBuilder {
+    var ActionRowBuilder3 = class extends ComponentBuilder {
       static {
         __name(this, "ActionRowBuilder");
       }
@@ -46051,14 +46051,14 @@ var require_dist8 = __commonJS({
     });
     var import_shapeshift9 = require_cjs3();
     var titleValidator = import_shapeshift9.s.string().lengthGreaterThanOrEqual(1).lengthLessThanOrEqual(45).setValidationEnabled(isValidationEnabled);
-    var componentsValidator = import_shapeshift9.s.union([import_shapeshift9.s.instance(ActionRowBuilder2), import_shapeshift9.s.instance(LabelBuilder), import_shapeshift9.s.instance(TextDisplayBuilder)]).array().lengthGreaterThanOrEqual(1).setValidationEnabled(isValidationEnabled);
+    var componentsValidator = import_shapeshift9.s.union([import_shapeshift9.s.instance(ActionRowBuilder3), import_shapeshift9.s.instance(LabelBuilder), import_shapeshift9.s.instance(TextDisplayBuilder)]).array().lengthGreaterThanOrEqual(1).setValidationEnabled(isValidationEnabled);
     function validateRequiredParameters2(customId, title, components) {
       customIdValidator.parse(customId);
       titleValidator.parse(title);
       componentsValidator.parse(components);
     }
     __name(validateRequiredParameters2, "validateRequiredParameters");
-    var ModalBuilder2 = class {
+    var ModalBuilder3 = class {
       static {
         __name(this, "ModalBuilder");
       }
@@ -46106,15 +46106,15 @@ var require_dist8 = __commonJS({
       addComponents(...components) {
         this.components.push(
           ...normalizeArray(components).map((component, idx) => {
-            if (component instanceof ActionRowBuilder2 || component instanceof LabelBuilder || component instanceof TextDisplayBuilder) {
+            if (component instanceof ActionRowBuilder3 || component instanceof LabelBuilder || component instanceof TextDisplayBuilder) {
               return component;
             }
-            if (component instanceof TextInputBuilder2) {
-              return new ActionRowBuilder2().addComponents(component);
+            if (component instanceof TextInputBuilder3) {
+              return new ActionRowBuilder3().addComponents(component);
             }
             if ("type" in component) {
               if (component.type === import_v1029.ComponentType.ActionRow) {
-                return new ActionRowBuilder2(component);
+                return new ActionRowBuilder3(component);
               }
               if (component.type === import_v1029.ComponentType.Label) {
                 return new LabelBuilder(component);
@@ -46123,8 +46123,8 @@ var require_dist8 = __commonJS({
                 return new TextDisplayBuilder(component);
               }
               if (component.type === import_v1029.ComponentType.TextInput) {
-                return new ActionRowBuilder2().addComponents(
-                  new TextInputBuilder2(component)
+                return new ActionRowBuilder3().addComponents(
+                  new TextInputBuilder3(component)
                 );
               }
             }
@@ -46163,7 +46163,7 @@ var require_dist8 = __commonJS({
        */
       addActionRowComponents(...components) {
         const normalized = normalizeArray(components);
-        const resolved = normalized.map((row) => resolveBuilder(row, ActionRowBuilder2));
+        const resolved = normalized.map((row) => resolveBuilder(row, ActionRowBuilder3));
         this.components.push(...resolved);
         return this;
       }
@@ -47178,7 +47178,7 @@ var require_dist8 = __commonJS({
         return this;
       }
     };
-    var SlashCommandBuilder7 = class {
+    var SlashCommandBuilder8 = class {
       /**
        * The name of this command.
        */
@@ -47231,10 +47231,10 @@ var require_dist8 = __commonJS({
        */
       nsfw = void 0;
     };
-    __name(SlashCommandBuilder7, "SlashCommandBuilder");
-    SlashCommandBuilder7 = __decorateClass([
+    __name(SlashCommandBuilder8, "SlashCommandBuilder");
+    SlashCommandBuilder8 = __decorateClass([
       (0, import_ts_mixer6.mix)(SharedSlashCommandOptions, SharedNameAndDescription, SharedSlashCommandSubcommands, SharedSlashCommand)
-    ], SlashCommandBuilder7);
+    ], SlashCommandBuilder8);
     var Assertions_exports11 = {};
     __export2(Assertions_exports11, {
       contextsPredicate: () => contextsPredicate2,
@@ -48341,7 +48341,7 @@ var require_GuildEmojiRoleManager = __commonJS({
 var require_GuildEmoji = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/GuildEmoji.js"(exports2, module2) {
     "use strict";
-    var { PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
     var BaseGuildEmoji = require_BaseGuildEmoji();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var GuildEmojiRoleManager = require_GuildEmojiRoleManager();
@@ -48374,7 +48374,7 @@ var require_GuildEmoji = __commonJS({
        */
       get deletable() {
         if (!this.guild.members.me) throw new DiscordjsError2(ErrorCodes2.GuildUncachedMe);
-        return !this.managed && this.guild.members.me.permissions.has(PermissionFlagsBits5.ManageGuildExpressions);
+        return !this.managed && this.guild.members.me.permissions.has(PermissionFlagsBits6.ManageGuildExpressions);
       }
       /**
        * A manager for roles this emoji is active for.
@@ -48821,7 +48821,7 @@ var require_ActionRowBuilder = __commonJS({
     var { isJSONEncodable } = require_dist();
     var { createComponentBuilder } = require_Components();
     var { toSnakeCase } = require_Transformers();
-    var ActionRowBuilder2 = class extends BuildersActionRow {
+    var ActionRowBuilder3 = class extends BuildersActionRow {
       constructor({ components, ...data } = {}) {
         super({
           ...toSnakeCase(data),
@@ -48837,7 +48837,7 @@ var require_ActionRowBuilder = __commonJS({
         return new this(isJSONEncodable(other) ? other.toJSON() : other);
       }
     };
-    module2.exports = ActionRowBuilder2;
+    module2.exports = ActionRowBuilder3;
   }
 });
 
@@ -48849,7 +48849,7 @@ var require_ButtonBuilder = __commonJS({
     var { isJSONEncodable } = require_dist();
     var { toSnakeCase } = require_Transformers();
     var { resolvePartialEmoji } = require_Util();
-    var ButtonBuilder = class extends BuildersButton {
+    var ButtonBuilder2 = class extends BuildersButton {
       constructor({ emoji, ...data } = {}) {
         super(toSnakeCase({ ...data, emoji: emoji && typeof emoji === "string" ? resolvePartialEmoji(emoji) : emoji }));
       }
@@ -48873,7 +48873,7 @@ var require_ButtonBuilder = __commonJS({
         return new this(isJSONEncodable(other) ? other.toJSON() : other);
       }
     };
-    module2.exports = ButtonBuilder;
+    module2.exports = ButtonBuilder2;
   }
 });
 
@@ -49479,7 +49479,7 @@ var require_TextInputBuilder = __commonJS({
     var { TextInputBuilder: BuildersTextInput } = require_dist8();
     var { isJSONEncodable } = require_dist();
     var { toSnakeCase } = require_Transformers();
-    var TextInputBuilder2 = class extends BuildersTextInput {
+    var TextInputBuilder3 = class extends BuildersTextInput {
       constructor(data) {
         super(toSnakeCase(data));
       }
@@ -49492,7 +49492,7 @@ var require_TextInputBuilder = __commonJS({
         return new this(isJSONEncodable(other) ? other.toJSON() : other);
       }
     };
-    module2.exports = TextInputBuilder2;
+    module2.exports = TextInputBuilder3;
   }
 });
 
@@ -49626,8 +49626,8 @@ var require_Components = __commonJS({
     }
     module2.exports = { createComponent, createComponentBuilder, findComponentByCustomId };
     var ActionRow = require_ActionRow();
-    var ActionRowBuilder2 = require_ActionRowBuilder();
-    var ButtonBuilder = require_ButtonBuilder();
+    var ActionRowBuilder3 = require_ActionRowBuilder();
+    var ButtonBuilder2 = require_ButtonBuilder();
     var ButtonComponent = require_ButtonComponent();
     var ChannelSelectMenuBuilder = require_ChannelSelectMenuBuilder();
     var ChannelSelectMenuComponent = require_ChannelSelectMenuComponent();
@@ -49645,7 +49645,7 @@ var require_Components = __commonJS({
     var StringSelectMenuBuilder = require_StringSelectMenuBuilder();
     var StringSelectMenuComponent = require_StringSelectMenuComponent();
     var TextDisplayComponent = require_TextDisplayComponent();
-    var TextInputBuilder2 = require_TextInputBuilder();
+    var TextInputBuilder3 = require_TextInputBuilder();
     var TextInputComponent = require_TextInputComponent();
     var ThumbnailComponent = require_ThumbnailComponent();
     var UserSelectMenuBuilder = require_UserSelectMenuBuilder();
@@ -49669,10 +49669,10 @@ var require_Components = __commonJS({
       [ComponentType.Label]: LabelComponent
     };
     var ComponentTypeToBuilder = {
-      [ComponentType.ActionRow]: ActionRowBuilder2,
-      [ComponentType.Button]: ButtonBuilder,
+      [ComponentType.ActionRow]: ActionRowBuilder3,
+      [ComponentType.Button]: ButtonBuilder2,
       [ComponentType.StringSelect]: StringSelectMenuBuilder,
-      [ComponentType.TextInput]: TextInputBuilder2,
+      [ComponentType.TextInput]: TextInputBuilder3,
       [ComponentType.UserSelect]: UserSelectMenuBuilder,
       [ComponentType.RoleSelect]: RoleSelectMenuBuilder,
       [ComponentType.MentionableSelect]: MentionableSelectMenuBuilder,
@@ -49692,8 +49692,8 @@ var require_Message = __commonJS({
       InteractionType,
       ChannelType,
       MessageType,
-      MessageFlags: MessageFlags6,
-      PermissionFlagsBits: PermissionFlagsBits5,
+      MessageFlags: MessageFlags7,
+      PermissionFlagsBits: PermissionFlagsBits6,
       MessageReferenceType
     } = require_v106();
     var Attachment = require_Attachment();
@@ -50009,7 +50009,7 @@ var require_Message = __commonJS({
        * @readonly
        */
       get hasThread() {
-        return this.flags.has(MessageFlags6.HasThread);
+        return this.flags.has(MessageFlags7.HasThread);
       }
       /**
        * The thread started by this message
@@ -50149,7 +50149,7 @@ var require_Message = __commonJS({
           if (this.channel.archived) return false;
           if (this.channel.locked) {
             const permissions = this.channel.permissionsFor(this.client.user);
-            if (!permissions?.has(PermissionFlagsBits5.ManageThreads, true)) return false;
+            if (!permissions?.has(PermissionFlagsBits6.ManageThreads, true)) return false;
           }
         }
         return precheck;
@@ -50169,8 +50169,8 @@ var require_Message = __commonJS({
         }
         const permissions = this.channel?.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
-        return this.type !== MessageType.AutoModerationAction && this.author.id === this.client.user.id || permissions.has(PermissionFlagsBits5.ManageMessages, false) && !this.guild.members.me.isCommunicationDisabled();
+        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
+        return this.type !== MessageType.AutoModerationAction && this.author.id === this.client.user.id || permissions.has(PermissionFlagsBits6.ManageMessages, false) && !this.guild.members.me.isCommunicationDisabled();
       }
       /**
        * Whether the message is bulk deletable by the client user
@@ -50181,7 +50181,7 @@ var require_Message = __commonJS({
        * channel.bulkDelete(messages.filter(message => message.bulkDeletable));
        */
       get bulkDeletable() {
-        return (this.inGuild() && Date.now() - this.createdTimestamp < MaxBulkDeletableMessageAge && this.deletable && this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits5.ManageMessages, false)) ?? false;
+        return (this.inGuild() && Date.now() - this.createdTimestamp < MaxBulkDeletableMessageAge && this.deletable && this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits6.ManageMessages, false)) ?? false;
       }
       /**
        * Whether the message is pinnable by the client user
@@ -50195,7 +50195,7 @@ var require_Message = __commonJS({
         if (!channel || channel.isVoiceBased() || !channel.viewable) return false;
         const permissions = channel?.permissionsFor(this.client.user);
         if (!permissions) return false;
-        return permissions.has(PermissionFlagsBits5.ReadMessageHistory | PermissionFlagsBits5.PinMessages);
+        return permissions.has(PermissionFlagsBits6.ReadMessageHistory | PermissionFlagsBits6.PinMessages);
       }
       /**
        * Fetches the Message this crosspost/reply/pin-add references, if available to the client
@@ -50216,10 +50216,10 @@ var require_Message = __commonJS({
        * @readonly
        */
       get crosspostable() {
-        const bitfield = PermissionFlagsBits5.SendMessages | (this.author.id === this.client.user.id ? PermissionsBitField2.DefaultBit : PermissionFlagsBits5.ManageMessages);
+        const bitfield = PermissionFlagsBits6.SendMessages | (this.author.id === this.client.user.id ? PermissionsBitField2.DefaultBit : PermissionFlagsBits6.ManageMessages);
         const { channel } = this;
         return Boolean(
-          channel?.type === ChannelType.GuildAnnouncement && !this.flags.has(MessageFlags6.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
+          channel?.type === ChannelType.GuildAnnouncement && !this.flags.has(MessageFlags7.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
         );
       }
       /**
@@ -50420,9 +50420,9 @@ var require_Message = __commonJS({
       suppressEmbeds(suppress = true) {
         const flags = new MessageFlagsBitField(this.flags.bitfield);
         if (suppress) {
-          flags.add(MessageFlags6.SuppressEmbeds);
+          flags.add(MessageFlags7.SuppressEmbeds);
         } else {
-          flags.remove(MessageFlags6.SuppressEmbeds);
+          flags.remove(MessageFlags7.SuppressEmbeds);
         }
         return this.edit({ flags });
       }
@@ -51409,7 +51409,7 @@ var require_GuildMemberFlagsBitField = __commonJS({
 var require_GuildMember = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/GuildMember.js"(exports2) {
     "use strict";
-    var { PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
     var Base = require_Base();
     var VoiceState = require_VoiceState();
     var TextBasedChannel = require_TextBasedChannel();
@@ -51661,7 +51661,7 @@ var require_GuildMember = __commonJS({
        */
       get kickable() {
         if (!this.guild.members.me) throw new DiscordjsError2(ErrorCodes2.GuildUncachedMe);
-        return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits5.KickMembers);
+        return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits6.KickMembers);
       }
       /**
        * Whether this member is bannable by the client user
@@ -51670,7 +51670,7 @@ var require_GuildMember = __commonJS({
        */
       get bannable() {
         if (!this.guild.members.me) throw new DiscordjsError2(ErrorCodes2.GuildUncachedMe);
-        return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits5.BanMembers);
+        return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits6.BanMembers);
       }
       /**
        * Whether this member is moderatable by the client user
@@ -51678,7 +51678,7 @@ var require_GuildMember = __commonJS({
        * @readonly
        */
       get moderatable() {
-        return !this.permissions.has(PermissionFlagsBits5.Administrator) && this.manageable && (this.guild.members.me?.permissions.has(PermissionFlagsBits5.ModerateMembers) ?? false);
+        return !this.permissions.has(PermissionFlagsBits6.Administrator) && this.manageable && (this.guild.members.me?.permissions.has(PermissionFlagsBits6.ModerateMembers) ?? false);
       }
       /**
        * Whether this member is currently timed out
@@ -52220,7 +52220,7 @@ var require_MessagePayload = __commonJS({
     var { Buffer: Buffer2 } = __require("node:buffer");
     var { lazy, isJSONEncodable } = require_dist();
     var { DiscordSnowflake } = require_cjs();
-    var { MessageFlags: MessageFlags6, MessageReferenceType } = require_v106();
+    var { MessageFlags: MessageFlags7, MessageReferenceType } = require_v106();
     var { DiscordjsError: DiscordjsError2, DiscordjsRangeError: DiscordjsRangeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var { resolveFile } = require_DataResolver();
     var MessageFlagsBitField = require_MessageFlagsBitField();
@@ -52346,7 +52346,7 @@ var require_MessagePayload = __commonJS({
           flags = new MessageFlagsBitField(this.options.flags).bitfield;
         }
         if (isInteraction && this.options.ephemeral) {
-          flags |= MessageFlags6.Ephemeral;
+          flags |= MessageFlags7.Ephemeral;
         }
         let allowedMentions = this.options.allowedMentions === void 0 ? this.target.client.options.allowedMentions : this.options.allowedMentions;
         if (allowedMentions?.repliedUser !== void 0) {
@@ -54555,7 +54555,7 @@ var require_ThreadChannel = __commonJS({
     "use strict";
     var { DiscordAPIError } = require_dist5();
     var { lazy } = require_dist();
-    var { RESTJSONErrorCodes, ChannelFlags, ChannelType, PermissionFlagsBits: PermissionFlagsBits5, Routes: Routes3 } = require_v106();
+    var { RESTJSONErrorCodes, ChannelFlags, ChannelType, PermissionFlagsBits: PermissionFlagsBits6, Routes: Routes3 } = require_v106();
     var { BaseChannel } = require_BaseChannel();
     var getThreadOnlyChannel = lazy(() => require_ThreadOnlyChannel());
     var TextBasedChannel = require_TextBasedChannel();
@@ -54915,7 +54915,7 @@ var require_ThreadChannel = __commonJS({
        */
       get joinable() {
         return !this.archived && !this.joined && this.permissionsFor(this.client.user)?.has(
-          this.type === ChannelType.PrivateThread ? PermissionFlagsBits5.ManageThreads : PermissionFlagsBits5.ViewChannel,
+          this.type === ChannelType.PrivateThread ? PermissionFlagsBits6.ManageThreads : PermissionFlagsBits6.ViewChannel,
           false
         );
       }
@@ -54927,8 +54927,8 @@ var require_ThreadChannel = __commonJS({
       get manageable() {
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
-        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits5.ManageThreads, false);
+        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
+        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits6.ManageThreads, false);
       }
       /**
        * Whether the thread is viewable by the client user
@@ -54939,7 +54939,7 @@ var require_ThreadChannel = __commonJS({
         if (this.client.user.id === this.guild.ownerId) return true;
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        return permissions.has(PermissionFlagsBits5.ViewChannel, false);
+        return permissions.has(PermissionFlagsBits6.ViewChannel, false);
       }
       /**
        * Whether the client user can send messages in this thread
@@ -54949,8 +54949,8 @@ var require_ThreadChannel = __commonJS({
       get sendable() {
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
-        return !(this.archived && this.locked && !this.manageable) && (this.type !== ChannelType.PrivateThread || this.joined || this.manageable) && permissions.has(PermissionFlagsBits5.SendMessagesInThreads, false) && this.guild.members.me.communicationDisabledUntilTimestamp < Date.now();
+        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
+        return !(this.archived && this.locked && !this.manageable) && (this.type !== ChannelType.PrivateThread || this.joined || this.manageable) && permissions.has(PermissionFlagsBits6.SendMessagesInThreads, false) && this.guild.members.me.communicationDisabledUntilTimestamp < Date.now();
       }
       /**
        * Whether the thread is unarchivable by the client user
@@ -55444,7 +55444,7 @@ var require_BaseGuildVoiceChannel = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/BaseGuildVoiceChannel.js"(exports2, module2) {
     "use strict";
     var { Collection: Collection2 } = require_dist6();
-    var { PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
     var GuildChannel = require_GuildChannel();
     var TextBasedChannel = require_TextBasedChannel();
     var GuildMessageManager = require_GuildMessageManager();
@@ -55515,8 +55515,8 @@ var require_BaseGuildVoiceChannel = __commonJS({
         if (!this.viewable) return false;
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
-        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits5.Connect, false);
+        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
+        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits6.Connect, false);
       }
       /**
        * Creates an invite to this guild channel.
@@ -55700,7 +55700,7 @@ var require_TextChannel = __commonJS({
 var require_VoiceChannel = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/VoiceChannel.js"(exports2, module2) {
     "use strict";
-    var { PermissionFlagsBits: PermissionFlagsBits5, Routes: Routes3 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits6, Routes: Routes3 } = require_v106();
     var BaseGuildVoiceChannel = require_BaseGuildVoiceChannel();
     var VoiceChannel = class extends BaseGuildVoiceChannel {
       /**
@@ -55710,7 +55710,7 @@ var require_VoiceChannel = __commonJS({
        */
       get joinable() {
         if (!super.joinable) return false;
-        if (this.full && !this.permissionsFor(this.client.user).has(PermissionFlagsBits5.MoveMembers, false)) return false;
+        if (this.full && !this.permissionsFor(this.client.user).has(PermissionFlagsBits6.MoveMembers, false)) return false;
         return true;
       }
       /**
@@ -55721,8 +55721,8 @@ var require_VoiceChannel = __commonJS({
       get speakable() {
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
-        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits5.Speak, false);
+        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
+        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits6.Speak, false);
       }
       /**
        * @typedef {Object} SendSoundboardSoundOptions
@@ -58115,7 +58115,7 @@ var require_InteractionResponses = __commonJS({
     var { deprecate } = __require("node:util");
     var { makeURLSearchParams: makeURLSearchParams2 } = require_dist5();
     var { isJSONEncodable } = require_dist();
-    var { InteractionResponseType, MessageFlags: MessageFlags6, Routes: Routes3, InteractionType } = require_v106();
+    var { InteractionResponseType, MessageFlags: MessageFlags7, Routes: Routes3, InteractionType } = require_v106();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var MessageFlagsBitField = require_MessageFlagsBitField();
     var InteractionCallbackResponse = require_InteractionCallbackResponse();
@@ -58209,7 +58209,7 @@ var require_InteractionResponses = __commonJS({
         }
         const flags = new MessageFlagsBitField(options.flags);
         if (options.ephemeral) {
-          flags.add(MessageFlags6.Ephemeral);
+          flags.add(MessageFlags7.Ephemeral);
         }
         const response = await this.client.rest.post(Routes3.interactionCallback(this.id, this.token), {
           body: {
@@ -58222,7 +58222,7 @@ var require_InteractionResponses = __commonJS({
           query: makeURLSearchParams2({ with_response: options.withResponse ?? false })
         });
         this.deferred = true;
-        this.ephemeral = flags.has(MessageFlags6.Ephemeral);
+        this.ephemeral = flags.has(MessageFlags7.Ephemeral);
         return options.withResponse ? new InteractionCallbackResponse(this.client, response) : options.fetchReply ? this.fetchReply() : new InteractionResponse(this);
       }
       /**
@@ -58277,7 +58277,7 @@ var require_InteractionResponses = __commonJS({
           auth: false,
           query: makeURLSearchParams2({ with_response: options.withResponse ?? false })
         });
-        this.ephemeral = Boolean(data.flags & MessageFlags6.Ephemeral);
+        this.ephemeral = Boolean(data.flags & MessageFlags7.Ephemeral);
         this.replied = true;
         return options.withResponse ? new InteractionCallbackResponse(this.client, response) : options.fetchReply ? this.fetchReply() : new InteractionResponse(this);
       }
@@ -58607,9 +58607,9 @@ var require_ButtonInteraction = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/ButtonInteraction.js"(exports2, module2) {
     "use strict";
     var MessageComponentInteraction = require_MessageComponentInteraction();
-    var ButtonInteraction = class extends MessageComponentInteraction {
+    var ButtonInteraction2 = class extends MessageComponentInteraction {
     };
-    module2.exports = ButtonInteraction;
+    module2.exports = ButtonInteraction2;
   }
 });
 
@@ -58756,7 +58756,7 @@ var require_ChatInputCommandInteraction = __commonJS({
     var CommandInteraction = require_CommandInteraction();
     var CommandInteractionOptionResolver = require_CommandInteractionOptionResolver();
     var { transformResolved } = require_Util();
-    var ChatInputCommandInteraction7 = class extends CommandInteraction {
+    var ChatInputCommandInteraction8 = class extends CommandInteraction {
       constructor(client, data) {
         super(client, data);
         this.options = new CommandInteractionOptionResolver(
@@ -58780,7 +58780,7 @@ var require_ChatInputCommandInteraction = __commonJS({
         return `/${properties.filter(Boolean).join(" ")}`;
       }
     };
-    module2.exports = ChatInputCommandInteraction7;
+    module2.exports = ChatInputCommandInteraction8;
   }
 });
 
@@ -59376,9 +59376,9 @@ var require_InteractionCreate = __commonJS({
     var { InteractionType, ComponentType, ApplicationCommandType } = require_v106();
     var Action = require_Action();
     var AutocompleteInteraction = require_AutocompleteInteraction();
-    var ButtonInteraction = require_ButtonInteraction();
+    var ButtonInteraction2 = require_ButtonInteraction();
     var ChannelSelectMenuInteraction = require_ChannelSelectMenuInteraction();
-    var ChatInputCommandInteraction7 = require_ChatInputCommandInteraction();
+    var ChatInputCommandInteraction8 = require_ChatInputCommandInteraction();
     var MentionableSelectMenuInteraction = require_MentionableSelectMenuInteraction();
     var MessageContextMenuCommandInteraction = require_MessageContextMenuCommandInteraction();
     var ModalSubmitInteraction2 = require_ModalSubmitInteraction();
@@ -59397,7 +59397,7 @@ var require_InteractionCreate = __commonJS({
           case InteractionType.ApplicationCommand:
             switch (data.data.type) {
               case ApplicationCommandType.ChatInput:
-                InteractionClass = ChatInputCommandInteraction7;
+                InteractionClass = ChatInputCommandInteraction8;
                 break;
               case ApplicationCommandType.User:
                 InteractionClass = UserContextMenuCommandInteraction;
@@ -59421,7 +59421,7 @@ var require_InteractionCreate = __commonJS({
             if (channel && !channel.isTextBased()) return;
             switch (data.data.component_type) {
               case ComponentType.Button:
-                InteractionClass = ButtonInteraction;
+                InteractionClass = ButtonInteraction2;
                 break;
               case ComponentType.StringSelect:
                 InteractionClass = StringSelectMenuInteraction;
@@ -68799,7 +68799,7 @@ var require_GuildEmojiManager = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/managers/GuildEmojiManager.js"(exports2, module2) {
     "use strict";
     var { Collection: Collection2 } = require_dist6();
-    var { Routes: Routes3, PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
+    var { Routes: Routes3, PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
     var BaseGuildEmojiManager2 = require_BaseGuildEmojiManager();
     var { DiscordjsError: DiscordjsError2, DiscordjsTypeError: DiscordjsTypeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var { resolveImage } = require_DataResolver();
@@ -68938,7 +68938,7 @@ var require_GuildEmojiManager = __commonJS({
         }
         const { me } = this.guild.members;
         if (!me) throw new DiscordjsError2(ErrorCodes2.GuildUncachedMe);
-        if (!me.permissions.any(PermissionFlagsBits5.CreateGuildExpressions | PermissionFlagsBits5.ManageGuildExpressions)) {
+        if (!me.permissions.any(PermissionFlagsBits6.CreateGuildExpressions | PermissionFlagsBits6.ManageGuildExpressions)) {
           throw new DiscordjsError2(ErrorCodes2.MissingManageGuildExpressionsPermission, this.guild);
         }
         const data = await this.client.rest.get(Routes3.guildEmoji(this.guild.id, emoji.id));
@@ -74906,7 +74906,7 @@ var require_EmbedBuilder = __commonJS({
     var { isJSONEncodable } = require_dist();
     var { toSnakeCase } = require_Transformers();
     var { resolveColor } = require_Util();
-    var EmbedBuilder6 = class extends BuildersEmbed {
+    var EmbedBuilder7 = class extends BuildersEmbed {
       constructor(data) {
         super(toSnakeCase(data));
       }
@@ -74935,7 +74935,7 @@ var require_EmbedBuilder = __commonJS({
         return embedLength(this.data);
       }
     };
-    module2.exports = EmbedBuilder6;
+    module2.exports = EmbedBuilder7;
   }
 });
 
@@ -75066,7 +75066,7 @@ var require_ModalBuilder = __commonJS({
     var { ModalBuilder: BuildersModal, ComponentBuilder } = require_dist8();
     var { isJSONEncodable } = require_dist();
     var { toSnakeCase } = require_Transformers();
-    var ModalBuilder2 = class extends BuildersModal {
+    var ModalBuilder3 = class extends BuildersModal {
       constructor({ components, ...data } = {}) {
         super({
           ...toSnakeCase(data),
@@ -75084,7 +75084,7 @@ var require_ModalBuilder = __commonJS({
         return new this(isJSONEncodable(other) ? other.toJSON() : other);
       }
     };
-    module2.exports = ModalBuilder2;
+    module2.exports = ModalBuilder3;
   }
 });
 
@@ -75470,7 +75470,7 @@ var require_src = __commonJS({
 });
 
 // src/bot/index.ts
-var import_discord8 = __toESM(require_src(), 1);
+var import_discord9 = __toESM(require_src(), 1);
 
 // src/lib/logger-stub.ts
 function fmt(obj) {
@@ -76303,6 +76303,40 @@ async function handleSearchCommand(interaction) {
   }
 }
 
+// src/bot/commands/panel.ts
+var import_discord8 = __toESM(require_src(), 1);
+var PANEL_BUTTON_ID = "panel_file_report";
+var panelCommand = new import_discord8.SlashCommandBuilder().setName("panel").setDescription("Post the DSI Filing Center panel in this channel").setDefaultMemberPermissions(import_discord8.PermissionFlagsBits.Administrator);
+async function handlePanelButton(interaction) {
+  const allowed = await getAllowedUsers();
+  if (!checkAccess(interaction, allowed)) {
+    await interaction.reply({
+      content: "You do not have access to submit a filing.",
+      flags: import_discord8.MessageFlags.Ephemeral
+    });
+    return;
+  }
+  const modal = new import_discord8.ModalBuilder().setCustomId("filing_modal").setTitle("File a Record");
+  modal.addComponents(
+    new import_discord8.ActionRowBuilder().addComponents(
+      new import_discord8.TextInputBuilder().setCustomId("username").setLabel("Username").setStyle(import_discord8.TextInputStyle.Short).setPlaceholder("e.g. JohnDoe").setRequired(true).setMaxLength(100)
+    ),
+    new import_discord8.ActionRowBuilder().addComponents(
+      new import_discord8.TextInputBuilder().setCustomId("license_plate").setLabel("License Plate").setStyle(import_discord8.TextInputStyle.Short).setPlaceholder("e.g. ABC-1234").setRequired(true).setMaxLength(20)
+    ),
+    new import_discord8.ActionRowBuilder().addComponents(
+      new import_discord8.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord8.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50)
+    ),
+    new import_discord8.ActionRowBuilder().addComponents(
+      new import_discord8.TextInputBuilder().setCustomId("peace_officer").setLabel("Name of Peace Officer").setStyle(import_discord8.TextInputStyle.Short).setPlaceholder("e.g. Officer Smith").setRequired(true).setMaxLength(100)
+    ),
+    new import_discord8.ActionRowBuilder().addComponents(
+      new import_discord8.TextInputBuilder().setCustomId("notes").setLabel("Notes & Evidence (optional)").setStyle(import_discord8.TextInputStyle.Paragraph).setPlaceholder("Any additional notes or evidence links").setRequired(false).setMaxLength(1e3)
+    )
+  );
+  await interaction.showModal(modal);
+}
+
 // src/bot/index.ts
 var commands = [
   filingCommand.toJSON(),
@@ -76310,17 +76344,18 @@ var commands = [
   accessCommand.toJSON(),
   robloxCommand.toJSON(),
   groupsCommand.toJSON(),
-  searchCommand.toJSON()
+  searchCommand.toJSON(),
+  panelCommand.toJSON()
 ];
 function buildInviteUrl(clientId) {
-  const scopes = [import_discord8.OAuth2Scopes.Bot, import_discord8.OAuth2Scopes.ApplicationsCommands].join("%20");
-  const perms = import_discord8.PermissionFlagsBits.SendMessages | import_discord8.PermissionFlagsBits.EmbedLinks;
+  const scopes = [import_discord9.OAuth2Scopes.Bot, import_discord9.OAuth2Scopes.ApplicationsCommands].join("%20");
+  const perms = import_discord9.PermissionFlagsBits.SendMessages | import_discord9.PermissionFlagsBits.EmbedLinks;
   return `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=${perms}&scope=${scopes}`;
 }
 async function registerCommands(token, clientId, guildId) {
   try {
-    const rest = new import_discord8.REST({ version: "10" }).setToken(token);
-    await rest.put(import_discord8.Routes.applicationGuildCommands(clientId, guildId), { body: commands });
+    const rest = new import_discord9.REST({ version: "10" }).setToken(token);
+    await rest.put(import_discord9.Routes.applicationGuildCommands(clientId, guildId), { body: commands });
     logger.info({ commandCount: commands.length }, "Slash commands registered with Discord");
     return true;
   } catch (err) {
@@ -76347,18 +76382,18 @@ async function startBot() {
     return;
   }
   logger.info({ inviteUrl: buildInviteUrl(clientId) }, "Discord bot invite URL");
-  const client = new import_discord8.Client({ intents: [import_discord8.GatewayIntentBits.Guilds] });
-  client.once(import_discord8.Events.ClientReady, async (readyClient) => {
+  const client = new import_discord9.Client({ intents: [import_discord9.GatewayIntentBits.Guilds] });
+  client.once(import_discord9.Events.ClientReady, async (readyClient) => {
     logger.info({ tag: readyClient.user.tag }, "Discord bot is online");
     await registerCommands(token, clientId, guildId);
   });
-  client.on(import_discord8.Events.GuildCreate, async (guild) => {
+  client.on(import_discord9.Events.GuildCreate, async (guild) => {
     if (guild.id === guildId) {
       logger.info({ guildName: guild.name }, "Bot joined the target guild \u2014 registering commands");
       await registerCommands(token, clientId, guildId);
     }
   });
-  client.on(import_discord8.Events.InteractionCreate, async (interaction) => {
+  client.on(import_discord9.Events.InteractionCreate, async (interaction) => {
     try {
       if (interaction.isChatInputCommand()) {
         if (interaction.commandName === "filing") {
@@ -76373,6 +76408,10 @@ async function startBot() {
           await handleGroupsCommand(interaction);
         } else if (interaction.commandName === "search") {
           await handleSearchCommand(interaction);
+        }
+      } else if (interaction.isButton()) {
+        if (interaction.customId === PANEL_BUTTON_ID) {
+          await handlePanelButton(interaction);
         }
       } else if (interaction.isModalSubmit()) {
         if (interaction.customId === "filing_modal") {

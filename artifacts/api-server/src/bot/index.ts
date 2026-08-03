@@ -14,6 +14,7 @@ import { accessCommand, handleAccessCommand } from "./commands/access";
 import { robloxCommand, handleRobloxCommand } from "./commands/roblox";
 import { groupsCommand, handleGroupsCommand } from "./commands/groups";
 import { searchCommand, handleSearchCommand } from "./commands/search";
+import { panelCommand, handlePanelCommand, handlePanelButton, PANEL_BUTTON_ID } from "./commands/panel";
 
 const commands = [
   filingCommand.toJSON(),
@@ -22,6 +23,7 @@ const commands = [
   robloxCommand.toJSON(),
   groupsCommand.toJSON(),
   searchCommand.toJSON(),
+  panelCommand.toJSON(),
 ];
 
 function buildInviteUrl(clientId: string): string {
@@ -97,6 +99,10 @@ export async function startBot(): Promise<void> {
           await handleGroupsCommand(interaction);
         } else if (interaction.commandName === "search") {
           await handleSearchCommand(interaction);
+        }
+      } else if (interaction.isButton()) {
+        if (interaction.customId === PANEL_BUTTON_ID) {
+          await handlePanelButton(interaction);
         }
       } else if (interaction.isModalSubmit()) {
         if (interaction.customId === "filing_modal") {
