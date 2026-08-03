@@ -41,15 +41,24 @@ async function getAccessToken(): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   if (cachedToken && cachedToken.expiresAt > now + 60) return cachedToken.token;
 
-  const saJson = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  if (!saJson) {
+  let sa: ServiceAccount;
+
+  // Prefer individual env vars (easier to paste into BisectHosting)
+  const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+
+  if (clientEmail && privateKey) {
+    // Replace literal \n with actual newlines in case the key was pasted on one line
+    sa = { client_email: clientEmail, private_key: privateKey.replace(/\\n/g, "\n") };
+  } else if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+    sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON) as ServiceAccount;
+    sa.private_key = sa.private_key.replace(/\\n/g, "\n");
+  } else {
     throw new Error(
-      "GOOGLE_SERVICE_ACCOUNT_JSON is not set. " +
-      "Create a Google Service Account, download the JSON key, and paste it as this env var in BisectHosting."
+      "Google Sheets credentials not set. Add GOOGLE_CLIENT_EMAIL and GOOGLE_PRIVATE_KEY " +
+      "as environment variables in BisectHosting. Find these values in your service account JSON key file."
     );
   }
-
-  const sa = JSON.parse(saJson) as ServiceAccount;
 
   const header = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
   const payload = Buffer.from(JSON.stringify({
