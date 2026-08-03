@@ -75504,6 +75504,18 @@ import { existsSync } from "node:fs";
 var SHEET_ID_FILE = "./.bot-data/sheet-id.json";
 var cachedToken = null;
 var cachedSheetId = null;
+function fixPrivateKey(key) {
+  let fixed = key.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n").trim();
+  const header = "-----BEGIN PRIVATE KEY-----";
+  const footer = "-----END PRIVATE KEY-----";
+  if (fixed.includes(header) && !fixed.includes("\n")) {
+    const body = fixed.replace(header, "").replace(footer, "").trim().replace(/(.{64})/g, "$1\n");
+    fixed = `${header}
+${body}
+${footer}`;
+  }
+  return fixed;
+}
 async function getAccessToken() {
   const now = Math.floor(Date.now() / 1e3);
   if (cachedToken && cachedToken.expiresAt > now + 60) return cachedToken.token;
@@ -75511,10 +75523,10 @@ async function getAccessToken() {
   const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
   const privateKey = process.env.GOOGLE_PRIVATE_KEY;
   if (clientEmail && privateKey) {
-    sa = { client_email: clientEmail, private_key: privateKey.replace(/\\n/g, "\n") };
+    sa = { client_email: clientEmail, private_key: fixPrivateKey(privateKey) };
   } else if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
     sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
-    sa.private_key = sa.private_key.replace(/\\n/g, "\n");
+    sa.private_key = fixPrivateKey(sa.private_key);
   } else {
     throw new Error(
       "Google Sheets credentials not set. Add GOOGLE_CLIENT_EMAIL and GOOGLE_PRIVATE_KEY as environment variables in BisectHosting. Find these values in your service account JSON key file."

@@ -37,6 +37,30 @@ interface ServiceAccount {
 let cachedToken: { token: string; expiresAt: number } | null = null;
 let cachedSheetId: string | null = null;
 
+/**
+ * Normalises a private key that may have been pasted with literal \n instead
+ * of real newlines (common when copying from a JSON file into an env var field).
+ */
+function fixPrivateKey(key: string): string {
+  // Replace any literal \n or \r\n sequences with real newlines
+  let fixed = key.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n").trim();
+
+  // If the key body has no newlines at all, it was pasted as one line —
+  // insert newlines every 64 chars between the header and footer.
+  const header = "-----BEGIN PRIVATE KEY-----";
+  const footer = "-----END PRIVATE KEY-----";
+  if (fixed.includes(header) && !fixed.includes("\n")) {
+    const body = fixed
+      .replace(header, "")
+      .replace(footer, "")
+      .trim()
+      .replace(/(.{64})/g, "$1\n");
+    fixed = `${header}\n${body}\n${footer}`;
+  }
+
+  return fixed;
+}
+
 async function getAccessToken(): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   if (cachedToken && cachedToken.expiresAt > now + 60) return cachedToken.token;
@@ -48,11 +72,10 @@ async function getAccessToken(): Promise<string> {
   const privateKey = process.env.GOOGLE_PRIVATE_KEY;
 
   if (clientEmail && privateKey) {
-    // Replace literal \n with actual newlines in case the key was pasted on one line
-    sa = { client_email: clientEmail, private_key: privateKey.replace(/\\n/g, "\n") };
+    sa = { client_email: clientEmail, private_key: fixPrivateKey(privateKey) };
   } else if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
     sa = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON) as ServiceAccount;
-    sa.private_key = sa.private_key.replace(/\\n/g, "\n");
+    sa.private_key = fixPrivateKey(sa.private_key);
   } else {
     throw new Error(
       "Google Sheets credentials not set. Add GOOGLE_CLIENT_EMAIL and GOOGLE_PRIVATE_KEY " +
