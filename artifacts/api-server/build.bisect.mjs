@@ -8,7 +8,6 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build as esbuild } from "esbuild";
-import esbuildPluginPino from "esbuild-plugin-pino";
 import { rm, writeFile, mkdir } from "node:fs/promises";
 
 globalThis.require = createRequire(import.meta.url);
@@ -57,7 +56,18 @@ async function buildBisect() {
     external,
     sourcemap: false,
     banner,
-    plugins: [esbuildPluginPino({ transports: ["pino-pretty"] })],
+    plugins: [
+      // Replace pino logger with a console stub — avoids worker-thread files
+      // with hardcoded absolute paths that break on non-Replit hosts.
+      {
+        name: "logger-stub",
+        setup(build) {
+          build.onResolve({ filter: /\/lib\/logger$/ }, (args) => ({
+            path: path.resolve(artifactDir, "src/lib/logger-stub.ts"),
+          }));
+        },
+      },
+    ],
   });
 
   // Write a minimal package.json for BisectHosting
