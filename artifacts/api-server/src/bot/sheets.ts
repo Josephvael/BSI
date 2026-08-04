@@ -18,6 +18,7 @@ import { webcrypto } from "node:crypto";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { logger } from "../lib/logger";
+import { runHeaderMigration } from "./sheet-header-migration";
 
 const SHEET_ID_FILE = "./.bot-data/sheet-id.json";
 
@@ -50,9 +51,6 @@ let filingsCache: FilingsCache | null = null;
 
 /** Tracks whether the header migration has already run this session. */
 let headerMigrated = false;
-
-const OLD_HEADER = ["Offender's Username", "Date of Incident", "Seized", "Discord User + ID", "Timestamp"];
-const NEW_HEADER = ["Filing ID", "Offender's Username", "Date of Incident", "Item Seized", "Quantity", "Discord User + ID", "Timestamp"];
 
 /**
  * Normalises a private key that may have been pasted with literal \n instead
@@ -220,52 +218,50 @@ async function createSpreadsheet(): Promise<string> {
 }
 
 /**
- * Checks row 1 of the existing Sheet1 and upgrades it from the old 5-column
- * header to the new 7-column header if needed.  Runs at most once per session.
+ * Checks row 1 of Sheet1 and upgrades it from the old 5-column header to the
+ * new 7-column header when needed.  Runs at most once per bot session.
+ *
+ * Throws on Sheets API failures so `appendFiling` aborts rather than writing
+ * new 7-column rows under a misaligned header.
  */
 async function migrateSheetHeader(sheetId: string): Promise<void> {
   if (headerMigrated) return;
-  headerMigrated = true; // set early so a concurrent call doesn't double-run
 
-  const range = encodeURIComponent("Sheet1!A1:G1");
-  const res = await sheetsRequest(`/v4/spreadsheets/${sheetId}/values/${range}`, { method: "GET" });
-  if (!res.ok) {
-    logger.warn({ status: res.status }, "Sheet header migration: could not read row 1 — skipping");
-    return;
-  }
-
-  const data = (await res.json()) as { values?: string[][] };
-  const existingHeader = data.values?.[0] ?? [];
-
-  // Already on new schema — nothing to do
-  if (existingHeader[0] === NEW_HEADER[0]) {
-    logger.info("Sheet header migration: already up to date (7-column)");
-    return;
-  }
-
-  // Old 5-column schema detected — or empty sheet — upgrade the header
-  const isOldSchema =
-    existingHeader.length === 0 ||
-    (existingHeader[0] === OLD_HEADER[0] && existingHeader.length <= OLD_HEADER.length);
-
-  if (!isOldSchema) {
-    logger.warn(
-      { existingHeader },
-      "Sheet header migration: unrecognised header — skipping to avoid data loss",
-    );
-    return;
-  }
-
-  const putRes = await sheetsRequest(
-    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
-    { method: "PUT", body: JSON.stringify({ values: [NEW_HEADER] }) },
+  const result = await runHeaderMigration(sheetId, (path, options) =>
+    sheetsRequest(path, options),
   );
 
-  if (putRes.ok) {
-    logger.info("Sheet header migration: upgraded from 5-column to 7-column header");
-  } else {
-    const err = await putRes.text();
-    logger.warn({ status: putRes.status, err }, "Sheet header migration: PUT failed");
+  switch (result.outcome) {
+    case "up-to-date":
+      logger.info("Sheet header migration: already up to date (7-column)");
+      headerMigrated = true;
+      break;
+
+    case "migrated":
+      logger.info("Sheet header migration: upgraded from 5-column to 7-column header");
+      headerMigrated = true;
+      break;
+
+    case "unknown-header":
+      logger.warn(
+        { existingHeader: result.existingHeader },
+        "Sheet header migration: unrecognised header — leaving unchanged; " +
+        "Sheets formulas may not work correctly on existing rows",
+      );
+      headerMigrated = true; // don't retry on unrecognised layouts
+      break;
+
+    case "get-failed":
+      // Cannot verify current schema — abort so we don't write misaligned rows
+      throw new Error(
+        `Sheet header migration: failed to read header row (HTTP ${result.status}) — filing aborted`,
+      );
+
+    case "put-failed":
+      // Detected old schema but couldn't update — abort
+      throw new Error(
+        `Sheet header migration: failed to update header (HTTP ${result.status}): ${result.body} — filing aborted`,
+      );
   }
 }
 

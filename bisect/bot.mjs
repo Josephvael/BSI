@@ -75501,14 +75501,57 @@ var import_discord2 = __toESM(require_src(), 1);
 import { webcrypto } from "node:crypto";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
+
+// src/bot/sheet-header-migration.ts
+var OLD_HEADER = [
+  "Offender's Username",
+  "Date of Incident",
+  "Seized",
+  "Discord User + ID",
+  "Timestamp"
+];
+var NEW_HEADER = [
+  "Filing ID",
+  "Offender's Username",
+  "Date of Incident",
+  "Item Seized",
+  "Quantity",
+  "Discord User + ID",
+  "Timestamp"
+];
+async function runHeaderMigration(sheetId, request) {
+  const range = encodeURIComponent("Sheet1!A1:G1");
+  const getRes = await request(`/v4/spreadsheets/${sheetId}/values/${range}`, { method: "GET" });
+  if (!getRes.ok) {
+    return { outcome: "get-failed", status: getRes.status };
+  }
+  const data = await getRes.json();
+  const existingHeader = data.values?.[0] ?? [];
+  if (existingHeader[0] === NEW_HEADER[0]) {
+    return { outcome: "up-to-date" };
+  }
+  const isOldSchema = existingHeader.length === 0 || existingHeader[0] === OLD_HEADER[0] && existingHeader.length <= OLD_HEADER.length;
+  if (!isOldSchema) {
+    return { outcome: "unknown-header", existingHeader };
+  }
+  const putRes = await request(
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
+    { method: "PUT", body: JSON.stringify({ values: [NEW_HEADER] }) }
+  );
+  if (!putRes.ok) {
+    const body = await putRes.text();
+    return { outcome: "put-failed", status: putRes.status, body };
+  }
+  return { outcome: "migrated" };
+}
+
+// src/bot/sheets.ts
 var SHEET_ID_FILE = "./.bot-data/sheet-id.json";
 var cachedToken = null;
 var cachedSheetId = null;
 var FILINGS_CACHE_TTL_MS = Number(process.env.FILINGS_CACHE_TTL_MS ?? 6e4);
 var filingsCache = null;
 var headerMigrated = false;
-var OLD_HEADER = ["Offender's Username", "Date of Incident", "Seized", "Discord User + ID", "Timestamp"];
-var NEW_HEADER = ["Filing ID", "Offender's Username", "Date of Incident", "Item Seized", "Quantity", "Discord User + ID", "Timestamp"];
 function fixPrivateKey(key) {
   let fixed = key.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n").trim();
   const header = "-----BEGIN PRIVATE KEY-----";
@@ -75634,36 +75677,34 @@ async function createSpreadsheet() {
 }
 async function migrateSheetHeader(sheetId) {
   if (headerMigrated) return;
-  headerMigrated = true;
-  const range = encodeURIComponent("Sheet1!A1:G1");
-  const res = await sheetsRequest(`/v4/spreadsheets/${sheetId}/values/${range}`, { method: "GET" });
-  if (!res.ok) {
-    logger.warn({ status: res.status }, "Sheet header migration: could not read row 1 \u2014 skipping");
-    return;
-  }
-  const data = await res.json();
-  const existingHeader = data.values?.[0] ?? [];
-  if (existingHeader[0] === NEW_HEADER[0]) {
-    logger.info("Sheet header migration: already up to date (7-column)");
-    return;
-  }
-  const isOldSchema = existingHeader.length === 0 || existingHeader[0] === OLD_HEADER[0] && existingHeader.length <= OLD_HEADER.length;
-  if (!isOldSchema) {
-    logger.warn(
-      { existingHeader },
-      "Sheet header migration: unrecognised header \u2014 skipping to avoid data loss"
-    );
-    return;
-  }
-  const putRes = await sheetsRequest(
-    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
-    { method: "PUT", body: JSON.stringify({ values: [NEW_HEADER] }) }
+  const result = await runHeaderMigration(
+    sheetId,
+    (path, options) => sheetsRequest(path, options)
   );
-  if (putRes.ok) {
-    logger.info("Sheet header migration: upgraded from 5-column to 7-column header");
-  } else {
-    const err = await putRes.text();
-    logger.warn({ status: putRes.status, err }, "Sheet header migration: PUT failed");
+  switch (result.outcome) {
+    case "up-to-date":
+      logger.info("Sheet header migration: already up to date (7-column)");
+      headerMigrated = true;
+      break;
+    case "migrated":
+      logger.info("Sheet header migration: upgraded from 5-column to 7-column header");
+      headerMigrated = true;
+      break;
+    case "unknown-header":
+      logger.warn(
+        { existingHeader: result.existingHeader },
+        "Sheet header migration: unrecognised header \u2014 leaving unchanged; Sheets formulas may not work correctly on existing rows"
+      );
+      headerMigrated = true;
+      break;
+    case "get-failed":
+      throw new Error(
+        `Sheet header migration: failed to read header row (HTTP ${result.status}) \u2014 filing aborted`
+      );
+    case "put-failed":
+      throw new Error(
+        `Sheet header migration: failed to update header (HTTP ${result.status}): ${result.body} \u2014 filing aborted`
+      );
   }
 }
 function parseSeizedItems(seized) {
