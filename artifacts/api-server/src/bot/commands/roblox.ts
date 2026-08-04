@@ -3,13 +3,11 @@ import {
   EmbedBuilder,
   MessageFlags,
   ChatInputCommandInteraction,
-  PermissionFlagsBits,
 } from "discord.js";
 import {
   getUserByUsername,
   getAvatarUrl,
   checkGroupMembership,
-  getUserGroups,
   profileUrl,
 } from "../roblox";
 import { setVerification, getVerification, removeVerification } from "../verifications";

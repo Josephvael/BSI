@@ -16,15 +16,28 @@ interface VerificationStore {
   };
 }
 
+// In-memory cache — invalidated on every write
+let cache: VerificationStore | null = null;
+
 async function load(): Promise<VerificationStore> {
-  if (!existsSync(FILE)) return {};
-  const raw = await readFile(FILE, "utf-8");
-  return JSON.parse(raw) as VerificationStore;
+  if (cache) return cache;
+  if (!existsSync(FILE)) {
+    cache = {};
+    return cache;
+  }
+  try {
+    const raw = await readFile(FILE, "utf-8");
+    cache = JSON.parse(raw) as VerificationStore;
+  } catch {
+    cache = {};
+  }
+  return cache;
 }
 
 async function save(store: VerificationStore): Promise<void> {
   await mkdir("./.bot-data", { recursive: true });
   await writeFile(FILE, JSON.stringify(store, null, 2));
+  cache = store;
 }
 
 export async function setVerification(

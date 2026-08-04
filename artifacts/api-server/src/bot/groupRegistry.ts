@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { syncGroupsSheet } from "./sheets";
+import { logger } from "../lib/logger";
 
 const FILE = "./.bot-data/groups.json";
 
@@ -11,15 +12,28 @@ export interface RegisteredGroup {
   addedAt: string;
 }
 
+// In-memory cache — invalidated on every write
+let cache: RegisteredGroup[] | null = null;
+
 async function load(): Promise<RegisteredGroup[]> {
-  if (!existsSync(FILE)) return [];
-  const raw = await readFile(FILE, "utf-8");
-  return JSON.parse(raw) as RegisteredGroup[];
+  if (cache) return cache;
+  if (!existsSync(FILE)) {
+    cache = [];
+    return cache;
+  }
+  try {
+    const raw = await readFile(FILE, "utf-8");
+    cache = JSON.parse(raw) as RegisteredGroup[];
+  } catch {
+    cache = [];
+  }
+  return cache;
 }
 
 async function save(groups: RegisteredGroup[]): Promise<void> {
   await mkdir("./.bot-data", { recursive: true });
   await writeFile(FILE, JSON.stringify(groups, null, 2));
+  cache = groups;
 }
 
 export async function getGroups(): Promise<RegisteredGroup[]> {
@@ -37,8 +51,9 @@ export async function addGroup(
 
   const updated = [...groups, { id, label, addedBy, addedAt: new Date().toISOString() }];
   await save(updated);
-  // Sync to Google Sheets in background — don't block the Discord reply
-  syncGroupsSheet(updated).catch(() => {});
+  syncGroupsSheet(updated).catch((err) =>
+    logger.warn({ err }, "Failed to sync groups to Google Sheet"),
+  );
   return { added: true };
 }
 
@@ -47,7 +62,8 @@ export async function removeGroup(id: number): Promise<boolean> {
   const updated = groups.filter((g) => g.id !== id);
   if (updated.length === groups.length) return false;
   await save(updated);
-  // Sync to Google Sheets in background
-  syncGroupsSheet(updated).catch(() => {});
+  syncGroupsSheet(updated).catch((err) =>
+    logger.warn({ err }, "Failed to sync groups to Google Sheet"),
+  );
   return true;
 }

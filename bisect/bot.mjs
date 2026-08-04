@@ -16058,8 +16058,8 @@ var require_cache = __commonJS({
        * @returns {requestResponseList}
        */
       #batchCacheOperations(operations) {
-        const cache = this.#relevantRequestResponseList;
-        const backupCache = [...cache];
+        const cache3 = this.#relevantRequestResponseList;
+        const backupCache = [...cache3];
         const addedItems = [];
         const resultList = [];
         try {
@@ -16086,9 +16086,9 @@ var require_cache = __commonJS({
                 return [];
               }
               for (const requestResponse of requestResponses) {
-                const idx = cache.indexOf(requestResponse);
+                const idx = cache3.indexOf(requestResponse);
                 assert(idx !== -1);
-                cache.splice(idx, 1);
+                cache3.splice(idx, 1);
               }
             } else if (operation.type === "put") {
               if (operation.response == null) {
@@ -16118,11 +16118,11 @@ var require_cache = __commonJS({
               }
               requestResponses = this.#queryCache(operation.request);
               for (const requestResponse of requestResponses) {
-                const idx = cache.indexOf(requestResponse);
+                const idx = cache3.indexOf(requestResponse);
                 assert(idx !== -1);
-                cache.splice(idx, 1);
+                cache3.splice(idx, 1);
               }
-              cache.push([operation.request, operation.response]);
+              cache3.push([operation.request, operation.response]);
               addedItems.push([operation.request, operation.response]);
             }
             resultList.push([operation.request, operation.response]);
@@ -16296,13 +16296,13 @@ var require_cachestorage = __commonJS({
         if (options.cacheName != null) {
           if (this.#caches.has(options.cacheName)) {
             const cacheList = this.#caches.get(options.cacheName);
-            const cache = new Cache(kConstruct, cacheList);
-            return await cache.match(request, options);
+            const cache3 = new Cache(kConstruct, cacheList);
+            return await cache3.match(request, options);
           }
         } else {
           for (const cacheList of this.#caches.values()) {
-            const cache = new Cache(kConstruct, cacheList);
-            const response = await cache.match(request, options);
+            const cache3 = new Cache(kConstruct, cacheList);
+            const response = await cache3.match(request, options);
             if (response !== void 0) {
               return response;
             }
@@ -16332,12 +16332,12 @@ var require_cachestorage = __commonJS({
         webidl.argumentLengthCheck(arguments, 1, prefix);
         cacheName = webidl.converters.DOMString(cacheName, prefix, "cacheName");
         if (this.#caches.has(cacheName)) {
-          const cache2 = this.#caches.get(cacheName);
-          return new Cache(kConstruct, cache2);
+          const cache4 = this.#caches.get(cacheName);
+          return new Cache(kConstruct, cache4);
         }
-        const cache = [];
-        this.#caches.set(cacheName, cache);
-        return new Cache(kConstruct, cache);
+        const cache3 = [];
+        this.#caches.set(cacheName, cache3);
+        return new Cache(kConstruct, cache3);
       }
       /**
        * @see https://w3c.github.io/ServiceWorker/#cache-storage-delete
@@ -31919,10 +31919,10 @@ var require_CachedManager = __commonJS({
       get cache() {
         return this._cache;
       }
-      _add(data, cache = true, { id, extras = [] } = {}) {
+      _add(data, cache3 = true, { id, extras = [] } = {}) {
         const existing = this.cache.get(id ?? data.id);
         if (existing) {
-          if (cache) {
+          if (cache3) {
             existing._patch(data);
             return existing;
           }
@@ -31931,7 +31931,7 @@ var require_CachedManager = __commonJS({
           return clone;
         }
         const entry = this.holds ? new this.holds(this.client, data, ...extras) : data;
-        if (cache) this.cache.set(id ?? entry.id, entry);
+        if (cache3) this.cache.set(id ?? entry.id, entry);
         return entry;
       }
     };
@@ -31943,7 +31943,7 @@ var require_CachedManager = __commonJS({
 var require_PermissionsBitField = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/util/PermissionsBitField.js"(exports2, module2) {
     "use strict";
-    var { PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
     var BitField = require_BitField();
     var PermissionsBitField2 = class extends BitField {
       /**
@@ -31952,13 +31952,13 @@ var require_PermissionsBitField = __commonJS({
        * @memberof PermissionsBitField
        * @see {@link https://discord.com/developers/docs/topics/permissions#permissions-bitwise-permission-flags}
        */
-      static Flags = PermissionFlagsBits6;
+      static Flags = PermissionFlagsBits5;
       /**
        * Bitfield representing every permission combined
        * @type {bigint}
        * @memberof PermissionsBitField
        */
-      static All = Object.values(PermissionFlagsBits6).reduce((all, p) => all | p, 0n);
+      static All = Object.values(PermissionFlagsBits5).reduce((all, p) => all | p, 0n);
       /**
        * Bitfield representing the default permissions for users
        * @type {bigint}
@@ -31970,7 +31970,7 @@ var require_PermissionsBitField = __commonJS({
        * @type {bigint}
        * @memberof PermissionsBitField
        */
-      static StageModerator = PermissionFlagsBits6.ManageChannels | PermissionFlagsBits6.MuteMembers | PermissionFlagsBits6.MoveMembers;
+      static StageModerator = PermissionFlagsBits5.ManageChannels | PermissionFlagsBits5.MuteMembers | PermissionFlagsBits5.MoveMembers;
       /**
        * @type {bigint}
        * @memberof PermissionsBitField
@@ -31997,7 +31997,7 @@ var require_PermissionsBitField = __commonJS({
        * @returns {string[]}
        */
       missing(bits, checkAdmin = true) {
-        return checkAdmin && this.has(PermissionFlagsBits6.Administrator) ? [] : super.missing(bits);
+        return checkAdmin && this.has(PermissionFlagsBits5.Administrator) ? [] : super.missing(bits);
       }
       /**
        * Checks whether the bitfield has a permission, or any of multiple permissions.
@@ -32006,7 +32006,7 @@ var require_PermissionsBitField = __commonJS({
        * @returns {boolean}
        */
       any(permission, checkAdmin = true) {
-        return checkAdmin && super.has(PermissionFlagsBits6.Administrator) || super.any(permission);
+        return checkAdmin && super.has(PermissionFlagsBits5.Administrator) || super.any(permission);
       }
       /**
        * Checks whether the bitfield has a permission, or multiple permissions.
@@ -32015,7 +32015,7 @@ var require_PermissionsBitField = __commonJS({
        * @returns {boolean}
        */
       has(permission, checkAdmin = true) {
-        return checkAdmin && super.has(PermissionFlagsBits6.Administrator) || super.has(permission);
+        return checkAdmin && super.has(PermissionFlagsBits5.Administrator) || super.has(permission);
       }
       /**
        * Gets an {@link Array} of bitfield names based on the permissions available.
@@ -32053,7 +32053,7 @@ var require_Role = __commonJS({
     "use strict";
     var { roleMention } = require_dist7();
     var { DiscordSnowflake } = require_cjs();
-    var { PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
     var Base = require_Base();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var PermissionsBitField2 = require_PermissionsBitField();
@@ -32165,7 +32165,7 @@ var require_Role = __commonJS({
       get editable() {
         if (this.managed) return false;
         const clientMember = this.guild.members.resolve(this.client.user);
-        if (!clientMember.permissions.has(PermissionFlagsBits6.ManageRoles)) return false;
+        if (!clientMember.permissions.has(PermissionFlagsBits5.ManageRoles)) return false;
         return clientMember.roles.highest.comparePositionTo(this) > 0;
       }
       /**
@@ -32617,8 +32617,8 @@ var require_PermissionOverwriteManager = __commonJS({
        * @type {Collection<Snowflake, PermissionOverwrites>}
        * @name PermissionOverwriteManager#cache
        */
-      _add(data, cache) {
-        return super._add(data, cache, { extras: [this.channel] });
+      _add(data, cache3) {
+        return super._add(data, cache3, { extras: [this.channel] });
       }
       /**
        * Replaces the permission overwrites in this channel.
@@ -32735,7 +32735,7 @@ var require_GuildChannel = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/GuildChannel.js"(exports2, module2) {
     "use strict";
     var { Snowflake } = require_cjs();
-    var { PermissionFlagsBits: PermissionFlagsBits6, ChannelType } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits5, ChannelType } = require_v106();
     var { BaseChannel } = require_BaseChannel();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var PermissionOverwriteManager = require_PermissionOverwriteManager();
@@ -32876,7 +32876,7 @@ var require_GuildChannel = __commonJS({
         }
         const roles = member.roles.cache;
         const permissions = new PermissionsBitField2(roles.map((role) => role.permissions));
-        if (checkAdmin && permissions.has(PermissionFlagsBits6.Administrator)) {
+        if (checkAdmin && permissions.has(PermissionFlagsBits5.Administrator)) {
           return new PermissionsBitField2(PermissionsBitField2.All).freeze();
         }
         const overwrites = this.overwritesFor(member, true, roles);
@@ -32891,7 +32891,7 @@ var require_GuildChannel = __commonJS({
        * @private
        */
       rolePermissions(role, checkAdmin) {
-        if (checkAdmin && role.permissions.has(PermissionFlagsBits6.Administrator)) {
+        if (checkAdmin && role.permissions.has(PermissionFlagsBits5.Administrator)) {
           return new PermissionsBitField2(PermissionsBitField2.All).freeze();
         }
         const basePermissions = new PermissionsBitField2([role.permissions, role.guild.roles.everyone.permissions]);
@@ -32917,7 +32917,7 @@ var require_GuildChannel = __commonJS({
        */
       get members() {
         return this.guild.members.cache.filter(
-          (member) => this.permissionsFor(member).has(PermissionFlagsBits6.ViewChannel, false)
+          (member) => this.permissionsFor(member).has(PermissionFlagsBits5.ViewChannel, false)
         );
       }
       /**
@@ -33051,10 +33051,10 @@ var require_GuildChannel = __commonJS({
         if (this.client.user.id === this.guild.ownerId) return true;
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
+        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
         if (this.guild.members.me.communicationDisabledUntilTimestamp > Date.now()) return false;
-        const baseBitfield = PermissionFlagsBits6.ViewChannel | PermissionFlagsBits6.ManageChannels;
-        const bitfield = VoiceBasedChannelTypes.includes(this.type) ? baseBitfield | PermissionFlagsBits6.Connect : baseBitfield;
+        const baseBitfield = PermissionFlagsBits5.ViewChannel | PermissionFlagsBits5.ManageChannels;
+        const bitfield = VoiceBasedChannelTypes.includes(this.type) ? baseBitfield | PermissionFlagsBits5.Connect : baseBitfield;
         return permissions.has(bitfield, false);
       }
       /**
@@ -33066,7 +33066,7 @@ var require_GuildChannel = __commonJS({
         if (this.client.user.id === this.guild.ownerId) return true;
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        return permissions.has(PermissionFlagsBits6.ViewChannel, false);
+        return permissions.has(PermissionFlagsBits5.ViewChannel, false);
       }
       /**
        * Deletes this channel.
@@ -35420,7 +35420,7 @@ var require_InviteGuild = __commonJS({
 var require_Invite = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/Invite.js"(exports2, module2) {
     "use strict";
-    var { RouteBases, Routes: Routes3, PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
+    var { RouteBases, Routes: Routes3, PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
     var Base = require_Base();
     var { GuildScheduledEvent } = require_GuildScheduledEvent();
     var IntegrationApplication = require_IntegrationApplication();
@@ -35554,7 +35554,7 @@ var require_Invite = __commonJS({
         if (!guild || !this.client.guilds.cache.has(guild.id)) return false;
         if (!guild.members.me) throw new DiscordjsError2(ErrorCodes2.GuildUncachedMe);
         return Boolean(
-          this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits6.ManageChannels, false) || guild.members.me.permissions.has(PermissionFlagsBits6.ManageGuild)
+          this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits5.ManageChannels, false) || guild.members.me.permissions.has(PermissionFlagsBits5.ManageGuild)
         );
       }
       /**
@@ -37178,8 +37178,8 @@ var require_ApplicationCommandManager = __commonJS({
        * @type {Collection<Snowflake, ApplicationCommand>}
        * @name ApplicationCommandManager#cache
        */
-      _add(data, cache, guildId) {
-        return super._add(data, cache, { extras: [this.guild, guildId] });
+      _add(data, cache3, guildId) {
+        return super._add(data, cache3, { extras: [this.guild, guildId] });
       }
       /**
        * The APIRouter path to the commands
@@ -37240,16 +37240,16 @@ var require_ApplicationCommandManager = __commonJS({
        *   .then(commands => console.log(`Fetched ${commands.size} commands`))
        *   .catch(console.error);
        */
-      async fetch(id, { guildId, cache = true, force = false, locale, withLocalizations } = {}) {
+      async fetch(id, { guildId, cache: cache3 = true, force = false, locale, withLocalizations } = {}) {
         if (typeof id === "object") {
-          ({ guildId, cache = true, locale, withLocalizations } = id);
+          ({ guildId, cache: cache3 = true, locale, withLocalizations } = id);
         } else if (id) {
           if (!force) {
             const existing = this.cache.get(id);
             if (existing) return existing;
           }
           const command = await this.client.rest.get(this.commandPath({ id, guildId }));
-          return this._add(command, cache);
+          return this._add(command, cache3);
         }
         const data = await this.client.rest.get(this.commandPath({ guildId }), {
           headers: {
@@ -37257,7 +37257,7 @@ var require_ApplicationCommandManager = __commonJS({
           },
           query: makeURLSearchParams2({ with_localizations: withLocalizations })
         });
-        return data.reduce((coll, command) => coll.set(command.id, this._add(command, cache, guildId)), new Collection2());
+        return data.reduce((coll, command) => coll.set(command.id, this._add(command, cache3, guildId)), new Collection2());
       }
       /**
        * Creates an application command.
@@ -37487,8 +37487,8 @@ var require_ApplicationEmojiManager = __commonJS({
         super(application.client, ApplicationEmoji, iterable);
         this.application = application;
       }
-      _add(data, cache) {
-        return super._add(data, cache, { extras: [this.application] });
+      _add(data, cache3) {
+        return super._add(data, cache3, { extras: [this.application] });
       }
       /**
        * Options used for creating an emoji of the application
@@ -37534,18 +37534,18 @@ var require_ApplicationEmojiManager = __commonJS({
        *   .then(emoji => console.log(`The emoji name is: ${emoji.name}`))
        *   .catch(console.error);
        */
-      async fetch(id, { cache = true, force = false } = {}) {
+      async fetch(id, { cache: cache3 = true, force = false } = {}) {
         if (id) {
           if (!force) {
             const existing = this.cache.get(id);
             if (existing) return existing;
           }
           const emoji = await this.client.rest.get(Routes3.applicationEmoji(this.application.id, id));
-          return this._add(emoji, cache);
+          return this._add(emoji, cache3);
         }
         const { items: data } = await this.client.rest.get(Routes3.applicationEmojis(this.application.id));
         const emojis = new Collection2();
-        for (const emoji of data) emojis.set(emoji.id, this._add(emoji, cache));
+        for (const emoji of data) emojis.set(emoji.id, this._add(emoji, cache3));
         return emojis;
       }
       /**
@@ -37772,14 +37772,14 @@ var require_EntitlementManager = __commonJS({
        */
       async fetch(options) {
         if (!options) return this._fetchMany(options);
-        const { entitlement, cache, force } = options;
+        const { entitlement, cache: cache3, force } = options;
         const resolvedEntitlement = this.resolveId(entitlement ?? options);
         if (resolvedEntitlement) {
-          return this._fetchSingle({ entitlement: resolvedEntitlement, cache, force });
+          return this._fetchSingle({ entitlement: resolvedEntitlement, cache: cache3, force });
         }
         return this._fetchMany(options);
       }
-      async _fetchSingle({ entitlement, cache, force = false }) {
+      async _fetchSingle({ entitlement, cache: cache3, force = false }) {
         if (!force) {
           const existing = this.cache.get(entitlement);
           if (existing) {
@@ -37787,9 +37787,9 @@ var require_EntitlementManager = __commonJS({
           }
         }
         const data = await this.client.rest.get(Routes3.entitlement(this.client.application.id, entitlement));
-        return this._add(data, cache);
+        return this._add(data, cache3);
       }
-      async _fetchMany({ limit, guild, user, skus, excludeEnded, excludeDeleted, cache, before, after } = {}) {
+      async _fetchMany({ limit, guild, user, skus, excludeEnded, excludeDeleted, cache: cache3, before, after } = {}) {
         const query = makeURLSearchParams2({
           limit,
           guild_id: guild && this.client.guilds.resolveId(guild),
@@ -37802,7 +37802,7 @@ var require_EntitlementManager = __commonJS({
         });
         const entitlements = await this.client.rest.get(Routes3.entitlements(this.client.application.id), { query });
         return entitlements.reduce(
-          (coll, entitlement) => coll.set(entitlement.id, this._add(entitlement, cache)),
+          (coll, entitlement) => coll.set(entitlement.id, this._add(entitlement, cache3)),
           new Collection2()
         );
       }
@@ -37968,12 +37968,12 @@ var require_SubscriptionManager = __commonJS({
        */
       async fetch(options = {}) {
         if (typeof options !== "object") throw new DiscordjsTypeError2(ErrorCodes2.InvalidType, "options", "object", true);
-        const { after, before, cache, limit, sku, subscriptionId, user } = options;
+        const { after, before, cache: cache3, limit, sku, subscriptionId, user } = options;
         const skuId = resolveSKUId(sku);
         if (!skuId) throw new DiscordjsTypeError2(ErrorCodes2.InvalidType, "sku", "SKUResolvable");
         if (subscriptionId) {
           const subscription = await this.client.rest.get(Routes3.skuSubscription(skuId, subscriptionId));
-          return this._add(subscription, cache);
+          return this._add(subscription, cache3);
         }
         const query = makeURLSearchParams2({
           limit,
@@ -37984,7 +37984,7 @@ var require_SubscriptionManager = __commonJS({
         });
         const subscriptions = await this.client.rest.get(Routes3.skuSubscriptions(skuId), { query });
         return subscriptions.reduce(
-          (coll, subscription) => coll.set(subscription.id, this._add(subscription, cache)),
+          (coll, subscription) => coll.set(subscription.id, this._add(subscription, cache3)),
           new Collection2()
         );
       }
@@ -38912,12 +38912,12 @@ var require_memoize = __commonJS({
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       var memoized = function() {
-        var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache = memoized.cache;
-        if (cache.has(key)) {
-          return cache.get(key);
+        var args = arguments, key = resolver ? resolver.apply(this, args) : args[0], cache3 = memoized.cache;
+        if (cache3.has(key)) {
+          return cache3.get(key);
         }
         var result = func.apply(this, args);
-        memoized.cache = cache.set(key, result) || cache;
+        memoized.cache = cache3.set(key, result) || cache3;
         return result;
       };
       memoized.cache = new (memoize.Cache || MapCache)();
@@ -38935,12 +38935,12 @@ var require_memoizeCapped = __commonJS({
     var MAX_MEMOIZE_SIZE = 500;
     function memoizeCapped(func) {
       var result = memoize(func, function(key) {
-        if (cache.size === MAX_MEMOIZE_SIZE) {
-          cache.clear();
+        if (cache3.size === MAX_MEMOIZE_SIZE) {
+          cache3.clear();
         }
         return key;
       });
-      var cache = result.cache;
+      var cache3 = result.cache;
       return result;
     }
     module2.exports = memoizeCapped;
@@ -39264,8 +39264,8 @@ var require_arrayIncludesWith = __commonJS({
 // ../../node_modules/.pnpm/lodash@4.18.1/node_modules/lodash/_cacheHas.js
 var require_cacheHas = __commonJS({
   "../../node_modules/.pnpm/lodash@4.18.1/node_modules/lodash/_cacheHas.js"(exports2, module2) {
-    function cacheHas(cache, key) {
-      return cache.has(key);
+    function cacheHas(cache3, key) {
+      return cache3.has(key);
     }
     module2.exports = cacheHas;
   }
@@ -48253,14 +48253,14 @@ var require_GuildEmojiRoleManager = __commonJS({
        * @readonly
        */
       get cache() {
-        const cache = new Collection2();
+        const cache3 = new Collection2();
         for (const roleId of this.emoji._roles) {
           const role = this.guild.roles.cache.get(roleId);
           if (role !== void 0) {
-            cache.set(roleId, role);
+            cache3.set(roleId, role);
           }
         }
-        return cache;
+        return cache3;
       }
       /**
        * Adds a role (or multiple roles) to the list of roles that can use this emoji.
@@ -48341,7 +48341,7 @@ var require_GuildEmojiRoleManager = __commonJS({
 var require_GuildEmoji = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/GuildEmoji.js"(exports2, module2) {
     "use strict";
-    var { PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
     var BaseGuildEmoji = require_BaseGuildEmoji();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var GuildEmojiRoleManager = require_GuildEmojiRoleManager();
@@ -48374,7 +48374,7 @@ var require_GuildEmoji = __commonJS({
        */
       get deletable() {
         if (!this.guild.members.me) throw new DiscordjsError2(ErrorCodes2.GuildUncachedMe);
-        return !this.managed && this.guild.members.me.permissions.has(PermissionFlagsBits6.ManageGuildExpressions);
+        return !this.managed && this.guild.members.me.permissions.has(PermissionFlagsBits5.ManageGuildExpressions);
       }
       /**
        * A manager for roles this emoji is active for.
@@ -48684,8 +48684,8 @@ var require_ReactionManager = __commonJS({
         super(message.client, MessageReaction, iterable);
         this.message = message;
       }
-      _add(data, cache) {
-        return super._add(data, cache, { id: data.emoji.id ?? data.emoji.name, extras: [this.message] });
+      _add(data, cache3) {
+        return super._add(data, cache3, { id: data.emoji.id ?? data.emoji.name, extras: [this.message] });
       }
       /**
        * The reaction cache of this manager
@@ -49693,7 +49693,7 @@ var require_Message = __commonJS({
       ChannelType,
       MessageType,
       MessageFlags: MessageFlags7,
-      PermissionFlagsBits: PermissionFlagsBits6,
+      PermissionFlagsBits: PermissionFlagsBits5,
       MessageReferenceType
     } = require_v106();
     var Attachment = require_Attachment();
@@ -50149,7 +50149,7 @@ var require_Message = __commonJS({
           if (this.channel.archived) return false;
           if (this.channel.locked) {
             const permissions = this.channel.permissionsFor(this.client.user);
-            if (!permissions?.has(PermissionFlagsBits6.ManageThreads, true)) return false;
+            if (!permissions?.has(PermissionFlagsBits5.ManageThreads, true)) return false;
           }
         }
         return precheck;
@@ -50169,8 +50169,8 @@ var require_Message = __commonJS({
         }
         const permissions = this.channel?.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
-        return this.type !== MessageType.AutoModerationAction && this.author.id === this.client.user.id || permissions.has(PermissionFlagsBits6.ManageMessages, false) && !this.guild.members.me.isCommunicationDisabled();
+        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
+        return this.type !== MessageType.AutoModerationAction && this.author.id === this.client.user.id || permissions.has(PermissionFlagsBits5.ManageMessages, false) && !this.guild.members.me.isCommunicationDisabled();
       }
       /**
        * Whether the message is bulk deletable by the client user
@@ -50181,7 +50181,7 @@ var require_Message = __commonJS({
        * channel.bulkDelete(messages.filter(message => message.bulkDeletable));
        */
       get bulkDeletable() {
-        return (this.inGuild() && Date.now() - this.createdTimestamp < MaxBulkDeletableMessageAge && this.deletable && this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits6.ManageMessages, false)) ?? false;
+        return (this.inGuild() && Date.now() - this.createdTimestamp < MaxBulkDeletableMessageAge && this.deletable && this.channel?.permissionsFor(this.client.user).has(PermissionFlagsBits5.ManageMessages, false)) ?? false;
       }
       /**
        * Whether the message is pinnable by the client user
@@ -50195,7 +50195,7 @@ var require_Message = __commonJS({
         if (!channel || channel.isVoiceBased() || !channel.viewable) return false;
         const permissions = channel?.permissionsFor(this.client.user);
         if (!permissions) return false;
-        return permissions.has(PermissionFlagsBits6.ReadMessageHistory | PermissionFlagsBits6.PinMessages);
+        return permissions.has(PermissionFlagsBits5.ReadMessageHistory | PermissionFlagsBits5.PinMessages);
       }
       /**
        * Fetches the Message this crosspost/reply/pin-add references, if available to the client
@@ -50216,7 +50216,7 @@ var require_Message = __commonJS({
        * @readonly
        */
       get crosspostable() {
-        const bitfield = PermissionFlagsBits6.SendMessages | (this.author.id === this.client.user.id ? PermissionsBitField2.DefaultBit : PermissionFlagsBits6.ManageMessages);
+        const bitfield = PermissionFlagsBits5.SendMessages | (this.author.id === this.client.user.id ? PermissionsBitField2.DefaultBit : PermissionFlagsBits5.ManageMessages);
         const { channel } = this;
         return Boolean(
           channel?.type === ChannelType.GuildAnnouncement && !this.flags.has(MessageFlags7.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
@@ -51220,15 +51220,15 @@ var require_GuildMemberRoleManager = __commonJS({
        * @readonly
        */
       get cache() {
-        const cache = new Collection2();
-        cache.set(this.guild.id, this.guild.roles.everyone);
+        const cache3 = new Collection2();
+        cache3.set(this.guild.id, this.guild.roles.everyone);
         for (const roleId of this.member._roles) {
           const role = this.guild.roles.cache.get(roleId);
           if (role !== void 0) {
-            cache.set(roleId, role);
+            cache3.set(roleId, role);
           }
         }
-        return cache;
+        return cache3;
       }
       /**
        * The role of the member used to hoist them in a separate category in the users list
@@ -51409,7 +51409,7 @@ var require_GuildMemberFlagsBitField = __commonJS({
 var require_GuildMember = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/GuildMember.js"(exports2) {
     "use strict";
-    var { PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
     var Base = require_Base();
     var VoiceState = require_VoiceState();
     var TextBasedChannel = require_TextBasedChannel();
@@ -51661,7 +51661,7 @@ var require_GuildMember = __commonJS({
        */
       get kickable() {
         if (!this.guild.members.me) throw new DiscordjsError2(ErrorCodes2.GuildUncachedMe);
-        return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits6.KickMembers);
+        return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits5.KickMembers);
       }
       /**
        * Whether this member is bannable by the client user
@@ -51670,7 +51670,7 @@ var require_GuildMember = __commonJS({
        */
       get bannable() {
         if (!this.guild.members.me) throw new DiscordjsError2(ErrorCodes2.GuildUncachedMe);
-        return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits6.BanMembers);
+        return this.manageable && this.guild.members.me.permissions.has(PermissionFlagsBits5.BanMembers);
       }
       /**
        * Whether this member is moderatable by the client user
@@ -51678,7 +51678,7 @@ var require_GuildMember = __commonJS({
        * @readonly
        */
       get moderatable() {
-        return !this.permissions.has(PermissionFlagsBits6.Administrator) && this.manageable && (this.guild.members.me?.permissions.has(PermissionFlagsBits6.ModerateMembers) ?? false);
+        return !this.permissions.has(PermissionFlagsBits5.Administrator) && this.manageable && (this.guild.members.me?.permissions.has(PermissionFlagsBits5.ModerateMembers) ?? false);
       }
       /**
        * Whether this member is currently timed out
@@ -51879,8 +51879,8 @@ var require_MessageManager = __commonJS({
        * @type {Collection<Snowflake, Message>}
        * @name MessageManager#cache
        */
-      _add(data, cache) {
-        return super._add(data, cache);
+      _add(data, cache3) {
+        return super._add(data, cache3);
       }
       /**
        * Data that can be resolved to a Message object. This can be:
@@ -51933,24 +51933,24 @@ var require_MessageManager = __commonJS({
        */
       fetch(options) {
         if (!options) return this._fetchMany();
-        const { message, cache, force } = options;
+        const { message, cache: cache3, force } = options;
         const resolvedMessage = this.resolveId(message ?? options);
-        if (resolvedMessage) return this._fetchSingle({ message: resolvedMessage, cache, force });
+        if (resolvedMessage) return this._fetchSingle({ message: resolvedMessage, cache: cache3, force });
         return this._fetchMany(options);
       }
-      async _fetchSingle({ message, cache, force = false }) {
+      async _fetchSingle({ message, cache: cache3, force = false }) {
         if (!force) {
           const existing = this.cache.get(message);
           if (existing && !existing.partial) return existing;
         }
         const data = await this.client.rest.get(Routes3.channelMessage(this.channel.id, message));
-        return this._add(data, cache);
+        return this._add(data, cache3);
       }
-      async _fetchMany({ cache, ...apiOptions } = {}) {
+      async _fetchMany({ cache: cache3, ...apiOptions } = {}) {
         const data = await this.client.rest.get(Routes3.channelMessages(this.channel.id), {
           query: makeURLSearchParams2(apiOptions)
         });
-        return data.reduce((_data, message) => _data.set(message.id, this._add(message, cache)), new Collection2());
+        return data.reduce((_data, message) => _data.set(message.id, this._add(message, cache3)), new Collection2());
       }
       /**
        * Options used to fetch pinned messages.
@@ -51988,7 +51988,7 @@ var require_MessageManager = __commonJS({
        *   .then(messages => console.log(`Received ${messages.items.length} messages`))
        *   .catch(console.error);
        */
-      async fetchPins({ cache, ...apiOptions } = {}) {
+      async fetchPins({ cache: cache3, ...apiOptions } = {}) {
         const data = await this.client.rest.get(Routes3.channelMessagesPins(this.channel.id), {
           query: makeURLSearchParams2({
             ...apiOptions,
@@ -52001,7 +52001,7 @@ var require_MessageManager = __commonJS({
             get pinnedAt() {
               return new Date(this.pinnedTimestamp);
             },
-            message: this._add(item.message, cache)
+            message: this._add(item.message, cache3)
           })),
           hasMore: data.has_more
         };
@@ -52014,7 +52014,7 @@ var require_MessageManager = __commonJS({
        * @deprecated Use {@link MessageManager#fetchPins} instead.
        * @returns {Promise<Collection<Snowflake, Message>>}
        */
-      async fetchPinned(cache = true) {
+      async fetchPinned(cache3 = true) {
         if (!deprecationEmittedForFetchPinned) {
           process2.emitWarning(
             "The MessageManager#fetchPinned() method is deprecated. Use MessageManager#fetchPins() instead.",
@@ -52024,7 +52024,7 @@ var require_MessageManager = __commonJS({
         }
         const data = await this.client.rest.get(Routes3.channelPins(this.channel.id));
         const messages = new Collection2();
-        for (const message of data) messages.set(message.id, this._add(message, cache));
+        for (const message of data) messages.set(message.id, this._add(message, cache3));
         return messages;
       }
       /**
@@ -53488,8 +53488,8 @@ var require_Action = __commonJS({
       handle(data) {
         return data;
       }
-      getPayload(data, manager, id, partialType, cache) {
-        return this.client.options.partials.includes(partialType) ? manager._add(data, cache) : manager.cache.get(id);
+      getPayload(data, manager, id, partialType, cache3) {
+        return this.client.options.partials.includes(partialType) ? manager._add(data, cache3) : manager.cache.get(id);
       }
       getChannel(data) {
         const payloadData = {};
@@ -53506,7 +53506,7 @@ var require_Action = __commonJS({
         if (id !== void 0) payloadData.id = id;
         return data[this.client.actions.injectedChannel] ?? this.getPayload({ ...data, ...payloadData }, this.client.channels, id, Partials.Channel);
       }
-      getMessage(data, channel, cache) {
+      getMessage(data, channel, cache3) {
         const id = data.message_id ?? data.id;
         return data[this.client.actions.injectedMessage] ?? this.getPayload(
           {
@@ -53517,7 +53517,7 @@ var require_Action = __commonJS({
           channel.messages,
           id,
           Partials.Message,
-          cache
+          cache3
         );
       }
       getPoll(data, message, channel) {
@@ -54213,8 +54213,8 @@ var require_ThreadOnlyChannel = __commonJS({
        * @param {boolean} [cache=true] Whether to cache the fetched invites
        * @returns {Promise<Collection<string, Invite>>}
        */
-      fetchInvites(cache) {
-        return this.guild.invites.fetch({ channelId: this.id, cache });
+      fetchInvites(cache3) {
+        return this.guild.invites.fetch({ channelId: this.id, cache: cache3 });
       }
       /**
        * Sets the default auto archive duration for all newly created threads in this channel.
@@ -54398,12 +54398,12 @@ var require_ThreadMemberManager = __commonJS({
        * @type {Collection<Snowflake, ThreadMember>}
        * @name ThreadMemberManager#cache
        */
-      _add(data, cache = true) {
+      _add(data, cache3 = true) {
         const existing = this.cache.get(data.user_id);
-        if (cache) existing?._patch(data, { cache });
+        if (cache3) existing?._patch(data, { cache: cache3 });
         if (existing) return existing;
-        const member = new ThreadMember(this.thread, data, { cache });
-        if (cache) this.cache.set(data.user_id, member);
+        const member = new ThreadMember(this.thread, data, { cache: cache3 });
+        if (cache3) this.cache.set(data.user_id, member);
         return member;
       }
       /**
@@ -54523,12 +54523,12 @@ var require_ThreadMemberManager = __commonJS({
        */
       fetch(options) {
         if (!options) return this._fetchMany();
-        const { member, withMember, cache, force } = options;
+        const { member, withMember, cache: cache3, force } = options;
         const resolvedMember = this.resolveId(member ?? options);
-        if (resolvedMember) return this._fetchSingle({ member: resolvedMember, withMember, cache, force });
+        if (resolvedMember) return this._fetchSingle({ member: resolvedMember, withMember, cache: cache3, force });
         return this._fetchMany(options);
       }
-      async _fetchSingle({ member, withMember, cache, force = false }) {
+      async _fetchSingle({ member, withMember, cache: cache3, force = false }) {
         if (!force) {
           const existing = this.cache.get(member);
           if (existing) return existing;
@@ -54536,13 +54536,13 @@ var require_ThreadMemberManager = __commonJS({
         const data = await this.client.rest.get(Routes3.threadMembers(this.thread.id, member), {
           query: makeURLSearchParams2({ with_member: withMember })
         });
-        return this._add(data, cache);
+        return this._add(data, cache3);
       }
-      async _fetchMany({ withMember, after, limit, cache } = {}) {
+      async _fetchMany({ withMember, after, limit, cache: cache3 } = {}) {
         const data = await this.client.rest.get(Routes3.threadMembers(this.thread.id), {
           query: makeURLSearchParams2({ with_member: withMember, after, limit })
         });
-        return data.reduce((col, member) => col.set(member.user_id, this._add(member, cache)), new Collection2());
+        return data.reduce((col, member) => col.set(member.user_id, this._add(member, cache3)), new Collection2());
       }
     };
     module2.exports = ThreadMemberManager;
@@ -54555,7 +54555,7 @@ var require_ThreadChannel = __commonJS({
     "use strict";
     var { DiscordAPIError } = require_dist5();
     var { lazy } = require_dist();
-    var { RESTJSONErrorCodes, ChannelFlags, ChannelType, PermissionFlagsBits: PermissionFlagsBits6, Routes: Routes3 } = require_v106();
+    var { RESTJSONErrorCodes, ChannelFlags, ChannelType, PermissionFlagsBits: PermissionFlagsBits5, Routes: Routes3 } = require_v106();
     var { BaseChannel } = require_BaseChannel();
     var getThreadOnlyChannel = lazy(() => require_ThreadOnlyChannel());
     var TextBasedChannel = require_TextBasedChannel();
@@ -54915,7 +54915,7 @@ var require_ThreadChannel = __commonJS({
        */
       get joinable() {
         return !this.archived && !this.joined && this.permissionsFor(this.client.user)?.has(
-          this.type === ChannelType.PrivateThread ? PermissionFlagsBits6.ManageThreads : PermissionFlagsBits6.ViewChannel,
+          this.type === ChannelType.PrivateThread ? PermissionFlagsBits5.ManageThreads : PermissionFlagsBits5.ViewChannel,
           false
         );
       }
@@ -54927,8 +54927,8 @@ var require_ThreadChannel = __commonJS({
       get manageable() {
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
-        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits6.ManageThreads, false);
+        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
+        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits5.ManageThreads, false);
       }
       /**
        * Whether the thread is viewable by the client user
@@ -54939,7 +54939,7 @@ var require_ThreadChannel = __commonJS({
         if (this.client.user.id === this.guild.ownerId) return true;
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        return permissions.has(PermissionFlagsBits6.ViewChannel, false);
+        return permissions.has(PermissionFlagsBits5.ViewChannel, false);
       }
       /**
        * Whether the client user can send messages in this thread
@@ -54949,8 +54949,8 @@ var require_ThreadChannel = __commonJS({
       get sendable() {
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
-        return !(this.archived && this.locked && !this.manageable) && (this.type !== ChannelType.PrivateThread || this.joined || this.manageable) && permissions.has(PermissionFlagsBits6.SendMessagesInThreads, false) && this.guild.members.me.communicationDisabledUntilTimestamp < Date.now();
+        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
+        return !(this.archived && this.locked && !this.manageable) && (this.type !== ChannelType.PrivateThread || this.joined || this.manageable) && permissions.has(PermissionFlagsBits5.SendMessagesInThreads, false) && this.guild.members.me.communicationDisabledUntilTimestamp < Date.now();
       }
       /**
        * Whether the thread is unarchivable by the client user
@@ -55071,14 +55071,14 @@ var require_ThreadManager = __commonJS({
        *   .then(channel => console.log(channel.name))
        *   .catch(console.error);
        */
-      fetch(options, { cache, force } = {}) {
-        if (!options) return this.fetchActive(cache);
+      fetch(options, { cache: cache3, force } = {}) {
+        if (!options) return this.fetchActive(cache3);
         const channel = this.client.channels.resolveId(options);
-        if (channel) return this.client.channels.fetch(channel, { cache, force });
+        if (channel) return this.client.channels.fetch(channel, { cache: cache3, force });
         if (options.archived) {
-          return this.fetchArchived(options.archived, cache);
+          return this.fetchArchived(options.archived, cache3);
         }
-        return this.fetchActive(cache);
+        return this.fetchActive(cache3);
       }
       /**
        * Data that can be resolved to a Date object. This can be:
@@ -55111,7 +55111,7 @@ var require_ThreadManager = __commonJS({
        * @param {boolean} [cache=true] Whether to cache the new thread objects if they aren't already
        * @returns {Promise<FetchedThreadsMore>}
        */
-      async fetchArchived({ type = "public", fetchAll = false, before, limit } = {}, cache = true) {
+      async fetchArchived({ type = "public", fetchAll = false, before, limit } = {}, cache3 = true) {
         let path = Routes3.channelThreads(this.channel.id, type);
         if (type === "private" && !fetchAll) {
           path = Routes3.channelJoinedArchivedThreads(this.channel.id);
@@ -55139,20 +55139,20 @@ var require_ThreadManager = __commonJS({
           }
         }
         const raw = await this.client.rest.get(path, { query });
-        return this.constructor._mapThreads(raw, this.client, { parent: this.channel, cache });
+        return this.constructor._mapThreads(raw, this.client, { parent: this.channel, cache: cache3 });
       }
       /**
        * Obtains all active threads in the channel.
        * @param {boolean} [cache=true] Whether to cache the fetched data
        * @returns {Promise<FetchedThreads>}
        */
-      async fetchActive(cache = true) {
+      async fetchActive(cache3 = true) {
         const data = await this.channel.guild.channels.rawFetchGuildActiveThreads();
-        return this.constructor._mapThreads(data, this.client, { parent: this.channel, cache });
+        return this.constructor._mapThreads(data, this.client, { parent: this.channel, cache: cache3 });
       }
-      static _mapThreads(rawThreads, client, { parent, guild, cache }) {
+      static _mapThreads(rawThreads, client, { parent, guild, cache: cache3 }) {
         const threads = rawThreads.threads.reduce((coll, raw) => {
-          const thread = client.channels._add(raw, guild ?? parent?.guild, { cache });
+          const thread = client.channels._add(raw, guild ?? parent?.guild, { cache: cache3 });
           if (parent && thread.parentId !== parent.id) return coll;
           return coll.set(thread.id, thread);
         }, new Collection2());
@@ -55371,8 +55371,8 @@ var require_BaseGuildTextChannel = __commonJS({
        * @param {boolean} [cache=true] Whether or not to cache the fetched invites
        * @returns {Promise<Collection<string, Invite>>}
        */
-      fetchInvites(cache = true) {
-        return this.guild.invites.fetch({ channelId: this.id, cache });
+      fetchInvites(cache3 = true) {
+        return this.guild.invites.fetch({ channelId: this.id, cache: cache3 });
       }
       // These are here only for documentation purposes - they are implemented by TextBasedChannel
       /* eslint-disable no-empty-function */
@@ -55444,7 +55444,7 @@ var require_BaseGuildVoiceChannel = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/BaseGuildVoiceChannel.js"(exports2, module2) {
     "use strict";
     var { Collection: Collection2 } = require_dist6();
-    var { PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
     var GuildChannel = require_GuildChannel();
     var TextBasedChannel = require_TextBasedChannel();
     var GuildMessageManager = require_GuildMessageManager();
@@ -55515,8 +55515,8 @@ var require_BaseGuildVoiceChannel = __commonJS({
         if (!this.viewable) return false;
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
-        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits6.Connect, false);
+        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
+        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits5.Connect, false);
       }
       /**
        * Creates an invite to this guild channel.
@@ -55536,8 +55536,8 @@ var require_BaseGuildVoiceChannel = __commonJS({
        * @param {boolean} [cache=true] Whether to cache the fetched invites
        * @returns {Promise<Collection<string, Invite>>}
        */
-      fetchInvites(cache = true) {
-        return this.guild.invites.fetch({ channelId: this.id, cache });
+      fetchInvites(cache3 = true) {
+        return this.guild.invites.fetch({ channelId: this.id, cache: cache3 });
       }
       /**
        * Sets the bitrate of the channel.
@@ -55700,7 +55700,7 @@ var require_TextChannel = __commonJS({
 var require_VoiceChannel = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/VoiceChannel.js"(exports2, module2) {
     "use strict";
-    var { PermissionFlagsBits: PermissionFlagsBits6, Routes: Routes3 } = require_v106();
+    var { PermissionFlagsBits: PermissionFlagsBits5, Routes: Routes3 } = require_v106();
     var BaseGuildVoiceChannel = require_BaseGuildVoiceChannel();
     var VoiceChannel = class extends BaseGuildVoiceChannel {
       /**
@@ -55710,7 +55710,7 @@ var require_VoiceChannel = __commonJS({
        */
       get joinable() {
         if (!super.joinable) return false;
-        if (this.full && !this.permissionsFor(this.client.user).has(PermissionFlagsBits6.MoveMembers, false)) return false;
+        if (this.full && !this.permissionsFor(this.client.user).has(PermissionFlagsBits5.MoveMembers, false)) return false;
         return true;
       }
       /**
@@ -55721,8 +55721,8 @@ var require_VoiceChannel = __commonJS({
       get speakable() {
         const permissions = this.permissionsFor(this.client.user);
         if (!permissions) return false;
-        if (permissions.has(PermissionFlagsBits6.Administrator, false)) return true;
-        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits6.Speak, false);
+        if (permissions.has(PermissionFlagsBits5.Administrator, false)) return true;
+        return this.guild.members.me.communicationDisabledUntilTimestamp < Date.now() && permissions.has(PermissionFlagsBits5.Speak, false);
       }
       /**
        * @typedef {Object} SendSoundboardSoundOptions
@@ -67257,10 +67257,10 @@ var require_ChannelManager = __commonJS({
        * @type {Collection<Snowflake, BaseChannel>}
        * @name ChannelManager#cache
        */
-      _add(data, guild, { cache = true, allowUnknownGuild = false } = {}) {
+      _add(data, guild, { cache: cache3 = true, allowUnknownGuild = false } = {}) {
         const existing = this.cache.get(data.id);
         if (existing) {
-          if (cache) existing._patch(data);
+          if (cache3) existing._patch(data);
           guild?.channels?._add(existing);
           if (ThreadChannelTypes.includes(existing.type)) {
             existing.parent?.threads?._add(existing);
@@ -67272,7 +67272,7 @@ var require_ChannelManager = __commonJS({
           this.client.emit(Events3.Debug, `Failed to find guild, or unknown type for channel ${data.id} ${data.type}`);
           return null;
         }
-        if (cache && !allowUnknownGuild) this.cache.set(channel.id, channel);
+        if (cache3 && !allowUnknownGuild) this.cache.set(channel.id, channel);
         return channel;
       }
       _remove(id) {
@@ -67329,13 +67329,13 @@ var require_ChannelManager = __commonJS({
        *   .then(channel => console.log(channel.name))
        *   .catch(console.error);
        */
-      async fetch(id, { allowUnknownGuild = false, cache = true, force = false } = {}) {
+      async fetch(id, { allowUnknownGuild = false, cache: cache3 = true, force = false } = {}) {
         if (!force) {
           const existing = this.cache.get(id);
           if (existing && !existing.partial) return existing;
         }
         const data = await this.client.rest.get(Routes3.channel(id));
-        return this._add(data, null, { cache, allowUnknownGuild });
+        return this._add(data, null, { cache: cache3, allowUnknownGuild });
       }
     };
     module2.exports = ChannelManager2;
@@ -67865,8 +67865,8 @@ var require_AutoModerationRuleManager = __commonJS({
        * @param {AutoModerationRuleResolvable} autoModerationRule The AutoModerationRule resolvable to resolve
        * @returns {?Snowflake}
        */
-      _add(data, cache) {
-        return super._add(data, cache, { extras: [this.guild] });
+      _add(data, cache3) {
+        return super._add(data, cache3, { extras: [this.guild] });
       }
       /**
        * Options used to set the trigger metadata of an auto moderation rule.
@@ -68054,20 +68054,20 @@ var require_AutoModerationRuleManager = __commonJS({
        */
       fetch(options) {
         if (!options) return this._fetchMany();
-        const { autoModerationRule, cache, force } = options;
+        const { autoModerationRule, cache: cache3, force } = options;
         const resolvedAutoModerationRule = this.resolveId(autoModerationRule ?? options);
         if (resolvedAutoModerationRule) {
-          return this._fetchSingle({ autoModerationRule: resolvedAutoModerationRule, cache, force });
+          return this._fetchSingle({ autoModerationRule: resolvedAutoModerationRule, cache: cache3, force });
         }
         return this._fetchMany(options);
       }
-      async _fetchSingle({ autoModerationRule, cache, force = false }) {
+      async _fetchSingle({ autoModerationRule, cache: cache3, force = false }) {
         if (!force) {
           const existing = this.cache.get(autoModerationRule);
           if (existing) return existing;
         }
         const data = await this.client.rest.get(Routes3.guildAutoModerationRule(this.guild.id, autoModerationRule));
-        return this._add(data, cache);
+        return this._add(data, cache3);
       }
       async _fetchMany(options = {}) {
         const data = await this.client.rest.get(Routes3.guildAutoModerationRules(this.guild.id));
@@ -68131,8 +68131,8 @@ var require_GuildBanManager = __commonJS({
        * @type {Collection<Snowflake, GuildBan>}
        * @name GuildBanManager#cache
        */
-      _add(data, cache) {
-        return super._add(data, cache, { id: data.user.id, extras: [this.guild] });
+      _add(data, cache3) {
+        return super._add(data, cache3, { id: data.user.id, extras: [this.guild] });
       }
       /**
        * Data that resolves to give a GuildBan object. This can be:
@@ -68193,27 +68193,27 @@ var require_GuildBanManager = __commonJS({
        */
       async fetch(options) {
         if (!options) return this._fetchMany();
-        const { user, cache, force, limit, before, after } = options;
+        const { user, cache: cache3, force, limit, before, after } = options;
         const resolvedUser = this.client.users.resolveId(user ?? options);
-        if (resolvedUser) return this._fetchSingle({ user: resolvedUser, cache, force });
-        if (!before && !after && !limit && cache === void 0) {
+        if (resolvedUser) return this._fetchSingle({ user: resolvedUser, cache: cache3, force });
+        if (!before && !after && !limit && cache3 === void 0) {
           throw new DiscordjsError2(ErrorCodes2.FetchBanResolveId);
         }
         return this._fetchMany(options);
       }
-      async _fetchSingle({ user, cache, force = false }) {
+      async _fetchSingle({ user, cache: cache3, force = false }) {
         if (!force) {
           const existing = this.cache.get(user);
           if (existing && !existing.partial) return existing;
         }
         const data = await this.client.rest.get(Routes3.guildBan(this.guild.id, user));
-        return this._add(data, cache);
+        return this._add(data, cache3);
       }
-      async _fetchMany({ cache, ...apiOptions } = {}) {
+      async _fetchMany({ cache: cache3, ...apiOptions } = {}) {
         const data = await this.client.rest.get(Routes3.guildBans(this.guild.id), {
           query: makeURLSearchParams2(apiOptions)
         });
-        return data.reduce((col, ban) => col.set(ban.user.id, this._add(ban, cache)), new Collection2());
+        return data.reduce((col, ban) => col.set(ban.user.id, this._add(ban, cache3)), new Collection2());
       }
       /**
        * Options used to ban a user from a guild.
@@ -68676,7 +68676,7 @@ var require_GuildChannelManager = __commonJS({
        *   .then(channel => console.log(`The channel name is: ${channel.name}`))
        *   .catch(console.error);
        */
-      async fetch(id, { cache = true, force = false } = {}) {
+      async fetch(id, { cache: cache3 = true, force = false } = {}) {
         if (id && !force) {
           const existing = this.cache.get(id);
           if (existing) return existing;
@@ -68684,11 +68684,11 @@ var require_GuildChannelManager = __commonJS({
         if (id) {
           const data2 = await this.client.rest.get(Routes3.channel(id));
           if (this.guild.id !== data2.guild_id) throw new DiscordjsError2(ErrorCodes2.GuildChannelUnowned);
-          return this.client.channels._add(data2, this.guild, { cache });
+          return this.client.channels._add(data2, this.guild, { cache: cache3 });
         }
         const data = await this.client.rest.get(Routes3.guildChannels(this.guild.id));
         const channels = new Collection2();
-        for (const channel of data) channels.set(channel.id, this.client.channels._add(channel, this.guild, { cache }));
+        for (const channel of data) channels.set(channel.id, this.client.channels._add(channel, this.guild, { cache: cache3 }));
         return channels;
       }
       /**
@@ -68760,9 +68760,9 @@ var require_GuildChannelManager = __commonJS({
        *   .then(fetched => console.log(`There are ${fetched.threads.size} threads.`))
        *   .catch(console.error);
        */
-      async fetchActiveThreads(cache = true) {
+      async fetchActiveThreads(cache3 = true) {
         const data = await this.rawFetchGuildActiveThreads();
-        return GuildTextThreadManager._mapThreads(data, this.client, { guild: this.guild, cache });
+        return GuildTextThreadManager._mapThreads(data, this.client, { guild: this.guild, cache: cache3 });
       }
       /**
        * `GET /guilds/{guild.id}/threads/active`
@@ -68799,7 +68799,7 @@ var require_GuildEmojiManager = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/managers/GuildEmojiManager.js"(exports2, module2) {
     "use strict";
     var { Collection: Collection2 } = require_dist6();
-    var { Routes: Routes3, PermissionFlagsBits: PermissionFlagsBits6 } = require_v106();
+    var { Routes: Routes3, PermissionFlagsBits: PermissionFlagsBits5 } = require_v106();
     var BaseGuildEmojiManager2 = require_BaseGuildEmojiManager();
     var { DiscordjsError: DiscordjsError2, DiscordjsTypeError: DiscordjsTypeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var { resolveImage } = require_DataResolver();
@@ -68808,8 +68808,8 @@ var require_GuildEmojiManager = __commonJS({
         super(guild.client, iterable);
         this.guild = guild;
       }
-      _add(data, cache) {
-        return super._add(data, cache, { extras: [this.guild] });
+      _add(data, cache3) {
+        return super._add(data, cache3, { extras: [this.guild] });
       }
       /**
        * Options used for creating an emoji in a guild.
@@ -68875,18 +68875,18 @@ var require_GuildEmojiManager = __commonJS({
        *   .then(emoji => console.log(`The emoji name is: ${emoji.name}`))
        *   .catch(console.error);
        */
-      async fetch(id, { cache = true, force = false } = {}) {
+      async fetch(id, { cache: cache3 = true, force = false } = {}) {
         if (id) {
           if (!force) {
             const existing = this.cache.get(id);
             if (existing) return existing;
           }
           const emoji = await this.client.rest.get(Routes3.guildEmoji(this.guild.id, id));
-          return this._add(emoji, cache);
+          return this._add(emoji, cache3);
         }
         const data = await this.client.rest.get(Routes3.guildEmojis(this.guild.id));
         const emojis = new Collection2();
-        for (const emoji of data) emojis.set(emoji.id, this._add(emoji, cache));
+        for (const emoji of data) emojis.set(emoji.id, this._add(emoji, cache3));
         return emojis;
       }
       /**
@@ -68938,7 +68938,7 @@ var require_GuildEmojiManager = __commonJS({
         }
         const { me } = this.guild.members;
         if (!me) throw new DiscordjsError2(ErrorCodes2.GuildUncachedMe);
-        if (!me.permissions.any(PermissionFlagsBits6.CreateGuildExpressions | PermissionFlagsBits6.ManageGuildExpressions)) {
+        if (!me.permissions.any(PermissionFlagsBits5.CreateGuildExpressions | PermissionFlagsBits5.ManageGuildExpressions)) {
           throw new DiscordjsError2(ErrorCodes2.MissingManageGuildExpressionsPermission, this.guild);
         }
         const data = await this.client.rest.get(Routes3.guildEmoji(this.guild.id, emoji.id));
@@ -68970,8 +68970,8 @@ var require_GuildInviteManager = __commonJS({
        * @type {Collection<string, Invite>}
        * @name GuildInviteManager#cache
        */
-      _add(data, cache) {
-        return super._add(data, cache, { id: data.code, extras: [this.guild] });
+      _add(data, cache3) {
+        return super._add(data, cache3, { id: data.code, extras: [this.guild] });
       }
       /**
        * Data that resolves to give an Invite object. This can be:
@@ -69077,23 +69077,23 @@ var require_GuildInviteManager = __commonJS({
           code: resolveInviteCode2(options.code)
         });
       }
-      async _fetchSingle({ code, cache, force = false }) {
+      async _fetchSingle({ code, cache: cache3, force = false }) {
         if (!force) {
           const existing = this.cache.get(code);
           if (existing) return existing;
         }
-        const invites = await this._fetchMany(cache);
+        const invites = await this._fetchMany(cache3);
         const invite = invites.get(code);
         if (!invite) throw new DiscordjsError2(ErrorCodes2.InviteNotFound);
         return invite;
       }
-      async _fetchMany(cache) {
+      async _fetchMany(cache3) {
         const data = await this.client.rest.get(Routes3.guildInvites(this.guild.id));
-        return data.reduce((col, invite) => col.set(invite.code, this._add(invite, cache)), new Collection2());
+        return data.reduce((col, invite) => col.set(invite.code, this._add(invite, cache3)), new Collection2());
       }
-      async _fetchChannelMany(channelId, cache) {
+      async _fetchChannelMany(channelId, cache3) {
         const data = await this.client.rest.get(Routes3.channelInvites(channelId));
-        return data.reduce((col, invite) => col.set(invite.code, this._add(invite, cache)), new Collection2());
+        return data.reduce((col, invite) => col.set(invite.code, this._add(invite, cache3)), new Collection2());
       }
       /**
        * Create an invite to the guild from the provided channel.
@@ -69169,8 +69169,8 @@ var require_GuildMemberManager = __commonJS({
        * @type {Collection<Snowflake, GuildMember>}
        * @name GuildMemberManager#cache
        */
-      _add(data, cache = true) {
-        return super._add(data, cache, { id: data.user.id, extras: [this.guild] });
+      _add(data, cache3 = true) {
+        return super._add(data, cache3, { id: data.user.id, extras: [this.guild] });
       }
       /**
        * Data that resolves to give a GuildMember object. This can be:
@@ -69320,19 +69320,19 @@ var require_GuildMemberManager = __commonJS({
        */
       fetch(options) {
         if (!options) return this._fetchMany();
-        const { user: users, limit, withPresences, cache, force } = options;
+        const { user: users, limit, withPresences, cache: cache3, force } = options;
         const resolvedUser = this.client.users.resolveId(users ?? options);
-        if (resolvedUser && !limit && !withPresences) return this._fetchSingle({ user: resolvedUser, cache, force });
+        if (resolvedUser && !limit && !withPresences) return this._fetchSingle({ user: resolvedUser, cache: cache3, force });
         const resolvedUsers = users?.map?.((user) => this.client.users.resolveId(user)) ?? resolvedUser ?? void 0;
         return this._fetchMany({ ...options, users: resolvedUsers });
       }
-      async _fetchSingle({ user, cache, force = false }) {
+      async _fetchSingle({ user, cache: cache3, force = false }) {
         if (!force) {
           const existing = this.cache.get(user);
           if (existing && !existing.partial) return existing;
         }
         const data = await this.client.rest.get(Routes3.guildMember(this.guild.id, user));
-        return this._add(data, cache);
+        return this._add(data, cache3);
       }
       async _fetchMany({
         limit = 0,
@@ -69414,11 +69414,11 @@ var require_GuildMemberManager = __commonJS({
        * @param {GuildSearchMembersOptions} options Options for searching members
        * @returns {Promise<Collection<Snowflake, GuildMember>>}
        */
-      async search({ query, limit, cache = true } = {}) {
+      async search({ query, limit, cache: cache3 = true } = {}) {
         const data = await this.client.rest.get(Routes3.guildMembersSearch(this.guild.id), {
           query: makeURLSearchParams2({ query, limit })
         });
-        return data.reduce((col, member) => col.set(member.user.id, this._add(member, cache)), new Collection2());
+        return data.reduce((col, member) => col.set(member.user.id, this._add(member, cache3)), new Collection2());
       }
       /**
        * Options used for listing guild members.
@@ -69432,10 +69432,10 @@ var require_GuildMemberManager = __commonJS({
        * @param {GuildListMembersOptions} [options] Options for listing members
        * @returns {Promise<Collection<Snowflake, GuildMember>>}
        */
-      async list({ after, limit, cache = true } = {}) {
+      async list({ after, limit, cache: cache3 = true } = {}) {
         const query = makeURLSearchParams2({ limit, after });
         const data = await this.client.rest.get(Routes3.guildMembers(this.guild.id), { query });
-        return data.reduce((col, member) => col.set(member.user.id, this._add(member, cache)), new Collection2());
+        return data.reduce((col, member) => col.set(member.user.id, this._add(member, cache3)), new Collection2());
       }
       /**
        * The data for editing a guild member.
@@ -70118,8 +70118,8 @@ var require_GuildSoundboardSoundManager = __commonJS({
        * @type {Collection<Snowflake, SoundboardSound>}
        * @name GuildSoundboardSoundManager#cache
        */
-      _add(data, cache) {
-        return super._add(data, cache, { extras: [this.guild], id: data.sound_id });
+      _add(data, cache3) {
+        return super._add(data, cache3, { extras: [this.guild], id: data.sound_id });
       }
       /**
        * Data that resolves to give a SoundboardSound object. This can be:
@@ -70249,22 +70249,22 @@ var require_GuildSoundboardSoundManager = __commonJS({
       /* eslint-enable max-len */
       async fetch(options) {
         if (!options) return this._fetchMany();
-        const { cache, force, soundboardSound } = options;
+        const { cache: cache3, force, soundboardSound } = options;
         const resolvedSoundboardSound = this.resolveId(soundboardSound ?? options);
-        if (resolvedSoundboardSound) return this._fetchSingle({ cache, force, soundboardSound: resolvedSoundboardSound });
-        return this._fetchMany({ cache });
+        if (resolvedSoundboardSound) return this._fetchSingle({ cache: cache3, force, soundboardSound: resolvedSoundboardSound });
+        return this._fetchMany({ cache: cache3 });
       }
-      async _fetchSingle({ cache, force, soundboardSound } = {}) {
+      async _fetchSingle({ cache: cache3, force, soundboardSound } = {}) {
         if (!force) {
           const existing = this.cache.get(soundboardSound);
           if (existing) return existing;
         }
         const data = await this.client.rest.get(Routes3.guildSoundboardSound(this.guild.id, soundboardSound));
-        return this._add(data, cache);
+        return this._add(data, cache3);
       }
-      async _fetchMany({ cache } = {}) {
+      async _fetchMany({ cache: cache3 } = {}) {
         const data = await this.client.rest.get(Routes3.guildSoundboardSounds(this.guild.id));
-        return data.items.reduce((coll, sound) => coll.set(sound.sound_id, this._add(sound, cache)), new Collection2());
+        return data.items.reduce((coll, sound) => coll.set(sound.sound_id, this._add(sound, cache3)), new Collection2());
       }
     };
     exports2.GuildSoundboardSoundManager = GuildSoundboardSoundManager;
@@ -70291,8 +70291,8 @@ var require_GuildStickerManager = __commonJS({
        * @type {Collection<Snowflake, Sticker>}
        * @name GuildStickerManager#cache
        */
-      _add(data, cache) {
-        return super._add(data, cache, { extras: [this.guild] });
+      _add(data, cache3) {
+        return super._add(data, cache3, { extras: [this.guild] });
       }
       /**
        * Options used to create a guild sticker.
@@ -70401,17 +70401,17 @@ var require_GuildStickerManager = __commonJS({
        *   .then(sticker => console.log(`The sticker name is: ${sticker.name}`))
        *   .catch(console.error);
        */
-      async fetch(id, { cache = true, force = false } = {}) {
+      async fetch(id, { cache: cache3 = true, force = false } = {}) {
         if (id) {
           if (!force) {
             const existing = this.cache.get(id);
             if (existing) return existing;
           }
           const sticker = await this.client.rest.get(Routes3.guildSticker(this.guild.id, id));
-          return this._add(sticker, cache);
+          return this._add(sticker, cache3);
         }
         const data = await this.client.rest.get(Routes3.guildStickers(this.guild.id));
-        return new Collection2(data.map((sticker) => [sticker.id, this._add(sticker, cache)]));
+        return new Collection2(data.map((sticker) => [sticker.id, this._add(sticker, cache3)]));
       }
       /**
        * Fetches the user who uploaded this sticker, if this is a guild sticker.
@@ -70634,8 +70634,8 @@ var require_PresenceManager = __commonJS({
        * @type {Collection<Snowflake, Presence>}
        * @name PresenceManager#cache
        */
-      _add(data, cache) {
-        return super._add(data, cache, { id: data.user.id });
+      _add(data, cache3) {
+        return super._add(data, cache3, { id: data.user.id });
       }
       /**
        * Data that can be resolved to a Presence object. This can be:
@@ -70705,8 +70705,8 @@ var require_RoleManager = __commonJS({
        * @type {Collection<Snowflake, Role>}
        * @name RoleManager#cache
        */
-      _add(data, cache) {
-        return super._add(data, cache, { extras: [this.guild] });
+      _add(data, cache3) {
+        return super._add(data, cache3, { extras: [this.guild] });
       }
       /**
        * Obtains a role from Discord, or the role cache if they're already available.
@@ -70724,11 +70724,11 @@ var require_RoleManager = __commonJS({
        *   .then(role => console.log(`The role color is: ${role.colors.primaryColor}`))
        *   .catch(console.error);
        */
-      async fetch(id, { cache = true, force = false } = {}) {
+      async fetch(id, { cache: cache3 = true, force = false } = {}) {
         if (!id) {
           const data = await this.client.rest.get(Routes3.guildRoles(this.guild.id));
           const roles = new Collection2();
-          for (const role of data) roles.set(role.id, this._add(role, cache));
+          for (const role of data) roles.set(role.id, this._add(role, cache3));
           return roles;
         }
         if (!force) {
@@ -70737,7 +70737,7 @@ var require_RoleManager = __commonJS({
         }
         try {
           const data = await this.client.rest.get(Routes3.guildRole(this.guild.id, id));
-          return this._add(data, cache);
+          return this._add(data, cache3);
         } catch (error) {
           if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownRole) {
             return null;
@@ -71159,7 +71159,7 @@ var require_StageInstanceManager = __commonJS({
        *  .then(stageInstance => console.log(stageInstance))
        *  .catch(console.error);
        */
-      async fetch(channel, { cache = true, force = false } = {}) {
+      async fetch(channel, { cache: cache3 = true, force = false } = {}) {
         const channelId = this.guild.channels.resolveId(channel);
         if (!channelId) throw new DiscordjsError2(ErrorCodes2.StageChannelResolve);
         if (!force) {
@@ -71167,7 +71167,7 @@ var require_StageInstanceManager = __commonJS({
           if (existing) return existing;
         }
         const data = await this.client.rest.get(Routes3.stageInstance(channelId));
-        return this._add(data, cache);
+        return this._add(data, cache3);
       }
       /**
        * Options used to edit an existing stage instance.
@@ -71236,11 +71236,11 @@ var require_VoiceStateManager = __commonJS({
        * @type {Collection<Snowflake, VoiceState>}
        * @name VoiceStateManager#cache
        */
-      _add(data, cache = true) {
+      _add(data, cache3 = true) {
         const existing = this.cache.get(data.user_id);
         if (existing) return existing._patch(data);
         const entry = new this.holds(this.guild, data);
-        if (cache) this.cache.set(data.user_id, entry);
+        if (cache3) this.cache.set(data.user_id, entry);
         return entry;
       }
       /**
@@ -71254,14 +71254,14 @@ var require_VoiceStateManager = __commonJS({
        *    .then(console.log)
        *    .catch(console.error);
        */
-      async fetch(member, { cache = true, force = false } = {}) {
+      async fetch(member, { cache: cache3 = true, force = false } = {}) {
         const id = member === "@me" ? member : this.guild.members.resolveId(member);
         if (!force) {
           const existing = this.cache.get(id === "@me" ? this.client.user.id : id);
           if (existing) return existing;
         }
         const data = await this.client.rest.get(Routes3.guildVoiceState(this.guild.id, id));
-        return this._add(data, cache);
+        return this._add(data, cache3);
       }
     };
     module2.exports = VoiceStateManager;
@@ -72855,14 +72855,14 @@ var require_UserManager = __commonJS({
        * @param {BaseFetchOptions} [options] Additional options for this fetch
        * @returns {Promise<DMChannel>}
        */
-      async createDM(user, { cache = true, force = false } = {}) {
+      async createDM(user, { cache: cache3 = true, force = false } = {}) {
         const id = this.resolveId(user);
         if (!force) {
           const dmChannel = this.dmChannel(id);
           if (dmChannel && !dmChannel.partial) return dmChannel;
         }
         const data = await this.client.rest.post(Routes3.userChannels(), { body: { recipient_id: id } });
-        return this.client.channels._add(data, null, { cache });
+        return this.client.channels._add(data, null, { cache: cache3 });
       }
       /**
        * Deletes a {@link DMChannel} (if one exists) between the client and a user. Resolves with the channel if successful.
@@ -72883,14 +72883,14 @@ var require_UserManager = __commonJS({
        * @param {BaseFetchOptions} [options] Additional options for this fetch
        * @returns {Promise<User>}
        */
-      async fetch(user, { cache = true, force = false } = {}) {
+      async fetch(user, { cache: cache3 = true, force = false } = {}) {
         const id = this.resolveId(user);
         if (!force) {
           const existing = this.cache.get(id);
           if (existing && !existing.partial) return existing;
         }
         const data = await this.client.rest.get(Routes3.user(id));
-        return this._add(data, cache);
+        return this._add(data, cache3);
       }
       /**
        * Fetches a user's flags.
@@ -73563,9 +73563,9 @@ var require_Sweepers = __commonJS({
         let items = 0;
         for (const guild of this.client.guilds.cache.values()) {
           if (!guild.available) continue;
-          const { cache } = guild[key];
+          const { cache: cache3 } = guild[key];
           guilds++;
-          items += cache.sweep(filter);
+          items += cache3.sweep(filter);
         }
         if (emit) {
           this.client.emit(Events3.CacheSweep, `Swept ${items} ${outputName ?? key} in ${guilds} guilds.`);
@@ -75590,9 +75590,15 @@ async function getSheetId() {
     return cachedSheetId;
   }
   if (existsSync(SHEET_ID_FILE)) {
-    const raw = await readFile(SHEET_ID_FILE, "utf-8");
-    cachedSheetId = JSON.parse(raw).sheetId;
-    return cachedSheetId;
+    try {
+      const raw = await readFile(SHEET_ID_FILE, "utf-8");
+      const parsed = JSON.parse(raw);
+      if (parsed.sheetId) {
+        cachedSheetId = parsed.sheetId;
+        return cachedSheetId;
+      }
+    } catch {
+    }
   }
   return createSpreadsheet();
 }
@@ -75603,13 +75609,13 @@ async function createSpreadsheet() {
   });
   const data = await res.json();
   const sheetId = data.spreadsheetId;
-  const range = encodeURIComponent("Sheet1!A1:G1");
+  const range = encodeURIComponent("Sheet1!A1:E1");
   await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
     {
       method: "PUT",
       body: JSON.stringify({
-        values: [["Timestamp", "Discord User", "Username", "License Plate", "Date of Incident", "Peace Officer", "Notes & Evidence"]]
+        values: [["Offender's Username", "Date of Incident", "Seized", "Discord User + ID", "Timestamp"]]
       })
     }
   );
@@ -75639,8 +75645,9 @@ async function appendFiling(record) {
   );
   if (res.status === 404) {
     cachedSheetId = null;
-    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(() => {
-    });
+    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(
+      (err) => logger.warn({ err }, "Failed to clear cached sheet ID")
+    );
     sheetId = await createSpreadsheet();
     res = await sheetsRequest(
       `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:E")}:append?valueInputOption=USER_ENTERED`,
@@ -75661,8 +75668,9 @@ async function getFilings() {
   );
   if (res.status === 404) {
     cachedSheetId = null;
-    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(() => {
-    });
+    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(
+      (err) => logger.warn({ err }, "Failed to clear cached sheet ID")
+    );
     sheetId = await createSpreadsheet();
     res = await sheetsRequest(
       `/v4/spreadsheets/${sheetId}/values/${range}`,
@@ -75715,15 +75723,26 @@ var import_discord = __toESM(require_src(), 1);
 import { readFile as readFile2, writeFile as writeFile2, mkdir as mkdir2 } from "node:fs/promises";
 import { existsSync as existsSync2 } from "node:fs";
 var ACCESS_FILE = "./.bot-data/access.json";
+var rolesCache = null;
 async function loadRoles() {
-  if (!existsSync2(ACCESS_FILE)) return /* @__PURE__ */ new Set();
-  const raw = await readFile2(ACCESS_FILE, "utf-8");
-  const data = JSON.parse(raw);
-  return new Set(data.roles ?? data.users ?? []);
+  if (rolesCache) return rolesCache;
+  if (!existsSync2(ACCESS_FILE)) {
+    rolesCache = /* @__PURE__ */ new Set();
+    return rolesCache;
+  }
+  try {
+    const raw = await readFile2(ACCESS_FILE, "utf-8");
+    const data = JSON.parse(raw);
+    rolesCache = new Set(data.roles ?? []);
+  } catch {
+    rolesCache = /* @__PURE__ */ new Set();
+  }
+  return rolesCache;
 }
 async function saveRoles(roles) {
   await mkdir2("./.bot-data", { recursive: true });
   await writeFile2(ACCESS_FILE, JSON.stringify({ roles: [...roles] }, null, 2));
+  rolesCache = roles;
 }
 async function grantRoleAccess(roleId) {
   const roles = await loadRoles();
@@ -75739,15 +75758,13 @@ async function getAllowedRoles() {
   return loadRoles();
 }
 function checkAccess(interaction, allowedRoles) {
-  const isAdmin = interaction.memberPermissions?.has(import_discord.PermissionFlagsBits.Administrator) ?? false;
-  if (isAdmin) return true;
+  if (interaction.memberPermissions?.has(import_discord.PermissionFlagsBits.Administrator)) return true;
   const memberRoles = interaction.member?.roles;
   if (!memberRoles) return false;
-  if (memberRoles instanceof Array) {
+  if (Array.isArray(memberRoles)) {
     return memberRoles.some((id) => allowedRoles.has(id));
   }
-  const roleManager = memberRoles;
-  return [...allowedRoles].some((id) => roleManager.cache.has(id));
+  return [...allowedRoles].some((id) => memberRoles.cache.has(id));
 }
 
 // src/bot/commands/filing.ts
@@ -75914,28 +75931,39 @@ async function getUserByUsername(username) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ usernames: [username], excludeBannedUsers: false })
   });
-  if (!res.ok) return null;
+  if (!res.ok) {
+    logger.warn({ status: res.status, username }, "Roblox username lookup failed");
+    return null;
+  }
   const data = await res.json();
   if (!data.data.length) return null;
-  const partial = data.data[0];
-  return getUserById(partial.id);
+  return getUserById(data.data[0].id);
 }
 async function getUserById(userId) {
   const res = await fetch(`${BASE_USERS}/v1/users/${userId}`);
-  if (!res.ok) return null;
+  if (!res.ok) {
+    logger.warn({ status: res.status, userId }, "Roblox user lookup by ID failed");
+    return null;
+  }
   return res.json();
 }
 async function getAvatarUrl(userId) {
   const res = await fetch(
     `${BASE_THUMBNAILS}/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`
   );
-  if (!res.ok) return null;
+  if (!res.ok) {
+    logger.warn({ status: res.status, userId }, "Roblox avatar fetch failed");
+    return null;
+  }
   const data = await res.json();
   return data.data[0]?.imageUrl ?? null;
 }
 async function getUserGroups(userId) {
   const res = await fetch(`${BASE_GROUPS}/v1/users/${userId}/groups/roles`);
-  if (!res.ok) return [];
+  if (!res.ok) {
+    logger.warn({ status: res.status, userId }, "Roblox group roles fetch failed");
+    return [];
+  }
   const data = await res.json();
   return data.data ?? [];
 }
@@ -75951,14 +75979,25 @@ function profileUrl(userId) {
 import { readFile as readFile3, writeFile as writeFile3, mkdir as mkdir3 } from "node:fs/promises";
 import { existsSync as existsSync3 } from "node:fs";
 var FILE = "./.bot-data/verifications.json";
+var cache = null;
 async function load() {
-  if (!existsSync3(FILE)) return {};
-  const raw = await readFile3(FILE, "utf-8");
-  return JSON.parse(raw);
+  if (cache) return cache;
+  if (!existsSync3(FILE)) {
+    cache = {};
+    return cache;
+  }
+  try {
+    const raw = await readFile3(FILE, "utf-8");
+    cache = JSON.parse(raw);
+  } catch {
+    cache = {};
+  }
+  return cache;
 }
 async function save(store) {
   await mkdir3("./.bot-data", { recursive: true });
   await writeFile3(FILE, JSON.stringify(store, null, 2));
+  cache = store;
 }
 async function setVerification(discordUserId, robloxId, robloxUsername, verifiedBy) {
   const store = await load();
@@ -76137,14 +76176,25 @@ var import_discord6 = __toESM(require_src(), 1);
 import { readFile as readFile4, writeFile as writeFile4, mkdir as mkdir4 } from "node:fs/promises";
 import { existsSync as existsSync4 } from "node:fs";
 var FILE2 = "./.bot-data/groups.json";
+var cache2 = null;
 async function load2() {
-  if (!existsSync4(FILE2)) return [];
-  const raw = await readFile4(FILE2, "utf-8");
-  return JSON.parse(raw);
+  if (cache2) return cache2;
+  if (!existsSync4(FILE2)) {
+    cache2 = [];
+    return cache2;
+  }
+  try {
+    const raw = await readFile4(FILE2, "utf-8");
+    cache2 = JSON.parse(raw);
+  } catch {
+    cache2 = [];
+  }
+  return cache2;
 }
 async function save2(groups) {
   await mkdir4("./.bot-data", { recursive: true });
   await writeFile4(FILE2, JSON.stringify(groups, null, 2));
+  cache2 = groups;
 }
 async function getGroups() {
   return load2();
@@ -76155,8 +76205,9 @@ async function addGroup(id, label, addedBy) {
   if (existing) return { added: false, existing };
   const updated = [...groups, { id, label, addedBy, addedAt: (/* @__PURE__ */ new Date()).toISOString() }];
   await save2(updated);
-  syncGroupsSheet(updated).catch(() => {
-  });
+  syncGroupsSheet(updated).catch(
+    (err) => logger.warn({ err }, "Failed to sync groups to Google Sheet")
+  );
   return { added: true };
 }
 async function removeGroup(id) {
@@ -76164,8 +76215,9 @@ async function removeGroup(id) {
   const updated = groups.filter((g) => g.id !== id);
   if (updated.length === groups.length) return false;
   await save2(updated);
-  syncGroupsSheet(updated).catch(() => {
-  });
+  syncGroupsSheet(updated).catch(
+    (err) => logger.warn({ err }, "Failed to sync groups to Google Sheet")
+  );
   return true;
 }
 

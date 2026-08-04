@@ -42,8 +42,12 @@ export async function handlePanelCommand(
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button);
 
+  if (!interaction.channel) {
+    await interaction.reply({ flags: MessageFlags.Ephemeral, content: "Cannot post panel: channel not accessible." });
+    return;
+  }
   await interaction.reply({ flags: MessageFlags.Ephemeral, content: "Panel posted!" });
-  await interaction.channel!.send({ embeds: [embed], components: [row] });
+  await interaction.channel.send({ embeds: [embed], components: [row] });
 }
 
 export async function handlePanelButton(

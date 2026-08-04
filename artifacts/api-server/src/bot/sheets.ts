@@ -155,9 +155,16 @@ async function getSheetId(): Promise<string> {
   }
 
   if (existsSync(SHEET_ID_FILE)) {
-    const raw = await readFile(SHEET_ID_FILE, "utf-8");
-    cachedSheetId = (JSON.parse(raw) as { sheetId: string }).sheetId;
-    return cachedSheetId;
+    try {
+      const raw = await readFile(SHEET_ID_FILE, "utf-8");
+      const parsed = JSON.parse(raw) as { sheetId?: string };
+      if (parsed.sheetId) {
+        cachedSheetId = parsed.sheetId;
+        return cachedSheetId;
+      }
+    } catch {
+      // Malformed file — fall through to create a new spreadsheet
+    }
   }
 
   return createSpreadsheet();
@@ -172,14 +179,14 @@ async function createSpreadsheet(): Promise<string> {
   const data = (await res.json()) as { spreadsheetId: string };
   const sheetId = data.spreadsheetId;
 
-  // Write header row
-  const range = encodeURIComponent("Sheet1!A1:G1");
+  // Write header row matching current FilingRecord column order
+  const range = encodeURIComponent("Sheet1!A1:E1");
   await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
     {
       method: "PUT",
       body: JSON.stringify({
-        values: [["Timestamp", "Discord User", "Username", "License Plate", "Date of Incident", "Peace Officer", "Notes & Evidence"]],
+        values: [["Offender's Username", "Date of Incident", "Seized", "Discord User + ID", "Timestamp"]],
       }),
     },
   );
@@ -216,7 +223,9 @@ export async function appendFiling(record: FilingRecord): Promise<void> {
   // Stale sheet ID — create a fresh sheet and retry once
   if (res.status === 404) {
     cachedSheetId = null;
-    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(() => {});
+    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch((err) =>
+      logger.warn({ err }, "Failed to clear cached sheet ID"),
+    );
     sheetId = await createSpreadsheet();
     res = await sheetsRequest(
       `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:E")}:append?valueInputOption=USER_ENTERED`,
@@ -243,7 +252,9 @@ export async function getFilings(): Promise<FilingRecord[]> {
   // clear it and create a fresh one.
   if (res.status === 404) {
     cachedSheetId = null;
-    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(() => {});
+    await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch((err) =>
+      logger.warn({ err }, "Failed to clear cached sheet ID"),
+    );
     sheetId = await createSpreadsheet();
     res = await sheetsRequest(
       `/v4/spreadsheets/${sheetId}/values/${range}`,
