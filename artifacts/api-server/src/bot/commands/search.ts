@@ -29,6 +29,9 @@ export async function handleSearchCommand(
   const username = interaction.options.getString("username", true);
 
   try {
+    // Record fetch time before hitting the sheet so we can show freshness
+    const fetchedAt = Math.floor(Date.now() / 1000);
+
     // Fetch user, registered groups, and filing history in parallel
     const [user, groups, allFilings, sheetUrl] = await Promise.all([
       getUserByUsername(username),
@@ -111,7 +114,7 @@ export async function handleSearchCommand(
     if (userFilings.length === 0) {
       embed.addFields({
         name: "Filing History",
-        value: "No filings on record.",
+        value: `No filings on record.\n-# Last updated: <t:${fetchedAt}:R>`,
         inline: false,
       });
     } else {
@@ -121,6 +124,7 @@ export async function handleSearchCommand(
       if (userFilings.length > 5) {
         lines.push(`[View all ${userFilings.length} filings](${sheetUrl})`);
       }
+      lines.push(`-# Last updated: <t:${fetchedAt}:R>`);
       embed.addFields({
         name: `Filing History (${userFilings.length} total)`,
         value: lines.join("\n"),

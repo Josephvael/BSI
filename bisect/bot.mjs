@@ -76591,6 +76591,7 @@ async function handleSearchCommand(interaction) {
   await interaction.deferReply();
   const username = interaction.options.getString("username", true);
   try {
+    const fetchedAt = Math.floor(Date.now() / 1e3);
     const [user, groups, allFilings, sheetUrl] = await Promise.all([
       getUserByUsername(username),
       getGroups(),
@@ -76650,7 +76651,8 @@ async function handleSearchCommand(interaction) {
     if (userFilings.length === 0) {
       embed.addFields({
         name: "Filing History",
-        value: "No filings on record.",
+        value: `No filings on record.
+-# Last updated: <t:${fetchedAt}:R>`,
         inline: false
       });
     } else {
@@ -76659,6 +76661,7 @@ async function handleSearchCommand(interaction) {
       if (userFilings.length > 5) {
         lines.push(`[View all ${userFilings.length} filings](${sheetUrl})`);
       }
+      lines.push(`-# Last updated: <t:${fetchedAt}:R>`);
       embed.addFields({
         name: `Filing History (${userFilings.length} total)`,
         value: lines.join("\n"),
