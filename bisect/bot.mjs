@@ -75932,9 +75932,7 @@ function buildFilingModal() {
       new import_discord2.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50)
     ),
     new import_discord2.ActionRowBuilder().addComponents(
-      new import_discord2.TextInputBuilder().setCustomId("seized").setLabel("Seized Items (optional)").setStyle(import_discord2.TextInputStyle.Paragraph).setPlaceholder(
-        "List each item and quantity, one per line:\n2x Hawthorne M80\n1x Bag of Nopyfruit\n3x 9x19mm Bennetti Magazine"
-      ).setRequired(false).setMaxLength(1e3)
+      new import_discord2.TextInputBuilder().setCustomId("seized").setLabel("Seized Items (optional)").setStyle(import_discord2.TextInputStyle.Paragraph).setPlaceholder("One item per line, e.g.:\n2x Hawthorne M80\n1x Bag of Nopyfruit").setRequired(false).setMaxLength(1e3)
     )
   );
 }

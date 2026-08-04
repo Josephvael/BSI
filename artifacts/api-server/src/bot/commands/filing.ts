@@ -68,12 +68,7 @@ export function buildFilingModal(): ModalBuilder {
           .setCustomId("seized")
           .setLabel("Seized Items (optional)")
           .setStyle(TextInputStyle.Paragraph)
-          .setPlaceholder(
-            "List each item and quantity, one per line:\n" +
-            "2x Hawthorne M80\n" +
-            "1x Bag of Nopyfruit\n" +
-            "3x 9x19mm Bennetti Magazine",
-          )
+          .setPlaceholder("One item per line, e.g.:\n2x Hawthorne M80\n1x Bag of Nopyfruit")
           .setRequired(false)
           .setMaxLength(1000),
       ),
