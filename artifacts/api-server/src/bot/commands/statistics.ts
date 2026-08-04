@@ -38,6 +38,26 @@ export async function handleStatisticsCommand(
     // Count seized vs not seized
     const seizedCount = filings.filter((f) => f.seized && f.seized.trim().length > 0).length;
 
+    // Aggregate seized item counts — format: "2x Illegal Firearm(s), 1x Cocaine"
+    const itemTotals = new Map<string, number>();
+    for (const filing of filings) {
+      const raw = filing.seized?.trim();
+      if (!raw || raw.toLowerCase() === "none") continue;
+      for (const part of raw.split(",")) {
+        const match = part.trim().match(/^(\d+)x\s+(.+)$/i);
+        if (match) {
+          const qty = parseInt(match[1], 10);
+          const name = match[2].trim();
+          itemTotals.set(name, (itemTotals.get(name) ?? 0) + qty);
+        }
+      }
+    }
+
+    const topItems = [...itemTotals.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([name, count]) => `${name} — ${count}`)
+      .join("\n");
+
     // Last 5 filings (most recent first)
     const recent = filings
       .slice(-5)
@@ -56,6 +76,9 @@ export async function handleStatisticsCommand(
         { name: "Total Filings", value: `${filings.length}`, inline: true },
         { name: "With Seized Items", value: `${seizedCount}`, inline: true },
         { name: "\u200B", value: "\u200B", inline: true },
+        ...(topItems
+          ? [{ name: "Top Seized Items", value: topItems }]
+          : []),
         { name: "Recent Filings", value: recent },
       )
       .setFooter({ text: "Click the title to open the full spreadsheet" })
