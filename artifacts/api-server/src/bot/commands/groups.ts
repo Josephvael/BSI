@@ -112,8 +112,10 @@ export async function handleGroupsCommand(
     }
   } catch (err) {
     logger.error({ err }, "Error handling /groups command");
-    const reply = { content: "Something went wrong. Please try again.", flags: MessageFlags.Ephemeral };
-    if (interaction.replied || interaction.deferred) await interaction.editReply(reply);
-    else await interaction.reply(reply);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.editReply({ content: "Something went wrong. Please try again." });
+    } else {
+      await interaction.reply({ content: "Something went wrong. Please try again.", flags: MessageFlags.Ephemeral });
+    }
   }
 }

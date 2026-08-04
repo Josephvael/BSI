@@ -89,9 +89,11 @@ export async function handleRobloxCommand(
     else if (sub === "whois") await handleWhois(interaction);
   } catch (err) {
     logger.error({ err }, "Error handling /roblox command");
-    const reply = { content: "Something went wrong. Please try again.", flags: MessageFlags.Ephemeral };
-    if (interaction.deferred || interaction.replied) await interaction.editReply(reply);
-    else await interaction.reply(reply);
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply({ content: "Something went wrong. Please try again." });
+    } else {
+      await interaction.reply({ content: "Something went wrong. Please try again.", flags: MessageFlags.Ephemeral });
+    }
   }
 }
 

@@ -47,6 +47,9 @@ export async function handlePanelCommand(
     return;
   }
   await interaction.reply({ flags: MessageFlags.Ephemeral, content: "Panel posted!" });
+  if (!("send" in interaction.channel)) {
+    return;
+  }
   await interaction.channel.send({ embeds: [embed], components: [row] });
 }
 
