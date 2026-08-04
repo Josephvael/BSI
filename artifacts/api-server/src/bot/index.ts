@@ -8,7 +8,13 @@ import {
   PermissionFlagsBits,
 } from "discord.js";
 import { logger } from "../lib/logger";
-import { filingCommand, handleFilingCommand, handleFilingModal } from "./commands/filing";
+import {
+  filingCommand,
+  handleFilingCommand,
+  handleFilingModal,
+  handleSeizedSelect,
+  FILING_SEIZED_SELECT_ID,
+} from "./commands/filing";
 import { statisticsCommand, handleStatisticsCommand } from "./commands/statistics";
 import { accessCommand, handleAccessCommand } from "./commands/access";
 import { robloxCommand, handleRobloxCommand } from "./commands/roblox";
@@ -106,8 +112,12 @@ export async function startBot(): Promise<void> {
         if (interaction.customId === PANEL_BUTTON_ID) {
           await handlePanelButton(interaction);
         }
+      } else if (interaction.isStringSelectMenu()) {
+        if (interaction.customId === FILING_SEIZED_SELECT_ID) {
+          await handleSeizedSelect(interaction);
+        }
       } else if (interaction.isModalSubmit()) {
-        if (interaction.customId === "filing_modal") {
+        if (interaction.customId.startsWith("filing_modal")) {
           await handleFilingModal(interaction);
         }
       }

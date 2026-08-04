@@ -42952,7 +42952,7 @@ var require_dist8 = __commonJS({
       RoleSelectMenuBuilder: () => RoleSelectMenuBuilder,
       SectionBuilder: () => SectionBuilder,
       SelectMenuAssertions: () => Assertions_exports6,
-      SelectMenuBuilder: () => StringSelectMenuBuilder,
+      SelectMenuBuilder: () => StringSelectMenuBuilder2,
       SelectMenuOptionBuilder: () => StringSelectMenuOptionBuilder,
       SeparatorBuilder: () => SeparatorBuilder,
       SharedNameAndDescription: () => SharedNameAndDescription,
@@ -42972,7 +42972,7 @@ var require_dist8 = __commonJS({
       SlashCommandSubcommandBuilder: () => SlashCommandSubcommandBuilder,
       SlashCommandSubcommandGroupBuilder: () => SlashCommandSubcommandGroupBuilder,
       SlashCommandUserOption: () => SlashCommandUserOption,
-      StringSelectMenuBuilder: () => StringSelectMenuBuilder,
+      StringSelectMenuBuilder: () => StringSelectMenuBuilder2,
       StringSelectMenuOptionBuilder: () => StringSelectMenuOptionBuilder,
       TextDisplayBuilder: () => TextDisplayBuilder,
       TextInputAssertions: () => Assertions_exports5,
@@ -44664,7 +44664,7 @@ var require_dist8 = __commonJS({
       }
       return import_shapeshift6.Result.ok(value);
     }).setValidationEnabled(isValidationEnabled);
-    var StringSelectMenuBuilder = class extends BaseSelectMenuBuilder {
+    var StringSelectMenuBuilder2 = class extends BaseSelectMenuBuilder {
       static {
         __name(this, "StringSelectMenuBuilder");
       }
@@ -45063,7 +45063,7 @@ var require_dist8 = __commonJS({
        * @param input - A function that returns a component builder or an already built builder
        */
       setStringSelectMenuComponent(input) {
-        this.data.component = resolveBuilder(input, StringSelectMenuBuilder);
+        this.data.component = resolveBuilder(input, StringSelectMenuBuilder2);
         return this;
       }
       /**
@@ -45914,7 +45914,7 @@ var require_dist8 = __commonJS({
         case import_v1027.ComponentType.Button:
           return new ButtonBuilder2(data);
         case import_v1027.ComponentType.StringSelect:
-          return new StringSelectMenuBuilder(data);
+          return new StringSelectMenuBuilder2(data);
         case import_v1027.ComponentType.TextInput:
           return new TextInputBuilder2(data);
         case import_v1027.ComponentType.UserSelect:
@@ -49374,7 +49374,7 @@ var require_StringSelectMenuBuilder = __commonJS({
     var { isJSONEncodable } = require_dist();
     var { toSnakeCase } = require_Transformers();
     var { resolvePartialEmoji } = require_Util();
-    var StringSelectMenuBuilder = class _StringSelectMenuBuilder extends BuildersSelectMenu {
+    var StringSelectMenuBuilder2 = class _StringSelectMenuBuilder extends BuildersSelectMenu {
       constructor({ options, ...data } = {}) {
         super(
           toSnakeCase({
@@ -49430,7 +49430,7 @@ var require_StringSelectMenuBuilder = __commonJS({
         return new this(other);
       }
     };
-    module2.exports = StringSelectMenuBuilder;
+    module2.exports = StringSelectMenuBuilder2;
   }
 });
 
@@ -49642,7 +49642,7 @@ var require_Components = __commonJS({
     var RoleSelectMenuComponent = require_RoleSelectMenuComponent();
     var SectionComponent = require_SectionComponent();
     var SeparatorComponent = require_SeparatorComponent();
-    var StringSelectMenuBuilder = require_StringSelectMenuBuilder();
+    var StringSelectMenuBuilder2 = require_StringSelectMenuBuilder();
     var StringSelectMenuComponent = require_StringSelectMenuComponent();
     var TextDisplayComponent = require_TextDisplayComponent();
     var TextInputBuilder2 = require_TextInputBuilder();
@@ -49671,7 +49671,7 @@ var require_Components = __commonJS({
     var ComponentTypeToBuilder = {
       [ComponentType.ActionRow]: ActionRowBuilder3,
       [ComponentType.Button]: ButtonBuilder2,
-      [ComponentType.StringSelect]: StringSelectMenuBuilder,
+      [ComponentType.StringSelect]: StringSelectMenuBuilder2,
       [ComponentType.TextInput]: TextInputBuilder2,
       [ComponentType.UserSelect]: UserSelectMenuBuilder,
       [ComponentType.RoleSelect]: RoleSelectMenuBuilder,
@@ -58607,9 +58607,9 @@ var require_ButtonInteraction = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/ButtonInteraction.js"(exports2, module2) {
     "use strict";
     var MessageComponentInteraction = require_MessageComponentInteraction();
-    var ButtonInteraction2 = class extends MessageComponentInteraction {
+    var ButtonInteraction3 = class extends MessageComponentInteraction {
     };
-    module2.exports = ButtonInteraction2;
+    module2.exports = ButtonInteraction3;
   }
 });
 
@@ -59301,13 +59301,13 @@ var require_StringSelectMenuInteraction = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/StringSelectMenuInteraction.js"(exports2, module2) {
     "use strict";
     var MessageComponentInteraction = require_MessageComponentInteraction();
-    var StringSelectMenuInteraction = class extends MessageComponentInteraction {
+    var StringSelectMenuInteraction2 = class extends MessageComponentInteraction {
       constructor(client, data) {
         super(client, data);
         this.values = data.data.values ?? [];
       }
     };
-    module2.exports = StringSelectMenuInteraction;
+    module2.exports = StringSelectMenuInteraction2;
   }
 });
 
@@ -59376,7 +59376,7 @@ var require_InteractionCreate = __commonJS({
     var { InteractionType, ComponentType, ApplicationCommandType } = require_v106();
     var Action = require_Action();
     var AutocompleteInteraction = require_AutocompleteInteraction();
-    var ButtonInteraction2 = require_ButtonInteraction();
+    var ButtonInteraction3 = require_ButtonInteraction();
     var ChannelSelectMenuInteraction = require_ChannelSelectMenuInteraction();
     var ChatInputCommandInteraction8 = require_ChatInputCommandInteraction();
     var MentionableSelectMenuInteraction = require_MentionableSelectMenuInteraction();
@@ -59384,7 +59384,7 @@ var require_InteractionCreate = __commonJS({
     var ModalSubmitInteraction2 = require_ModalSubmitInteraction();
     var PrimaryEntryPointCommandInteraction = require_PrimaryEntryPointCommandInteraction();
     var RoleSelectMenuInteraction = require_RoleSelectMenuInteraction();
-    var StringSelectMenuInteraction = require_StringSelectMenuInteraction();
+    var StringSelectMenuInteraction2 = require_StringSelectMenuInteraction();
     var UserContextMenuCommandInteraction = require_UserContextMenuCommandInteraction();
     var UserSelectMenuInteraction = require_UserSelectMenuInteraction();
     var Events3 = require_Events();
@@ -59421,10 +59421,10 @@ var require_InteractionCreate = __commonJS({
             if (channel && !channel.isTextBased()) return;
             switch (data.data.component_type) {
               case ComponentType.Button:
-                InteractionClass = ButtonInteraction2;
+                InteractionClass = ButtonInteraction3;
                 break;
               case ComponentType.StringSelect:
-                InteractionClass = StringSelectMenuInteraction;
+                InteractionClass = StringSelectMenuInteraction2;
                 break;
               case ComponentType.UserSelect:
                 InteractionClass = UserSelectMenuInteraction;
@@ -75093,9 +75093,9 @@ var require_SelectMenuBuilder = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/SelectMenuBuilder.js"(exports2, module2) {
     "use strict";
     var process2 = __require("node:process");
-    var StringSelectMenuBuilder = require_StringSelectMenuBuilder();
+    var StringSelectMenuBuilder2 = require_StringSelectMenuBuilder();
     var deprecationEmitted = false;
-    var SelectMenuBuilder2 = class extends StringSelectMenuBuilder {
+    var SelectMenuBuilder2 = class extends StringSelectMenuBuilder2 {
       constructor(...params) {
         super(...params);
         if (!deprecationEmitted) {
@@ -75139,9 +75139,9 @@ var require_SelectMenuInteraction = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/SelectMenuInteraction.js"(exports2, module2) {
     "use strict";
     var process2 = __require("node:process");
-    var StringSelectMenuInteraction = require_StringSelectMenuInteraction();
+    var StringSelectMenuInteraction2 = require_StringSelectMenuInteraction();
     var deprecationEmitted = false;
-    var SelectMenuInteraction = class extends StringSelectMenuInteraction {
+    var SelectMenuInteraction = class extends StringSelectMenuInteraction2 {
       constructor(...params) {
         super(...params);
         if (!deprecationEmitted) {
@@ -75768,6 +75768,18 @@ function checkAccess(interaction, allowedRoles) {
 }
 
 // src/bot/commands/filing.ts
+var FILING_SEIZED_SELECT_ID = "filing_seized_select";
+var SEIZED_OPTIONS = [
+  { label: "None / N/A", value: "none", description: "Nothing was seized" },
+  { label: "Illegal Firearm(s)", value: "firearm", description: "Illegal firearms" },
+  { label: "Narcotics", value: "narcotics", description: "Illegal narcotics" },
+  { label: "Drug Paraphernalia", value: "paraphernalia", description: "Drug paraphernalia" },
+  { label: "Ammunition", value: "ammunition", description: "Ammunition" },
+  { label: "Other", value: "other", description: "Other seized items" }
+];
+function getSeizedLabel(value) {
+  return SEIZED_OPTIONS.find((o) => o.value === value)?.label ?? value;
+}
 var filingCommand = new import_discord2.SlashCommandBuilder().setName("filing").setDescription("File a new record");
 async function handleFilingCommand(interaction) {
   const allowed = await getAllowedRoles();
@@ -75778,28 +75790,53 @@ async function handleFilingCommand(interaction) {
     });
     return;
   }
-  await interaction.showModal(buildFilingModal());
+  await showSeizedSelectMenu(interaction);
 }
-function buildFilingModal() {
-  const modal = new import_discord2.ModalBuilder().setCustomId("filing_modal").setTitle("File a Record");
-  modal.addComponents(
+async function showSeizedSelectMenu(interaction) {
+  const select = new import_discord2.StringSelectMenuBuilder().setCustomId(FILING_SEIZED_SELECT_ID).setPlaceholder("Select seized item\u2026").addOptions(SEIZED_OPTIONS);
+  const row = new import_discord2.ActionRowBuilder().addComponents(select);
+  await interaction.reply({
+    content: "**Step 1 of 2** \u2014 What was seized?",
+    components: [row],
+    flags: import_discord2.MessageFlags.Ephemeral
+  });
+}
+async function handleSeizedSelect(interaction) {
+  const value = interaction.values[0];
+  await interaction.showModal(buildFilingModal(value));
+}
+function buildFilingModal(seizedValue) {
+  const modal = new import_discord2.ModalBuilder().setCustomId(`filing_modal:${seizedValue}`).setTitle("File a Record");
+  const rows = [
     new import_discord2.ActionRowBuilder().addComponents(
       new import_discord2.TextInputBuilder().setCustomId("username").setLabel("Offender's Username").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. JohnDoe").setRequired(true).setMaxLength(100)
     ),
     new import_discord2.ActionRowBuilder().addComponents(
       new import_discord2.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50)
-    ),
-    new import_discord2.ActionRowBuilder().addComponents(
-      new import_discord2.TextInputBuilder().setCustomId("seized").setLabel("Seized (optional)").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. Firearm, 2x bags narcotics").setRequired(false).setMaxLength(300)
     )
-  );
+  ];
+  if (seizedValue !== "none") {
+    const label = getSeizedLabel(seizedValue);
+    rows.push(
+      new import_discord2.ActionRowBuilder().addComponents(
+        new import_discord2.TextInputBuilder().setCustomId("seized_amount").setLabel(`Amount of ${label}`).setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2").setRequired(true).setMaxLength(50)
+      )
+    );
+  }
+  modal.addComponents(...rows);
   return modal;
 }
 async function handleFilingModal(interaction) {
   await interaction.deferReply({ flags: import_discord2.MessageFlags.Ephemeral });
+  const seizedValue = interaction.customId.split(":")[1] ?? "none";
   const username = interaction.fields.getTextInputValue("username");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
-  const seized = interaction.fields.getTextInputValue("seized") || "";
+  let seized = "";
+  if (seizedValue !== "none") {
+    const amount = interaction.fields.getTextInputValue("seized_amount");
+    const label = getSeizedLabel(seizedValue);
+    seized = `${amount}x ${label}`;
+  }
   try {
     await appendFiling({
       username,
@@ -76396,7 +76433,7 @@ async function handlePanelButton(interaction) {
     });
     return;
   }
-  await interaction.showModal(buildFilingModal());
+  await showSeizedSelectMenu(interaction);
 }
 
 // src/bot/index.ts
@@ -76477,8 +76514,12 @@ async function startBot() {
         if (interaction.customId === PANEL_BUTTON_ID) {
           await handlePanelButton(interaction);
         }
+      } else if (interaction.isStringSelectMenu()) {
+        if (interaction.customId === FILING_SEIZED_SELECT_ID) {
+          await handleSeizedSelect(interaction);
+        }
       } else if (interaction.isModalSubmit()) {
-        if (interaction.customId === "filing_modal") {
+        if (interaction.customId.startsWith("filing_modal")) {
           await handleFilingModal(interaction);
         }
       }

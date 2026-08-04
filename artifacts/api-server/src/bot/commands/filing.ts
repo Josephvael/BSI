@@ -4,14 +4,35 @@ import {
   TextInputBuilder,
   TextInputStyle,
   ActionRowBuilder,
+  StringSelectMenuBuilder,
   EmbedBuilder,
   MessageFlags,
   ChatInputCommandInteraction,
+  ButtonInteraction,
+  StringSelectMenuInteraction,
   ModalSubmitInteraction,
 } from "discord.js";
 import { appendFiling } from "../sheets";
 import { getAllowedRoles, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
+
+export const FILING_SEIZED_SELECT_ID = "filing_seized_select";
+
+// The selectable seized item options
+const SEIZED_OPTIONS = [
+  { label: "None / N/A",            value: "none",          description: "Nothing was seized" },
+  { label: "Illegal Firearm(s)",    value: "firearm",       description: "Illegal firearms" },
+  { label: "Narcotics",             value: "narcotics",     description: "Illegal narcotics" },
+  { label: "Drug Paraphernalia",    value: "paraphernalia", description: "Drug paraphernalia" },
+  { label: "Ammunition",            value: "ammunition",    description: "Ammunition" },
+  { label: "Other",                 value: "other",         description: "Other seized items" },
+] as const;
+
+type SeizedValue = (typeof SEIZED_OPTIONS)[number]["value"];
+
+function getSeizedLabel(value: string): string {
+  return SEIZED_OPTIONS.find((o) => o.value === value)?.label ?? value;
+}
 
 export const filingCommand = new SlashCommandBuilder()
   .setName("filing")
@@ -28,16 +49,42 @@ export async function handleFilingCommand(
     });
     return;
   }
-
-  await interaction.showModal(buildFilingModal());
+  await showSeizedSelectMenu(interaction);
 }
 
-export function buildFilingModal(): ModalBuilder {
+/** Shared: sends the ephemeral seized-item select menu. */
+export async function showSeizedSelectMenu(
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
+): Promise<void> {
+  const select = new StringSelectMenuBuilder()
+    .setCustomId(FILING_SEIZED_SELECT_ID)
+    .setPlaceholder("Select seized item…")
+    .addOptions(SEIZED_OPTIONS);
+
+  const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select);
+
+  await interaction.reply({
+    content: "**Step 1 of 2** — What was seized?",
+    components: [row],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+/** Called when the user picks an item from the select menu. */
+export async function handleSeizedSelect(
+  interaction: StringSelectMenuInteraction,
+): Promise<void> {
+  const value = interaction.values[0] as SeizedValue;
+  await interaction.showModal(buildFilingModal(value));
+}
+
+/** Builds the filing modal. Includes an "Amount" field unless "none" was chosen. */
+export function buildFilingModal(seizedValue: SeizedValue | "none"): ModalBuilder {
   const modal = new ModalBuilder()
-    .setCustomId("filing_modal")
+    .setCustomId(`filing_modal:${seizedValue}`)
     .setTitle("File a Record");
 
-  modal.addComponents(
+  const rows: ActionRowBuilder<TextInputBuilder>[] = [
     new ActionRowBuilder<TextInputBuilder>().addComponents(
       new TextInputBuilder()
         .setCustomId("username")
@@ -56,28 +103,45 @@ export function buildFilingModal(): ModalBuilder {
         .setRequired(true)
         .setMaxLength(50),
     ),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(
-      new TextInputBuilder()
-        .setCustomId("seized")
-        .setLabel("Seized (optional)")
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder("e.g. Firearm, 2x bags narcotics")
-        .setRequired(false)
-        .setMaxLength(300),
-    ),
-  );
+  ];
 
+  if (seizedValue !== "none") {
+    const label = getSeizedLabel(seizedValue);
+    rows.push(
+      new ActionRowBuilder<TextInputBuilder>().addComponents(
+        new TextInputBuilder()
+          .setCustomId("seized_amount")
+          .setLabel(`Amount of ${label}`)
+          .setStyle(TextInputStyle.Short)
+          .setPlaceholder("e.g. 2")
+          .setRequired(true)
+          .setMaxLength(50),
+      ),
+    );
+  }
+
+  modal.addComponents(...rows);
   return modal;
 }
 
+/** Called when the filing modal is submitted. */
 export async function handleFilingModal(
   interaction: ModalSubmitInteraction,
 ): Promise<void> {
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
+  // customId format: "filing_modal:<seizedValue>"
+  const seizedValue = interaction.customId.split(":")[1] ?? "none";
+
   const username = interaction.fields.getTextInputValue("username");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
-  const seized = interaction.fields.getTextInputValue("seized") || "";
+
+  let seized = "";
+  if (seizedValue !== "none") {
+    const amount = interaction.fields.getTextInputValue("seized_amount");
+    const label = getSeizedLabel(seizedValue);
+    seized = `${amount}x ${label}`;
+  }
 
   try {
     await appendFiling({
