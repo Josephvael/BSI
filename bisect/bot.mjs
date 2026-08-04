@@ -75626,13 +75626,13 @@ async function appendFiling(record) {
   const range = encodeURIComponent("Sheet1!A:G");
   const body = JSON.stringify({
     values: [[
-      record.timestamp,
-      record.discordUser,
       record.username,
       record.licensePlate,
       record.dateOfIncident,
       record.peaceOfficer,
-      record.notes
+      record.notes,
+      record.timestamp,
+      record.discordUser
     ]]
   });
   let res = await sheetsRequest(
@@ -75656,7 +75656,7 @@ async function appendFiling(record) {
 }
 async function getFilings() {
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:E");
+  const range = encodeURIComponent("Sheet1!A:G");
   let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}`,
     { method: "GET" }
@@ -75678,13 +75678,13 @@ async function getFilings() {
   const data = await res.json();
   const rows = data.values ?? [];
   return rows.slice(1).map((row) => ({
-    timestamp: row[0] ?? "",
-    discordUser: row[1] ?? "",
-    username: row[2] ?? "",
-    licensePlate: row[3] ?? "",
-    dateOfIncident: row[4] ?? "",
-    peaceOfficer: row[5] ?? "",
-    notes: row[6] ?? ""
+    username: row[0] ?? "",
+    licensePlate: row[1] ?? "",
+    dateOfIncident: row[2] ?? "",
+    peaceOfficer: row[3] ?? "",
+    notes: row[4] ?? "",
+    timestamp: row[5] ?? "",
+    discordUser: row[6] ?? ""
   }));
 }
 async function getSheetUrl() {
