@@ -75519,30 +75519,71 @@ var NEW_HEADER = [
   "Discord User + ID",
   "Timestamp"
 ];
-async function runHeaderMigration(sheetId, request) {
-  const range = encodeURIComponent("Sheet1!A1:G1");
-  const getRes = await request(`/v4/spreadsheets/${sheetId}/values/${range}`, { method: "GET" });
-  if (!getRes.ok) {
-    return { outcome: "get-failed", status: getRes.status };
+function parseOldSeized(seized) {
+  if (!seized?.trim() || seized.trim().toLowerCase() === "none") return [];
+  const items = [];
+  for (const part of seized.split(",")) {
+    const m = part.trim().match(/^(\d+)\s*x\s+(.+)$/i);
+    if (m) items.push({ name: m[2].trim(), qty: parseInt(m[1], 10) });
+    else if (part.trim()) items.push({ name: part.trim(), qty: 1 });
   }
+  return items;
+}
+function transformDataRows(rows) {
+  const result = [];
+  let legacyIdx = 0;
+  for (const row of rows) {
+    if (!row.some((cell) => cell?.trim())) continue;
+    if (row[0]?.startsWith("FID-")) {
+      result.push(row);
+    } else {
+      const [username = "", date = "", seized = "", discord = "", timestamp = ""] = row;
+      const filingId = `FID-legacy-${String(legacyIdx++).padStart(4, "0")}`;
+      const items = parseOldSeized(seized);
+      if (items.length === 0) {
+        result.push([filingId, username, date, "", "", discord, timestamp]);
+      } else {
+        for (const item of items) {
+          result.push([filingId, username, date, item.name, String(item.qty), discord, timestamp]);
+        }
+      }
+    }
+  }
+  return result;
+}
+async function runHeaderMigration(sheetId, request) {
+  const range = encodeURIComponent("Sheet1!A:G");
+  const getRes = await request(`/v4/spreadsheets/${sheetId}/values/${range}`, { method: "GET" });
+  if (!getRes.ok) return { outcome: "get-failed", status: getRes.status };
   const data = await getRes.json();
-  const existingHeader = data.values?.[0] ?? [];
-  if (NEW_HEADER.every((col, i) => existingHeader[i] === col)) {
+  const rows = data.values ?? [];
+  const existingHeader = rows[0] ?? [];
+  if (NEW_HEADER.every((col, i) => existingHeader[i] === col) && existingHeader.length === NEW_HEADER.length) {
     return { outcome: "up-to-date" };
   }
-  const isOldSchema = existingHeader.length === 0 || existingHeader[0] === OLD_HEADER[0] && existingHeader.length <= OLD_HEADER.length;
-  if (!isOldSchema) {
+  const isEmpty = existingHeader.length === 0;
+  const isOldSchema = !isEmpty && existingHeader.length === OLD_HEADER.length && OLD_HEADER.every((col, i) => existingHeader[i] === col);
+  if (!isEmpty && !isOldSchema) {
     return { outcome: "unknown-header", existingHeader };
   }
+  const dataRows = rows.slice(1);
+  const newDataRows = transformDataRows(dataRows);
+  const nonBlankOld = dataRows.filter((r) => r.some((c) => c?.trim())).length;
+  const clearRes = await request(
+    `/v4/spreadsheets/${sheetId}/values/${range}:clear`,
+    { method: "POST" }
+  );
+  if (!clearRes.ok) return { outcome: "clear-failed", status: clearRes.status };
+  const allRows = [[...NEW_HEADER], ...newDataRows];
   const putRes = await request(
-    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
-    { method: "PUT", body: JSON.stringify({ values: [NEW_HEADER] }) }
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A1")}?valueInputOption=USER_ENTERED`,
+    { method: "PUT", body: JSON.stringify({ values: allRows }) }
   );
   if (!putRes.ok) {
     const body = await putRes.text();
     return { outcome: "put-failed", status: putRes.status, body };
   }
-  return { outcome: "migrated" };
+  return { outcome: "migrated", rowsTransformed: nonBlankOld };
 }
 
 // src/bot/sheets.ts
@@ -75696,11 +75737,15 @@ async function migrateSheetHeader(sheetId) {
       );
     case "get-failed":
       throw new Error(
-        `Sheet header migration: failed to read header row (HTTP ${result.status}) \u2014 filing aborted`
+        `Sheet header migration: failed to read sheet (HTTP ${result.status}) \u2014 filing aborted`
+      );
+    case "clear-failed":
+      throw new Error(
+        `Sheet header migration: failed to clear sheet before rewrite (HTTP ${result.status}) \u2014 filing aborted`
       );
     case "put-failed":
       throw new Error(
-        `Sheet header migration: failed to update header (HTTP ${result.status}): ${result.body} \u2014 filing aborted`
+        `Sheet header migration: failed to write updated schema (HTTP ${result.status}): ${result.body} \u2014 filing aborted`
       );
   }
 }

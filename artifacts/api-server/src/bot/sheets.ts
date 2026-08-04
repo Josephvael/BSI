@@ -251,15 +251,18 @@ async function migrateSheetHeader(sheetId: string): Promise<void> {
       );
 
     case "get-failed":
-      // Cannot verify current schema — abort so we don't write misaligned rows
       throw new Error(
-        `Sheet header migration: failed to read header row (HTTP ${result.status}) — filing aborted`,
+        `Sheet header migration: failed to read sheet (HTTP ${result.status}) — filing aborted`,
+      );
+
+    case "clear-failed":
+      throw new Error(
+        `Sheet header migration: failed to clear sheet before rewrite (HTTP ${result.status}) — filing aborted`,
       );
 
     case "put-failed":
-      // Detected old schema but couldn't update — abort
       throw new Error(
-        `Sheet header migration: failed to update header (HTTP ${result.status}): ${result.body} — filing aborted`,
+        `Sheet header migration: failed to write updated schema (HTTP ${result.status}): ${result.body} — filing aborted`,
       );
   }
 }
