@@ -5,7 +5,7 @@ import { logger } from "../../lib/logger";
 
 export const statisticsCommand = new SlashCommandBuilder()
   .setName("statistics")
-  .setDescription("Show filing statistics — total count, top possessions, and recent entries");
+  .setDescription("Show filing statistics — total count, top charges, and recent entries");
 
 export async function handleStatisticsCommand(
   interaction: ChatInputCommandInteraction,
@@ -35,26 +35,17 @@ export async function handleStatisticsCommand(
       return;
     }
 
-    // Officer breakdown
-    const officerCounts: Record<string, number> = {};
-    for (const f of filings) {
-      const key = f.peaceOfficer.trim() || "Unknown";
-      officerCounts[key] = (officerCounts[key] ?? 0) + 1;
-    }
-
-    const topOfficers = Object.entries(officerCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(([officer, count]) => `${officer} — ${count} filing${count !== 1 ? "s" : ""}`)
-      .join("\n");
+    // Count seized vs not seized
+    const seizedCount = filings.filter((f) => f.seized && f.seized.trim().length > 0).length;
 
     // Last 5 filings (most recent first)
     const recent = filings
       .slice(-5)
       .reverse()
       .map((f) => {
-        const date = f.dateOfIncident || (f.timestamp ? new Date(f.timestamp).toLocaleDateString() : "?");
-        return `${f.username} | ${f.licensePlate} | ${date} | ${f.peaceOfficer}`;
+        const plate = f.licensePlateAndVehicle || "—";
+        const date = f.dateOfIncident || "?";
+        return `**${f.username}** | ${plate} | ${date}`;
       })
       .join("\n");
 
@@ -64,13 +55,8 @@ export async function handleStatisticsCommand(
       .setURL(sheetUrl)
       .addFields(
         { name: "Total Filings", value: `${filings.length}`, inline: true },
-        {
-          name: "Unique Officers",
-          value: `${Object.keys(officerCounts).length}`,
-          inline: true,
-        },
+        { name: "With Seized Items", value: `${seizedCount}`, inline: true },
         { name: "\u200B", value: "\u200B", inline: true },
-        { name: "Top Officers", value: topOfficers },
         { name: "Recent Filings", value: recent },
       )
       .setFooter({ text: "Click the title to open the full spreadsheet" })

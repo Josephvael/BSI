@@ -8,11 +8,9 @@ import {
   ChatInputCommandInteraction,
   ButtonInteraction,
   PermissionFlagsBits,
-  ModalBuilder,
-  TextInputBuilder,
-  TextInputStyle,
 } from "discord.js";
 import { getAllowedRoles, checkAccess } from "../access";
+import { buildFilingModal } from "./filing";
 
 export const PANEL_BUTTON_ID = "panel_file_report";
 
@@ -60,57 +58,5 @@ export async function handlePanelButton(
     return;
   }
 
-  const modal = new ModalBuilder()
-    .setCustomId("filing_modal")
-    .setTitle("File a Record");
-
-  modal.addComponents(
-    new ActionRowBuilder<TextInputBuilder>().addComponents(
-      new TextInputBuilder()
-        .setCustomId("username")
-        .setLabel("Username")
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder("e.g. JohnDoe")
-        .setRequired(true)
-        .setMaxLength(100),
-    ),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(
-      new TextInputBuilder()
-        .setCustomId("license_plate")
-        .setLabel("License Plate")
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder("e.g. ABC-1234")
-        .setRequired(true)
-        .setMaxLength(20),
-    ),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(
-      new TextInputBuilder()
-        .setCustomId("date_of_incident")
-        .setLabel("Date of Incident")
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024")
-        .setRequired(true)
-        .setMaxLength(50),
-    ),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(
-      new TextInputBuilder()
-        .setCustomId("peace_officer")
-        .setLabel("Name of Peace Officer")
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder("e.g. Officer Smith")
-        .setRequired(true)
-        .setMaxLength(100),
-    ),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(
-      new TextInputBuilder()
-        .setCustomId("notes")
-        .setLabel("Notes & Evidence (optional)")
-        .setStyle(TextInputStyle.Paragraph)
-        .setPlaceholder("Any additional notes or evidence links")
-        .setRequired(false)
-        .setMaxLength(1000),
-    ),
-  );
-
-  await interaction.showModal(modal);
+  await interaction.showModal(buildFilingModal());
 }

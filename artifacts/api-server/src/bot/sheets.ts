@@ -22,13 +22,13 @@ import { logger } from "../lib/logger";
 const SHEET_ID_FILE = "./.bot-data/sheet-id.json";
 
 export interface FilingRecord {
-  timestamp: string;
-  discordUser: string;
   username: string;
-  licensePlate: string;
   dateOfIncident: string;
-  peaceOfficer: string;
-  notes: string;
+  licensePlateAndVehicle: string;
+  charges: string;
+  seized: string;
+  discordUserAndId: string;
+  timestamp: string;
 }
 
 interface ServiceAccount {
@@ -203,12 +203,12 @@ export async function appendFiling(record: FilingRecord): Promise<void> {
   const body = JSON.stringify({
     values: [[
       record.username,
-      record.licensePlate,
       record.dateOfIncident,
-      record.peaceOfficer,
-      record.notes,
+      record.licensePlateAndVehicle,
+      record.charges,
+      record.seized,
+      record.discordUserAndId,
       record.timestamp,
-      record.discordUser,
     ]],
   });
 
@@ -263,17 +263,17 @@ export async function getFilings(): Promise<FilingRecord[]> {
   const data = (await res.json()) as { values?: string[][] };
   const rows = data.values ?? [];
 
-  // Skip header row — columns match modal question order:
-  // A: Username, B: License Plate, C: Date of Incident, D: Peace Officer,
-  // E: Notes, F: Timestamp, G: Discord User
+  // Skip header row — columns:
+  // A: Username, B: Date of Incident, C: License Plate + Vehicle,
+  // D: Charges, E: Seized, F: Discord User + ID, G: Timestamp
   return rows.slice(1).map((row) => ({
     username: row[0] ?? "",
-    licensePlate: row[1] ?? "",
-    dateOfIncident: row[2] ?? "",
-    peaceOfficer: row[3] ?? "",
-    notes: row[4] ?? "",
-    timestamp: row[5] ?? "",
-    discordUser: row[6] ?? "",
+    dateOfIncident: row[1] ?? "",
+    licensePlateAndVehicle: row[2] ?? "",
+    charges: row[3] ?? "",
+    seized: row[4] ?? "",
+    discordUserAndId: row[5] ?? "",
+    timestamp: row[6] ?? "",
   }));
 }
 

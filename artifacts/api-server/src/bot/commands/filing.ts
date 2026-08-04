@@ -15,7 +15,7 @@ import { logger } from "../../lib/logger";
 
 export const filingCommand = new SlashCommandBuilder()
   .setName("filing")
-  .setDescription("File a new record — enter Username, License Plate, Date, Officer, and Notes");
+  .setDescription("File a new record");
 
 export async function handleFilingCommand(
   interaction: ChatInputCommandInteraction,
@@ -29,59 +29,63 @@ export async function handleFilingCommand(
     return;
   }
 
+  await interaction.showModal(buildFilingModal());
+}
+
+export function buildFilingModal(): ModalBuilder {
   const modal = new ModalBuilder()
     .setCustomId("filing_modal")
     .setTitle("File a Record");
 
-  const usernameInput = new TextInputBuilder()
-    .setCustomId("username")
-    .setLabel("Username")
-    .setStyle(TextInputStyle.Short)
-    .setPlaceholder("e.g. JohnDoe")
-    .setRequired(true)
-    .setMaxLength(100);
-
-  const licensePlateInput = new TextInputBuilder()
-    .setCustomId("license_plate")
-    .setLabel("License Plate")
-    .setStyle(TextInputStyle.Short)
-    .setPlaceholder("e.g. ABC-1234")
-    .setRequired(true)
-    .setMaxLength(20);
-
-  const dateInput = new TextInputBuilder()
-    .setCustomId("date_of_incident")
-    .setLabel("Date of Incident")
-    .setStyle(TextInputStyle.Short)
-    .setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024")
-    .setRequired(true)
-    .setMaxLength(50);
-
-  const officerInput = new TextInputBuilder()
-    .setCustomId("peace_officer")
-    .setLabel("Name of Peace Officer")
-    .setStyle(TextInputStyle.Short)
-    .setPlaceholder("e.g. Officer Smith")
-    .setRequired(true)
-    .setMaxLength(100);
-
-  const notesInput = new TextInputBuilder()
-    .setCustomId("notes")
-    .setLabel("Notes & Evidence (optional)")
-    .setStyle(TextInputStyle.Paragraph)
-    .setPlaceholder("Any additional notes or evidence links")
-    .setRequired(false)
-    .setMaxLength(1000);
-
   modal.addComponents(
-    new ActionRowBuilder<TextInputBuilder>().addComponents(usernameInput),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(licensePlateInput),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(dateInput),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(officerInput),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(notesInput),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(
+      new TextInputBuilder()
+        .setCustomId("username")
+        .setLabel("Username")
+        .setStyle(TextInputStyle.Short)
+        .setPlaceholder("e.g. JohnDoe")
+        .setRequired(true)
+        .setMaxLength(100),
+    ),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(
+      new TextInputBuilder()
+        .setCustomId("date_of_incident")
+        .setLabel("Date of Incident")
+        .setStyle(TextInputStyle.Short)
+        .setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024")
+        .setRequired(true)
+        .setMaxLength(50),
+    ),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(
+      new TextInputBuilder()
+        .setCustomId("license_plate_vehicle")
+        .setLabel("License Plate + Vehicle Type & Color")
+        .setStyle(TextInputStyle.Short)
+        .setPlaceholder("e.g. ABC-1234 | Blue Honda Civic")
+        .setRequired(true)
+        .setMaxLength(150),
+    ),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(
+      new TextInputBuilder()
+        .setCustomId("charges")
+        .setLabel("Charges")
+        .setStyle(TextInputStyle.Paragraph)
+        .setPlaceholder("List all charges, one per line")
+        .setRequired(true)
+        .setMaxLength(1000),
+    ),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(
+      new TextInputBuilder()
+        .setCustomId("seized")
+        .setLabel("Seized (optional)")
+        .setStyle(TextInputStyle.Short)
+        .setPlaceholder("e.g. Firearm, 2x bags narcotics")
+        .setRequired(false)
+        .setMaxLength(300),
+    ),
   );
 
-  await interaction.showModal(modal);
+  return modal;
 }
 
 export async function handleFilingModal(
@@ -90,20 +94,20 @@ export async function handleFilingModal(
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   const username = interaction.fields.getTextInputValue("username");
-  const licensePlate = interaction.fields.getTextInputValue("license_plate");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
-  const peaceOfficer = interaction.fields.getTextInputValue("peace_officer");
-  const notes = interaction.fields.getTextInputValue("notes") || "";
+  const licensePlateAndVehicle = interaction.fields.getTextInputValue("license_plate_vehicle");
+  const charges = interaction.fields.getTextInputValue("charges");
+  const seized = interaction.fields.getTextInputValue("seized") || "";
 
   try {
     await appendFiling({
-      timestamp: new Date().toISOString(),
-      discordUser: interaction.user.tag,
       username,
-      licensePlate,
       dateOfIncident,
-      peaceOfficer,
-      notes,
+      licensePlateAndVehicle,
+      charges,
+      seized,
+      discordUserAndId: `${interaction.user.tag} | ${interaction.user.id}`,
+      timestamp: new Date().toISOString(),
     });
 
     const embed = new EmbedBuilder()
@@ -111,12 +115,12 @@ export async function handleFilingModal(
       .setTitle("Filing Submitted")
       .addFields(
         { name: "Username", value: username, inline: true },
-        { name: "License Plate", value: licensePlate, inline: true },
         { name: "Date of Incident", value: dateOfIncident, inline: true },
-        { name: "Peace Officer", value: peaceOfficer, inline: true },
-        ...(notes ? [{ name: "Notes & Evidence", value: notes, inline: false }] : []),
+        { name: "License Plate + Vehicle", value: licensePlateAndVehicle, inline: false },
+        { name: "Charges", value: charges, inline: false },
+        ...(seized ? [{ name: "Seized", value: seized, inline: false }] : []),
       )
-      .setFooter({ text: `Filed by ${interaction.user.tag}` })
+      .setFooter({ text: `Filed by ${interaction.user.tag} (${interaction.user.id})` })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });

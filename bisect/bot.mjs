@@ -20686,11 +20686,11 @@ var require_message = __commonJS({
       ButtonStyle3[ButtonStyle3["Link"] = 5] = "Link";
       ButtonStyle3[ButtonStyle3["Premium"] = 6] = "Premium";
     })(ButtonStyle2 || (exports2.ButtonStyle = ButtonStyle2 = {}));
-    var TextInputStyle3;
-    (function(TextInputStyle4) {
-      TextInputStyle4[TextInputStyle4["Short"] = 1] = "Short";
-      TextInputStyle4[TextInputStyle4["Paragraph"] = 2] = "Paragraph";
-    })(TextInputStyle3 || (exports2.TextInputStyle = TextInputStyle3 = {}));
+    var TextInputStyle2;
+    (function(TextInputStyle3) {
+      TextInputStyle3[TextInputStyle3["Short"] = 1] = "Short";
+      TextInputStyle3[TextInputStyle3["Paragraph"] = 2] = "Paragraph";
+    })(TextInputStyle2 || (exports2.TextInputStyle = TextInputStyle2 = {}));
     var SelectMenuDefaultValueType;
     (function(SelectMenuDefaultValueType2) {
       SelectMenuDefaultValueType2["Channel"] = "channel";
@@ -42946,7 +42946,7 @@ var require_dist8 = __commonJS({
       MediaGalleryItemBuilder: () => MediaGalleryItemBuilder,
       MentionableSelectMenuBuilder: () => MentionableSelectMenuBuilder,
       ModalAssertions: () => Assertions_exports9,
-      ModalBuilder: () => ModalBuilder3,
+      ModalBuilder: () => ModalBuilder2,
       RadioGroupBuilder: () => RadioGroupBuilder,
       RadioGroupOptionBuilder: () => RadioGroupOptionBuilder,
       RoleSelectMenuBuilder: () => RoleSelectMenuBuilder,
@@ -42976,7 +42976,7 @@ var require_dist8 = __commonJS({
       StringSelectMenuOptionBuilder: () => StringSelectMenuOptionBuilder,
       TextDisplayBuilder: () => TextDisplayBuilder,
       TextInputAssertions: () => Assertions_exports5,
-      TextInputBuilder: () => TextInputBuilder3,
+      TextInputBuilder: () => TextInputBuilder2,
       ThumbnailBuilder: () => ThumbnailBuilder,
       UserSelectMenuBuilder: () => UserSelectMenuBuilder,
       createComponentBuilder: () => createComponentBuilder,
@@ -44848,7 +44848,7 @@ var require_dist8 = __commonJS({
     var import_util = require_dist();
     var import_v1016 = require_v106();
     var import_fast_deep_equal = __toESM2(require_fast_deep_equal());
-    var TextInputBuilder3 = class extends ComponentBuilder {
+    var TextInputBuilder2 = class extends ComponentBuilder {
       static {
         __name(this, "TextInputBuilder");
       }
@@ -45108,7 +45108,7 @@ var require_dist8 = __commonJS({
        * @param input - A function that returns a component builder or an already built builder
        */
       setTextInputComponent(input) {
-        this.data.component = resolveBuilder(input, TextInputBuilder3);
+        this.data.component = resolveBuilder(input, TextInputBuilder2);
         return this;
       }
       /**
@@ -45916,7 +45916,7 @@ var require_dist8 = __commonJS({
         case import_v1027.ComponentType.StringSelect:
           return new StringSelectMenuBuilder(data);
         case import_v1027.ComponentType.TextInput:
-          return new TextInputBuilder3(data);
+          return new TextInputBuilder2(data);
         case import_v1027.ComponentType.UserSelect:
           return new UserSelectMenuBuilder(data);
         case import_v1027.ComponentType.RoleSelect:
@@ -46058,7 +46058,7 @@ var require_dist8 = __commonJS({
       componentsValidator.parse(components);
     }
     __name(validateRequiredParameters2, "validateRequiredParameters");
-    var ModalBuilder3 = class {
+    var ModalBuilder2 = class {
       static {
         __name(this, "ModalBuilder");
       }
@@ -46109,7 +46109,7 @@ var require_dist8 = __commonJS({
             if (component instanceof ActionRowBuilder3 || component instanceof LabelBuilder || component instanceof TextDisplayBuilder) {
               return component;
             }
-            if (component instanceof TextInputBuilder3) {
+            if (component instanceof TextInputBuilder2) {
               return new ActionRowBuilder3().addComponents(component);
             }
             if ("type" in component) {
@@ -46124,7 +46124,7 @@ var require_dist8 = __commonJS({
               }
               if (component.type === import_v1029.ComponentType.TextInput) {
                 return new ActionRowBuilder3().addComponents(
-                  new TextInputBuilder3(component)
+                  new TextInputBuilder2(component)
                 );
               }
             }
@@ -49479,7 +49479,7 @@ var require_TextInputBuilder = __commonJS({
     var { TextInputBuilder: BuildersTextInput } = require_dist8();
     var { isJSONEncodable } = require_dist();
     var { toSnakeCase } = require_Transformers();
-    var TextInputBuilder3 = class extends BuildersTextInput {
+    var TextInputBuilder2 = class extends BuildersTextInput {
       constructor(data) {
         super(toSnakeCase(data));
       }
@@ -49492,7 +49492,7 @@ var require_TextInputBuilder = __commonJS({
         return new this(isJSONEncodable(other) ? other.toJSON() : other);
       }
     };
-    module2.exports = TextInputBuilder3;
+    module2.exports = TextInputBuilder2;
   }
 });
 
@@ -49645,7 +49645,7 @@ var require_Components = __commonJS({
     var StringSelectMenuBuilder = require_StringSelectMenuBuilder();
     var StringSelectMenuComponent = require_StringSelectMenuComponent();
     var TextDisplayComponent = require_TextDisplayComponent();
-    var TextInputBuilder3 = require_TextInputBuilder();
+    var TextInputBuilder2 = require_TextInputBuilder();
     var TextInputComponent = require_TextInputComponent();
     var ThumbnailComponent = require_ThumbnailComponent();
     var UserSelectMenuBuilder = require_UserSelectMenuBuilder();
@@ -49672,7 +49672,7 @@ var require_Components = __commonJS({
       [ComponentType.ActionRow]: ActionRowBuilder3,
       [ComponentType.Button]: ButtonBuilder2,
       [ComponentType.StringSelect]: StringSelectMenuBuilder,
-      [ComponentType.TextInput]: TextInputBuilder3,
+      [ComponentType.TextInput]: TextInputBuilder2,
       [ComponentType.UserSelect]: UserSelectMenuBuilder,
       [ComponentType.RoleSelect]: RoleSelectMenuBuilder,
       [ComponentType.MentionableSelect]: MentionableSelectMenuBuilder,
@@ -75066,7 +75066,7 @@ var require_ModalBuilder = __commonJS({
     var { ModalBuilder: BuildersModal, ComponentBuilder } = require_dist8();
     var { isJSONEncodable } = require_dist();
     var { toSnakeCase } = require_Transformers();
-    var ModalBuilder3 = class extends BuildersModal {
+    var ModalBuilder2 = class extends BuildersModal {
       constructor({ components, ...data } = {}) {
         super({
           ...toSnakeCase(data),
@@ -75084,7 +75084,7 @@ var require_ModalBuilder = __commonJS({
         return new this(isJSONEncodable(other) ? other.toJSON() : other);
       }
     };
-    module2.exports = ModalBuilder3;
+    module2.exports = ModalBuilder2;
   }
 });
 
@@ -75627,12 +75627,12 @@ async function appendFiling(record) {
   const body = JSON.stringify({
     values: [[
       record.username,
-      record.licensePlate,
       record.dateOfIncident,
-      record.peaceOfficer,
-      record.notes,
-      record.timestamp,
-      record.discordUser
+      record.licensePlateAndVehicle,
+      record.charges,
+      record.seized,
+      record.discordUserAndId,
+      record.timestamp
     ]]
   });
   let res = await sheetsRequest(
@@ -75679,12 +75679,12 @@ async function getFilings() {
   const rows = data.values ?? [];
   return rows.slice(1).map((row) => ({
     username: row[0] ?? "",
-    licensePlate: row[1] ?? "",
-    dateOfIncident: row[2] ?? "",
-    peaceOfficer: row[3] ?? "",
-    notes: row[4] ?? "",
-    timestamp: row[5] ?? "",
-    discordUser: row[6] ?? ""
+    dateOfIncident: row[1] ?? "",
+    licensePlateAndVehicle: row[2] ?? "",
+    charges: row[3] ?? "",
+    seized: row[4] ?? "",
+    discordUserAndId: row[5] ?? "",
+    timestamp: row[6] ?? ""
   }));
 }
 async function getSheetUrl() {
@@ -75755,7 +75755,7 @@ function checkAccess(interaction, allowedRoles) {
 }
 
 // src/bot/commands/filing.ts
-var filingCommand = new import_discord2.SlashCommandBuilder().setName("filing").setDescription("File a new record \u2014 enter Username, License Plate, Date, Officer, and Notes");
+var filingCommand = new import_discord2.SlashCommandBuilder().setName("filing").setDescription("File a new record");
 async function handleFilingCommand(interaction) {
   const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
@@ -75765,45 +75765,53 @@ async function handleFilingCommand(interaction) {
     });
     return;
   }
+  await interaction.showModal(buildFilingModal());
+}
+function buildFilingModal() {
   const modal = new import_discord2.ModalBuilder().setCustomId("filing_modal").setTitle("File a Record");
-  const usernameInput = new import_discord2.TextInputBuilder().setCustomId("username").setLabel("Username").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. JohnDoe").setRequired(true).setMaxLength(100);
-  const licensePlateInput = new import_discord2.TextInputBuilder().setCustomId("license_plate").setLabel("License Plate").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. ABC-1234").setRequired(true).setMaxLength(20);
-  const dateInput = new import_discord2.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50);
-  const officerInput = new import_discord2.TextInputBuilder().setCustomId("peace_officer").setLabel("Name of Peace Officer").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. Officer Smith").setRequired(true).setMaxLength(100);
-  const notesInput = new import_discord2.TextInputBuilder().setCustomId("notes").setLabel("Notes & Evidence (optional)").setStyle(import_discord2.TextInputStyle.Paragraph).setPlaceholder("Any additional notes or evidence links").setRequired(false).setMaxLength(1e3);
   modal.addComponents(
-    new import_discord2.ActionRowBuilder().addComponents(usernameInput),
-    new import_discord2.ActionRowBuilder().addComponents(licensePlateInput),
-    new import_discord2.ActionRowBuilder().addComponents(dateInput),
-    new import_discord2.ActionRowBuilder().addComponents(officerInput),
-    new import_discord2.ActionRowBuilder().addComponents(notesInput)
+    new import_discord2.ActionRowBuilder().addComponents(
+      new import_discord2.TextInputBuilder().setCustomId("username").setLabel("Username").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. JohnDoe").setRequired(true).setMaxLength(100)
+    ),
+    new import_discord2.ActionRowBuilder().addComponents(
+      new import_discord2.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50)
+    ),
+    new import_discord2.ActionRowBuilder().addComponents(
+      new import_discord2.TextInputBuilder().setCustomId("license_plate_vehicle").setLabel("License Plate + Vehicle Type & Color").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. ABC-1234 | Blue Honda Civic").setRequired(true).setMaxLength(150)
+    ),
+    new import_discord2.ActionRowBuilder().addComponents(
+      new import_discord2.TextInputBuilder().setCustomId("charges").setLabel("Charges").setStyle(import_discord2.TextInputStyle.Paragraph).setPlaceholder("List all charges, one per line").setRequired(true).setMaxLength(1e3)
+    ),
+    new import_discord2.ActionRowBuilder().addComponents(
+      new import_discord2.TextInputBuilder().setCustomId("seized").setLabel("Seized (optional)").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. Firearm, 2x bags narcotics").setRequired(false).setMaxLength(300)
+    )
   );
-  await interaction.showModal(modal);
+  return modal;
 }
 async function handleFilingModal(interaction) {
   await interaction.deferReply({ flags: import_discord2.MessageFlags.Ephemeral });
   const username = interaction.fields.getTextInputValue("username");
-  const licensePlate = interaction.fields.getTextInputValue("license_plate");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
-  const peaceOfficer = interaction.fields.getTextInputValue("peace_officer");
-  const notes = interaction.fields.getTextInputValue("notes") || "";
+  const licensePlateAndVehicle = interaction.fields.getTextInputValue("license_plate_vehicle");
+  const charges = interaction.fields.getTextInputValue("charges");
+  const seized = interaction.fields.getTextInputValue("seized") || "";
   try {
     await appendFiling({
-      timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-      discordUser: interaction.user.tag,
       username,
-      licensePlate,
       dateOfIncident,
-      peaceOfficer,
-      notes
+      licensePlateAndVehicle,
+      charges,
+      seized,
+      discordUserAndId: `${interaction.user.tag} | ${interaction.user.id}`,
+      timestamp: (/* @__PURE__ */ new Date()).toISOString()
     });
     const embed = new import_discord2.EmbedBuilder().setColor(5763719).setTitle("Filing Submitted").addFields(
       { name: "Username", value: username, inline: true },
-      { name: "License Plate", value: licensePlate, inline: true },
       { name: "Date of Incident", value: dateOfIncident, inline: true },
-      { name: "Peace Officer", value: peaceOfficer, inline: true },
-      ...notes ? [{ name: "Notes & Evidence", value: notes, inline: false }] : []
-    ).setFooter({ text: `Filed by ${interaction.user.tag}` }).setTimestamp();
+      { name: "License Plate + Vehicle", value: licensePlateAndVehicle, inline: false },
+      { name: "Charges", value: charges, inline: false },
+      ...seized ? [{ name: "Seized", value: seized, inline: false }] : []
+    ).setFooter({ text: `Filed by ${interaction.user.tag} (${interaction.user.id})` }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
   } catch (err) {
     logger.error({ err }, "Failed to save filing");
@@ -75815,7 +75823,7 @@ async function handleFilingModal(interaction) {
 
 // src/bot/commands/statistics.ts
 var import_discord3 = __toESM(require_src(), 1);
-var statisticsCommand = new import_discord3.SlashCommandBuilder().setName("statistics").setDescription("Show filing statistics \u2014 total count, top possessions, and recent entries");
+var statisticsCommand = new import_discord3.SlashCommandBuilder().setName("statistics").setDescription("Show filing statistics \u2014 total count, top charges, and recent entries");
 async function handleStatisticsCommand(interaction) {
   const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
@@ -75833,25 +75841,16 @@ async function handleStatisticsCommand(interaction) {
       await interaction.editReply({ embeds: [embed2] });
       return;
     }
-    const officerCounts = {};
-    for (const f of filings) {
-      const key = f.peaceOfficer.trim() || "Unknown";
-      officerCounts[key] = (officerCounts[key] ?? 0) + 1;
-    }
-    const topOfficers = Object.entries(officerCounts).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([officer, count]) => `${officer} \u2014 ${count} filing${count !== 1 ? "s" : ""}`).join("\n");
+    const seizedCount = filings.filter((f) => f.seized && f.seized.trim().length > 0).length;
     const recent = filings.slice(-5).reverse().map((f) => {
-      const date = f.dateOfIncident || (f.timestamp ? new Date(f.timestamp).toLocaleDateString() : "?");
-      return `${f.username} | ${f.licensePlate} | ${date} | ${f.peaceOfficer}`;
+      const plate = f.licensePlateAndVehicle || "\u2014";
+      const date = f.dateOfIncident || "?";
+      return `**${f.username}** | ${plate} | ${date}`;
     }).join("\n");
     const embed = new import_discord3.EmbedBuilder().setColor(5793266).setTitle("Filing Statistics").setURL(sheetUrl).addFields(
       { name: "Total Filings", value: `${filings.length}`, inline: true },
-      {
-        name: "Unique Officers",
-        value: `${Object.keys(officerCounts).length}`,
-        inline: true
-      },
+      { name: "With Seized Items", value: `${seizedCount}`, inline: true },
       { name: "\u200B", value: "\u200B", inline: true },
-      { name: "Top Officers", value: topOfficers },
       { name: "Recent Filings", value: recent }
     ).setFooter({ text: "Click the title to open the full spreadsheet" }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
@@ -76349,25 +76348,7 @@ async function handlePanelButton(interaction) {
     });
     return;
   }
-  const modal = new import_discord8.ModalBuilder().setCustomId("filing_modal").setTitle("File a Record");
-  modal.addComponents(
-    new import_discord8.ActionRowBuilder().addComponents(
-      new import_discord8.TextInputBuilder().setCustomId("username").setLabel("Username").setStyle(import_discord8.TextInputStyle.Short).setPlaceholder("e.g. JohnDoe").setRequired(true).setMaxLength(100)
-    ),
-    new import_discord8.ActionRowBuilder().addComponents(
-      new import_discord8.TextInputBuilder().setCustomId("license_plate").setLabel("License Plate").setStyle(import_discord8.TextInputStyle.Short).setPlaceholder("e.g. ABC-1234").setRequired(true).setMaxLength(20)
-    ),
-    new import_discord8.ActionRowBuilder().addComponents(
-      new import_discord8.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord8.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50)
-    ),
-    new import_discord8.ActionRowBuilder().addComponents(
-      new import_discord8.TextInputBuilder().setCustomId("peace_officer").setLabel("Name of Peace Officer").setStyle(import_discord8.TextInputStyle.Short).setPlaceholder("e.g. Officer Smith").setRequired(true).setMaxLength(100)
-    ),
-    new import_discord8.ActionRowBuilder().addComponents(
-      new import_discord8.TextInputBuilder().setCustomId("notes").setLabel("Notes & Evidence (optional)").setStyle(import_discord8.TextInputStyle.Paragraph).setPlaceholder("Any additional notes or evidence links").setRequired(false).setMaxLength(1e3)
-    )
-  );
-  await interaction.showModal(modal);
+  await interaction.showModal(buildFilingModal());
 }
 
 // src/bot/index.ts
