@@ -42952,7 +42952,7 @@ var require_dist8 = __commonJS({
       RoleSelectMenuBuilder: () => RoleSelectMenuBuilder,
       SectionBuilder: () => SectionBuilder,
       SelectMenuAssertions: () => Assertions_exports6,
-      SelectMenuBuilder: () => StringSelectMenuBuilder2,
+      SelectMenuBuilder: () => StringSelectMenuBuilder,
       SelectMenuOptionBuilder: () => StringSelectMenuOptionBuilder,
       SeparatorBuilder: () => SeparatorBuilder,
       SharedNameAndDescription: () => SharedNameAndDescription,
@@ -42972,7 +42972,7 @@ var require_dist8 = __commonJS({
       SlashCommandSubcommandBuilder: () => SlashCommandSubcommandBuilder,
       SlashCommandSubcommandGroupBuilder: () => SlashCommandSubcommandGroupBuilder,
       SlashCommandUserOption: () => SlashCommandUserOption,
-      StringSelectMenuBuilder: () => StringSelectMenuBuilder2,
+      StringSelectMenuBuilder: () => StringSelectMenuBuilder,
       StringSelectMenuOptionBuilder: () => StringSelectMenuOptionBuilder,
       TextDisplayBuilder: () => TextDisplayBuilder,
       TextInputAssertions: () => Assertions_exports5,
@@ -44664,7 +44664,7 @@ var require_dist8 = __commonJS({
       }
       return import_shapeshift6.Result.ok(value);
     }).setValidationEnabled(isValidationEnabled);
-    var StringSelectMenuBuilder2 = class extends BaseSelectMenuBuilder {
+    var StringSelectMenuBuilder = class extends BaseSelectMenuBuilder {
       static {
         __name(this, "StringSelectMenuBuilder");
       }
@@ -45063,7 +45063,7 @@ var require_dist8 = __commonJS({
        * @param input - A function that returns a component builder or an already built builder
        */
       setStringSelectMenuComponent(input) {
-        this.data.component = resolveBuilder(input, StringSelectMenuBuilder2);
+        this.data.component = resolveBuilder(input, StringSelectMenuBuilder);
         return this;
       }
       /**
@@ -45914,7 +45914,7 @@ var require_dist8 = __commonJS({
         case import_v1027.ComponentType.Button:
           return new ButtonBuilder2(data);
         case import_v1027.ComponentType.StringSelect:
-          return new StringSelectMenuBuilder2(data);
+          return new StringSelectMenuBuilder(data);
         case import_v1027.ComponentType.TextInput:
           return new TextInputBuilder2(data);
         case import_v1027.ComponentType.UserSelect:
@@ -49374,7 +49374,7 @@ var require_StringSelectMenuBuilder = __commonJS({
     var { isJSONEncodable } = require_dist();
     var { toSnakeCase } = require_Transformers();
     var { resolvePartialEmoji } = require_Util();
-    var StringSelectMenuBuilder2 = class _StringSelectMenuBuilder extends BuildersSelectMenu {
+    var StringSelectMenuBuilder = class _StringSelectMenuBuilder extends BuildersSelectMenu {
       constructor({ options, ...data } = {}) {
         super(
           toSnakeCase({
@@ -49430,7 +49430,7 @@ var require_StringSelectMenuBuilder = __commonJS({
         return new this(other);
       }
     };
-    module2.exports = StringSelectMenuBuilder2;
+    module2.exports = StringSelectMenuBuilder;
   }
 });
 
@@ -49642,7 +49642,7 @@ var require_Components = __commonJS({
     var RoleSelectMenuComponent = require_RoleSelectMenuComponent();
     var SectionComponent = require_SectionComponent();
     var SeparatorComponent = require_SeparatorComponent();
-    var StringSelectMenuBuilder2 = require_StringSelectMenuBuilder();
+    var StringSelectMenuBuilder = require_StringSelectMenuBuilder();
     var StringSelectMenuComponent = require_StringSelectMenuComponent();
     var TextDisplayComponent = require_TextDisplayComponent();
     var TextInputBuilder2 = require_TextInputBuilder();
@@ -49671,7 +49671,7 @@ var require_Components = __commonJS({
     var ComponentTypeToBuilder = {
       [ComponentType.ActionRow]: ActionRowBuilder3,
       [ComponentType.Button]: ButtonBuilder2,
-      [ComponentType.StringSelect]: StringSelectMenuBuilder2,
+      [ComponentType.StringSelect]: StringSelectMenuBuilder,
       [ComponentType.TextInput]: TextInputBuilder2,
       [ComponentType.UserSelect]: UserSelectMenuBuilder,
       [ComponentType.RoleSelect]: RoleSelectMenuBuilder,
@@ -59301,13 +59301,13 @@ var require_StringSelectMenuInteraction = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/StringSelectMenuInteraction.js"(exports2, module2) {
     "use strict";
     var MessageComponentInteraction = require_MessageComponentInteraction();
-    var StringSelectMenuInteraction2 = class extends MessageComponentInteraction {
+    var StringSelectMenuInteraction = class extends MessageComponentInteraction {
       constructor(client, data) {
         super(client, data);
         this.values = data.data.values ?? [];
       }
     };
-    module2.exports = StringSelectMenuInteraction2;
+    module2.exports = StringSelectMenuInteraction;
   }
 });
 
@@ -59384,7 +59384,7 @@ var require_InteractionCreate = __commonJS({
     var ModalSubmitInteraction2 = require_ModalSubmitInteraction();
     var PrimaryEntryPointCommandInteraction = require_PrimaryEntryPointCommandInteraction();
     var RoleSelectMenuInteraction = require_RoleSelectMenuInteraction();
-    var StringSelectMenuInteraction2 = require_StringSelectMenuInteraction();
+    var StringSelectMenuInteraction = require_StringSelectMenuInteraction();
     var UserContextMenuCommandInteraction = require_UserContextMenuCommandInteraction();
     var UserSelectMenuInteraction = require_UserSelectMenuInteraction();
     var Events3 = require_Events();
@@ -59424,7 +59424,7 @@ var require_InteractionCreate = __commonJS({
                 InteractionClass = ButtonInteraction3;
                 break;
               case ComponentType.StringSelect:
-                InteractionClass = StringSelectMenuInteraction2;
+                InteractionClass = StringSelectMenuInteraction;
                 break;
               case ComponentType.UserSelect:
                 InteractionClass = UserSelectMenuInteraction;
@@ -75093,9 +75093,9 @@ var require_SelectMenuBuilder = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/SelectMenuBuilder.js"(exports2, module2) {
     "use strict";
     var process2 = __require("node:process");
-    var StringSelectMenuBuilder2 = require_StringSelectMenuBuilder();
+    var StringSelectMenuBuilder = require_StringSelectMenuBuilder();
     var deprecationEmitted = false;
-    var SelectMenuBuilder2 = class extends StringSelectMenuBuilder2 {
+    var SelectMenuBuilder2 = class extends StringSelectMenuBuilder {
       constructor(...params) {
         super(...params);
         if (!deprecationEmitted) {
@@ -75139,9 +75139,9 @@ var require_SelectMenuInteraction = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/SelectMenuInteraction.js"(exports2, module2) {
     "use strict";
     var process2 = __require("node:process");
-    var StringSelectMenuInteraction2 = require_StringSelectMenuInteraction();
+    var StringSelectMenuInteraction = require_StringSelectMenuInteraction();
     var deprecationEmitted = false;
-    var SelectMenuInteraction = class extends StringSelectMenuInteraction2 {
+    var SelectMenuInteraction = class extends StringSelectMenuInteraction {
       constructor(...params) {
         super(...params);
         if (!deprecationEmitted) {
@@ -75768,184 +75768,6 @@ function checkAccess(interaction, allowedRoles) {
 }
 
 // src/bot/commands/filing.ts
-var FILING_CAT_SELECT_ID = "filing_cat_select";
-var FILING_ITEM_SELECT_PREFIX = "filing_item_select";
-var CATEGORIES = {
-  weapons_1: {
-    label: "Weapons (1 / 2)",
-    prefix: "w1",
-    items: [
-      "Albert & Heinrich SM9",
-      "Albert & Heinrich LM2",
-      "Albert & Heinrich HR4",
-      "Afanasev Pistolet 1951",
-      "Bennetti 15",
-      "Bennetti 17",
-      "Cobray MP18",
-      "Delino R20",
-      "Delino R20P",
-      "Delino R21",
-      "Delino R21A",
-      "Delino R21B",
-      "Delino R21M",
-      "Delino XM21",
-      "Delino XR21",
-      "Delino Defender",
-      "Delino Special",
-      "Fedotovo Karabin 1949",
-      "Hawthorne 500",
-      "Hawthorne 800"
-    ]
-  },
-  weapons_2: {
-    label: "Weapons (2 / 2)",
-    prefix: "w2",
-    items: [
-      "Hawthorne M80",
-      "Hawthorne M80A1",
-      "Hawthorne M80A2",
-      "Hawthorne M80T",
-      "Kilikov 54U",
-      "Kilikov M62",
-      "Krovin M9871",
-      "Krovin Strelok 1981",
-      "Krovin Vintovka 1891",
-      "Kilikov Machinu 1962",
-      "Kilikov Pulemyot 1971",
-      "Kovrovsky Avtomat 1941",
-      "Klimosvk Drobovik S23K",
-      "Millsburg 780A1",
-      "Mustang M45",
-      "Pietro 92P",
-      "Protec DC9",
-      "R84 Anti-Tank Launcher",
-      "Xion XI26"
-    ]
-  },
-  ammo_1: {
-    label: "Ammunition (1 / 2)",
-    prefix: "a1",
-    items: [
-      "5.45x39mm Kilkov Magazine",
-      "5.45x39mm Kilikov Extended",
-      "30rd 5.56x45mm STANORD",
-      "20rd 5.56x45mm STANORD",
-      "5.56 Box Magazine",
-      "5.56 Box Magazine (Tracer)",
-      "9x19mm Bennetti Magazine",
-      "9x19mm Straight Magazine",
-      "9x19mm Curved Magazine",
-      "9x19mm 33rd Magazine",
-      "9x18mm Afanasev",
-      ".40 Automatic Pierto",
-      ".45 Automatic Delino Magazine",
-      ".45 Mitch & Kosi Magazine",
-      "7.62x25mm Tula Kovrovksy",
-      "7.62x25mm 71rd Drum",
-      "7.62x39mm Klikov Drum",
-      "7.62x39mm Klikov",
-      "7.62x39mm Klikov Extended",
-      "7.62x39 Clip"
-    ]
-  },
-  ammo_2: {
-    label: "Ammunition (2 / 2)",
-    prefix: "a2",
-    items: [
-      "7.62x51mm Albert & Heinrich",
-      "7.62x54mmR Krovin",
-      "7.62x54mm Rimmed",
-      "23x75mm Rimmed",
-      "10rd .308 Frankford Hawthorne",
-      "5rd .308 Frankford",
-      ".44 Delino",
-      "12 Gauge",
-      "Taser Cartridge"
-    ]
-  },
-  kits: {
-    label: "Weapon Kits",
-    prefix: "k",
-    items: [
-      "Assault Rifle Kit",
-      "Assault Carbine Kit",
-      "Battle Rifle Kit",
-      "Carbine Kit",
-      "Light Machine Gun Kit",
-      "Machine Pistol Kit",
-      "Pistol Kit",
-      "Revolver Kit",
-      "Rifle Kit",
-      "Shotgun Kit",
-      "Sniper Rifle Kit",
-      "Submachine Gun Kit"
-    ]
-  },
-  stolen: {
-    label: "Stolen Goods",
-    prefix: "s",
-    items: [
-      "Bag of Dirty Money",
-      "Folder of Military Intelligence",
-      "Military Encryption Card"
-    ]
-  },
-  narcotics: {
-    label: "Narcotics",
-    prefix: "n",
-    items: [
-      "Bag of Nopyfruit",
-      "Barrel of Nopyfruit Concentrate",
-      "Bag of Gushie",
-      "Barrel of Solution",
-      "Box of Plastic Bags",
-      "Jarniwus",
-      "Jarniwus Seeds"
-    ]
-  },
-  cargo: {
-    label: "Illicit Cargo",
-    prefix: "c",
-    items: [
-      "Crate of Illegal Firearm Parts",
-      "Crate of Illegal Ammunition",
-      "Coin-o-Matic Business Conveyer"
-    ]
-  },
-  devices: {
-    label: "Destructive Devices",
-    prefix: "d",
-    items: [
-      "Barrel of Thermite",
-      "Detonator",
-      "Encrypted Phone",
-      "Jerrybomb",
-      "Molotov",
-      "Tear Gas"
-    ]
-  },
-  misc: {
-    label: "Misc. Items",
-    prefix: "m",
-    items: [
-      "Cones",
-      "Handcuffs",
-      "Highland NR28",
-      "Lockpicks",
-      "Spike Strips",
-      "The Underground' Business Card"
-    ]
-  }
-};
-var ITEM_LABEL = {};
-for (const cat of Object.values(CATEGORIES)) {
-  cat.items.forEach((item, idx) => {
-    ITEM_LABEL[`${cat.prefix}_${idx}`] = item;
-  });
-}
-function getItemLabel(code) {
-  return ITEM_LABEL[code] ?? code;
-}
 var filingCommand = new import_discord2.SlashCommandBuilder().setName("filing").setDescription("File a new record");
 async function handleFilingCommand(interaction) {
   const allowed = await getAllowedRoles();
@@ -75956,85 +75778,31 @@ async function handleFilingCommand(interaction) {
     });
     return;
   }
-  await showCategorySelectMenu(interaction);
+  await interaction.showModal(buildFilingModal());
 }
-async function showCategorySelectMenu(interaction) {
-  const options = [
-    ...Object.entries(CATEGORIES).map(([key, cat]) => ({
-      label: cat.label,
-      value: key
-    })),
-    { label: "None / N/A", value: "none" }
-  ];
-  const select = new import_discord2.StringSelectMenuBuilder().setCustomId(FILING_CAT_SELECT_ID).setPlaceholder("Select a seized item category\u2026").addOptions(options);
-  const row = new import_discord2.ActionRowBuilder().addComponents(select);
-  await interaction.reply({
-    content: "**Step 1 of 3** \u2014 Choose a seized item category *(or None)*:",
-    components: [row],
-    flags: import_discord2.MessageFlags.Ephemeral
-  });
+async function showFilingModal(interaction) {
+  await interaction.showModal(buildFilingModal());
 }
-async function handleCatSelect(interaction) {
-  const categoryKey = interaction.values[0];
-  if (categoryKey === "none") {
-    await interaction.showModal(buildFilingModal("filing_modal:none", []));
-    return;
-  }
-  const cat = CATEGORIES[categoryKey];
-  if (!cat) {
-    await interaction.update({ content: "Unknown category. Please try again.", components: [] });
-    return;
-  }
-  const itemOptions = cat.items.map((item, idx) => ({
-    label: item,
-    value: `${cat.prefix}_${idx}`
-  }));
-  const select = new import_discord2.StringSelectMenuBuilder().setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${categoryKey}`).setPlaceholder(`Select item(s) from ${cat.label}\u2026`).setMinValues(1).setMaxValues(Math.min(3, itemOptions.length)).addOptions(itemOptions);
-  const row = new import_discord2.ActionRowBuilder().addComponents(select);
-  await interaction.update({
-    content: `**Step 2 of 3** \u2014 Select up to **3** items from ${cat.label}:`,
-    components: [row]
-  });
-}
-async function handleItemSelect(interaction) {
-  const itemCodes = interaction.values;
-  const customId = `filing_modal:${itemCodes.join(",")}`;
-  await interaction.showModal(buildFilingModal(customId, itemCodes));
-}
-function buildFilingModal(customId, itemCodes) {
-  const modal = new import_discord2.ModalBuilder().setCustomId(customId).setTitle("File a Record");
-  const rows = [
+function buildFilingModal() {
+  return new import_discord2.ModalBuilder().setCustomId("filing_modal").setTitle("File a Record").addComponents(
     new import_discord2.ActionRowBuilder().addComponents(
       new import_discord2.TextInputBuilder().setCustomId("username").setLabel("Offender's Username").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. JohnDoe").setRequired(true).setMaxLength(100)
     ),
     new import_discord2.ActionRowBuilder().addComponents(
       new import_discord2.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50)
+    ),
+    new import_discord2.ActionRowBuilder().addComponents(
+      new import_discord2.TextInputBuilder().setCustomId("seized").setLabel("Seized Items (optional)").setStyle(import_discord2.TextInputStyle.Paragraph).setPlaceholder(
+        "List each item and quantity, one per line:\n2x Hawthorne M80\n1x Bag of Nopyfruit\n3x 9x19mm Bennetti Magazine"
+      ).setRequired(false).setMaxLength(1e3)
     )
-  ];
-  for (const code of itemCodes.slice(0, 3)) {
-    const label = getItemLabel(code);
-    rows.push(
-      new import_discord2.ActionRowBuilder().addComponents(
-        new import_discord2.TextInputBuilder().setCustomId(`amt_${code}`).setLabel(`Amount \u2014 ${label}`).setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2").setRequired(true).setMaxLength(20)
-      )
-    );
-  }
-  modal.addComponents(...rows);
-  return modal;
+  );
 }
 async function handleFilingModal(interaction) {
   await interaction.deferReply({ flags: import_discord2.MessageFlags.Ephemeral });
-  const rawCodes = interaction.customId.split(":")[1] ?? "none";
-  const itemCodes = rawCodes === "none" ? [] : rawCodes.split(",");
   const username = interaction.fields.getTextInputValue("username");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
-  const seizedParts = [];
-  for (const code of itemCodes) {
-    const amount = interaction.fields.getTextInputValue(`amt_${code}`);
-    const label = getItemLabel(code);
-    seizedParts.push(`${amount}x ${label}`);
-  }
-  const seized = seizedParts.join(", ");
+  const seized = interaction.fields.getTextInputValue("seized").trim();
   try {
     await appendFiling({
       username,
@@ -76749,7 +76517,7 @@ async function handlePanelButton(interaction) {
     });
     return;
   }
-  await showCategorySelectMenu(interaction);
+  await showFilingModal(interaction);
 }
 
 // src/bot/index.ts
@@ -76830,14 +76598,8 @@ async function startBot() {
         if (interaction.customId === PANEL_BUTTON_ID) {
           await handlePanelButton(interaction);
         }
-      } else if (interaction.isStringSelectMenu()) {
-        if (interaction.customId === FILING_CAT_SELECT_ID) {
-          await handleCatSelect(interaction);
-        } else if (interaction.customId.startsWith(`${FILING_ITEM_SELECT_PREFIX}:`)) {
-          await handleItemSelect(interaction);
-        }
       } else if (interaction.isModalSubmit()) {
-        if (interaction.customId.startsWith("filing_modal")) {
+        if (interaction.customId === "filing_modal") {
           await handleFilingModal(interaction);
         }
       }
