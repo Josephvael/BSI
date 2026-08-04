@@ -75770,15 +75770,35 @@ function checkAccess(interaction, allowedRoles) {
 // src/bot/commands/filing.ts
 var FILING_SEIZED_SELECT_ID = "filing_seized_select";
 var SEIZED_OPTIONS = [
-  { label: "None / N/A", value: "none", description: "Nothing was seized" },
-  { label: "Illegal Firearm(s)", value: "firearm", description: "Illegal firearms" },
-  { label: "Narcotics", value: "narcotics", description: "Illegal narcotics" },
-  { label: "Drug Paraphernalia", value: "paraphernalia", description: "Drug paraphernalia" },
-  { label: "Ammunition", value: "ammunition", description: "Ammunition" },
-  { label: "Other", value: "other", description: "Other seized items" }
+  // ── Firearms ──────────────────────────────────────────────────────────────
+  { label: "\u{1F52B}  Illegal Firearm(s)", value: "firearm", description: "Firearms \u2014 Illegal firearm(s)" },
+  { label: "\u{1F52B}  Unregistered Firearm(s)", value: "unreg_gun", description: "Firearms \u2014 Unregistered firearm(s)" },
+  { label: "\u{1F52B}  Ammunition", value: "ammo", description: "Firearms \u2014 Ammunition / rounds" },
+  { label: "\u{1F52B}  High-Cap Magazine(s)", value: "hicap_mag", description: "Firearms \u2014 High-capacity magazine(s)" },
+  { label: "\u{1F52B}  Suppressor(s)", value: "suppressor", description: "Firearms \u2014 Suppressor(s) / silencer(s)" },
+  // ── Narcotics ─────────────────────────────────────────────────────────────
+  { label: "\u{1F48A}  Cocaine", value: "cocaine", description: "Narcotics \u2014 Cocaine" },
+  { label: "\u{1F48A}  Methamphetamine", value: "meth", description: "Narcotics \u2014 Methamphetamine" },
+  { label: "\u{1F48A}  Heroin", value: "heroin", description: "Narcotics \u2014 Heroin" },
+  { label: "\u{1F48A}  Fentanyl", value: "fentanyl", description: "Narcotics \u2014 Fentanyl" },
+  { label: "\u{1F48A}  Marijuana", value: "marijuana", description: "Narcotics \u2014 Marijuana" },
+  { label: "\u{1F48A}  MDMA / Ecstasy", value: "mdma", description: "Narcotics \u2014 MDMA / Ecstasy" },
+  { label: "\u{1F48A}  Unprescribed Rx Drugs", value: "rx_drugs", description: "Narcotics \u2014 Unprescribed prescription drugs" },
+  // ── Paraphernalia ─────────────────────────────────────────────────────────
+  { label: "\u2697\uFE0F  Drug Paraphernalia", value: "paraphernalia", description: "Paraphernalia \u2014 General drug paraphernalia" },
+  { label: "\u2697\uFE0F  Scale(s)", value: "scales", description: "Paraphernalia \u2014 Scales / measuring tools" },
+  { label: "\u2697\uFE0F  Packaging Materials", value: "packaging", description: "Paraphernalia \u2014 Bags, wraps, packaging" },
+  { label: "\u2697\uFE0F  Pipe(s) / Smoking Device", value: "pipe", description: "Paraphernalia \u2014 Pipe(s) or smoking device(s)" },
+  // ── Other ─────────────────────────────────────────────────────────────────
+  { label: "\u{1F4E6}  Cash / Currency", value: "cash", description: "Other \u2014 Cash or currency" },
+  { label: "\u{1F4E6}  Stolen Property", value: "stolen", description: "Other \u2014 Stolen property" },
+  { label: "\u{1F4E6}  Other", value: "other", description: "Other \u2014 Other seized item(s)" },
+  // ── None ──────────────────────────────────────────────────────────────────
+  { label: "\u2705  None / N/A", value: "none", description: "Nothing was seized" }
 ];
 function getSeizedLabel(value) {
-  return SEIZED_OPTIONS.find((o) => o.value === value)?.label ?? value;
+  const raw = SEIZED_OPTIONS.find((o) => o.value === value)?.label ?? value;
+  return raw.replace(/^.+?\s{2}/, "").trim();
 }
 var filingCommand = new import_discord2.SlashCommandBuilder().setName("filing").setDescription("File a new record");
 async function handleFilingCommand(interaction) {
@@ -75793,20 +75813,23 @@ async function handleFilingCommand(interaction) {
   await showSeizedSelectMenu(interaction);
 }
 async function showSeizedSelectMenu(interaction) {
-  const select = new import_discord2.StringSelectMenuBuilder().setCustomId(FILING_SEIZED_SELECT_ID).setPlaceholder("Select seized item\u2026").addOptions(SEIZED_OPTIONS);
+  const select = new import_discord2.StringSelectMenuBuilder().setCustomId(FILING_SEIZED_SELECT_ID).setPlaceholder("Select seized item(s)\u2026").setMinValues(1).setMaxValues(3).addOptions(SEIZED_OPTIONS);
   const row = new import_discord2.ActionRowBuilder().addComponents(select);
   await interaction.reply({
-    content: "**Step 1 of 2** \u2014 What was seized?",
+    content: "**Step 1 of 2** \u2014 Select what was seized *(choose up to 3 items, or None)*:",
     components: [row],
     flags: import_discord2.MessageFlags.Ephemeral
   });
 }
 async function handleSeizedSelect(interaction) {
-  const value = interaction.values[0];
-  await interaction.showModal(buildFilingModal(value));
+  const values = interaction.values;
+  const isNone = values.includes("none");
+  const items = isNone ? [] : values;
+  const customId = `filing_modal:${items.length ? items.join(",") : "none"}`;
+  await interaction.showModal(buildFilingModal(customId, items));
 }
-function buildFilingModal(seizedValue) {
-  const modal = new import_discord2.ModalBuilder().setCustomId(`filing_modal:${seizedValue}`).setTitle("File a Record");
+function buildFilingModal(customId, seizedItems) {
+  const modal = new import_discord2.ModalBuilder().setCustomId(customId).setTitle("File a Record");
   const rows = [
     new import_discord2.ActionRowBuilder().addComponents(
       new import_discord2.TextInputBuilder().setCustomId("username").setLabel("Offender's Username").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. JohnDoe").setRequired(true).setMaxLength(100)
@@ -75815,11 +75838,11 @@ function buildFilingModal(seizedValue) {
       new import_discord2.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50)
     )
   ];
-  if (seizedValue !== "none") {
-    const label = getSeizedLabel(seizedValue);
+  for (const item of seizedItems) {
+    const label = getSeizedLabel(item);
     rows.push(
       new import_discord2.ActionRowBuilder().addComponents(
-        new import_discord2.TextInputBuilder().setCustomId("seized_amount").setLabel(`Amount of ${label}`).setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2").setRequired(true).setMaxLength(50)
+        new import_discord2.TextInputBuilder().setCustomId(`seized_${item}`).setLabel(`Amount of ${label}`).setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2").setRequired(true).setMaxLength(50)
       )
     );
   }
@@ -75828,15 +75851,17 @@ function buildFilingModal(seizedValue) {
 }
 async function handleFilingModal(interaction) {
   await interaction.deferReply({ flags: import_discord2.MessageFlags.Ephemeral });
-  const seizedValue = interaction.customId.split(":")[1] ?? "none";
+  const rawItems = interaction.customId.split(":")[1] ?? "none";
+  const seizedItems = rawItems === "none" ? [] : rawItems.split(",");
   const username = interaction.fields.getTextInputValue("username");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
-  let seized = "";
-  if (seizedValue !== "none") {
-    const amount = interaction.fields.getTextInputValue("seized_amount");
-    const label = getSeizedLabel(seizedValue);
-    seized = `${amount}x ${label}`;
+  const seizedParts = [];
+  for (const item of seizedItems) {
+    const amount = interaction.fields.getTextInputValue(`seized_${item}`);
+    const label = getSeizedLabel(item);
+    seizedParts.push(`${amount}x ${label}`);
   }
+  const seized = seizedParts.join(", ");
   try {
     await appendFiling({
       username,
