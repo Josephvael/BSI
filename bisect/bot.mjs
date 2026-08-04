@@ -20677,15 +20677,15 @@ var require_message = __commonJS({
       ComponentType2[ComponentType2["Checkbox"] = 23] = "Checkbox";
       ComponentType2[ComponentType2["SelectMenu"] = 3] = "SelectMenu";
     })(ComponentType || (exports2.ComponentType = ComponentType = {}));
-    var ButtonStyle2;
-    (function(ButtonStyle3) {
-      ButtonStyle3[ButtonStyle3["Primary"] = 1] = "Primary";
-      ButtonStyle3[ButtonStyle3["Secondary"] = 2] = "Secondary";
-      ButtonStyle3[ButtonStyle3["Success"] = 3] = "Success";
-      ButtonStyle3[ButtonStyle3["Danger"] = 4] = "Danger";
-      ButtonStyle3[ButtonStyle3["Link"] = 5] = "Link";
-      ButtonStyle3[ButtonStyle3["Premium"] = 6] = "Premium";
-    })(ButtonStyle2 || (exports2.ButtonStyle = ButtonStyle2 = {}));
+    var ButtonStyle3;
+    (function(ButtonStyle4) {
+      ButtonStyle4[ButtonStyle4["Primary"] = 1] = "Primary";
+      ButtonStyle4[ButtonStyle4["Secondary"] = 2] = "Secondary";
+      ButtonStyle4[ButtonStyle4["Success"] = 3] = "Success";
+      ButtonStyle4[ButtonStyle4["Danger"] = 4] = "Danger";
+      ButtonStyle4[ButtonStyle4["Link"] = 5] = "Link";
+      ButtonStyle4[ButtonStyle4["Premium"] = 6] = "Premium";
+    })(ButtonStyle3 || (exports2.ButtonStyle = ButtonStyle3 = {}));
     var TextInputStyle2;
     (function(TextInputStyle3) {
       TextInputStyle3[TextInputStyle3["Short"] = 1] = "Short";
@@ -42923,7 +42923,7 @@ var require_dist8 = __commonJS({
       ApplicationCommandOptionWithAutocompleteMixin: () => ApplicationCommandOptionWithAutocompleteMixin,
       ApplicationCommandOptionWithChoicesMixin: () => ApplicationCommandOptionWithChoicesMixin,
       BaseSelectMenuBuilder: () => BaseSelectMenuBuilder,
-      ButtonBuilder: () => ButtonBuilder2,
+      ButtonBuilder: () => ButtonBuilder3,
       ChannelSelectMenuBuilder: () => ChannelSelectMenuBuilder,
       CheckboxAssertions: () => Assertions_exports3,
       CheckboxBuilder: () => CheckboxBuilder,
@@ -43489,7 +43489,7 @@ var require_dist8 = __commonJS({
     };
     var import_v1027 = require_v106();
     var import_v102 = require_v106();
-    var ButtonBuilder2 = class extends ComponentBuilder {
+    var ButtonBuilder3 = class extends ComponentBuilder {
       static {
         __name(this, "ButtonBuilder");
       }
@@ -45271,7 +45271,7 @@ var require_dist8 = __commonJS({
     var dividerPredicate = import_shapeshift8.s.boolean();
     var spacingPredicate = import_shapeshift8.s.nativeEnum(import_v1020.SeparatorSpacingSize);
     var textDisplayContentPredicate = import_shapeshift8.s.string().lengthGreaterThanOrEqual(1).lengthLessThanOrEqual(4e3).setValidationEnabled(isValidationEnabled);
-    var accessoryPredicate = import_shapeshift8.s.instance(ButtonBuilder2).or(import_shapeshift8.s.instance(ThumbnailBuilder)).setValidationEnabled(isValidationEnabled);
+    var accessoryPredicate = import_shapeshift8.s.instance(ButtonBuilder3).or(import_shapeshift8.s.instance(ThumbnailBuilder)).setValidationEnabled(isValidationEnabled);
     var containerColorPredicate = colorPredicate.nullish();
     function assertReturnOfBuilder(input, ExpectedInstanceOf) {
       import_shapeshift8.s.instance(ExpectedInstanceOf).setValidationEnabled(isValidationEnabled).parse(input);
@@ -45846,7 +45846,7 @@ var require_dist8 = __commonJS({
        * @param accessory - The accessory to use
        */
       setButtonAccessory(accessory) {
-        Reflect.set(this, "accessory", accessoryPredicate.parse(resolveBuilder(accessory, ButtonBuilder2)));
+        Reflect.set(this, "accessory", accessoryPredicate.parse(resolveBuilder(accessory, ButtonBuilder3)));
         return this;
       }
       /**
@@ -45912,7 +45912,7 @@ var require_dist8 = __commonJS({
         case import_v1027.ComponentType.ActionRow:
           return new ActionRowBuilder3(data);
         case import_v1027.ComponentType.Button:
-          return new ButtonBuilder2(data);
+          return new ButtonBuilder3(data);
         case import_v1027.ComponentType.StringSelect:
           return new StringSelectMenuBuilder2(data);
         case import_v1027.ComponentType.TextInput:
@@ -48849,7 +48849,7 @@ var require_ButtonBuilder = __commonJS({
     var { isJSONEncodable } = require_dist();
     var { toSnakeCase } = require_Transformers();
     var { resolvePartialEmoji } = require_Util();
-    var ButtonBuilder2 = class extends BuildersButton {
+    var ButtonBuilder3 = class extends BuildersButton {
       constructor({ emoji, ...data } = {}) {
         super(toSnakeCase({ ...data, emoji: emoji && typeof emoji === "string" ? resolvePartialEmoji(emoji) : emoji }));
       }
@@ -48873,7 +48873,7 @@ var require_ButtonBuilder = __commonJS({
         return new this(isJSONEncodable(other) ? other.toJSON() : other);
       }
     };
-    module2.exports = ButtonBuilder2;
+    module2.exports = ButtonBuilder3;
   }
 });
 
@@ -49627,7 +49627,7 @@ var require_Components = __commonJS({
     module2.exports = { createComponent, createComponentBuilder, findComponentByCustomId };
     var ActionRow = require_ActionRow();
     var ActionRowBuilder3 = require_ActionRowBuilder();
-    var ButtonBuilder2 = require_ButtonBuilder();
+    var ButtonBuilder3 = require_ButtonBuilder();
     var ButtonComponent = require_ButtonComponent();
     var ChannelSelectMenuBuilder = require_ChannelSelectMenuBuilder();
     var ChannelSelectMenuComponent = require_ChannelSelectMenuComponent();
@@ -49670,7 +49670,7 @@ var require_Components = __commonJS({
     };
     var ComponentTypeToBuilder = {
       [ComponentType.ActionRow]: ActionRowBuilder3,
-      [ComponentType.Button]: ButtonBuilder2,
+      [ComponentType.Button]: ButtonBuilder3,
       [ComponentType.StringSelect]: StringSelectMenuBuilder2,
       [ComponentType.TextInput]: TextInputBuilder2,
       [ComponentType.UserSelect]: UserSelectMenuBuilder,
@@ -76051,18 +76051,33 @@ var CATEGORIES = {
 };
 var FILING_CAT_SELECT_ID = "filing_cat_select";
 var FILING_ITEM_SELECT_PREFIX = "filing_item_select";
-var pendingItems = /* @__PURE__ */ new Map();
-function buildCategorySelect() {
-  const options = [
-    ...Object.entries(CATEGORIES).map(([key, cat]) => ({
-      label: cat.label,
-      value: key
-    })),
-    { label: "None / No Seizure", value: "none" }
-  ];
+var FILING_QTY_MODAL_ID = "filing_qty_modal";
+var FILING_ADD_MORE_BUTTON_ID = "filing_add_more";
+var FILING_CONTINUE_BUTTON_ID = "filing_continue";
+var pendingState = /* @__PURE__ */ new Map();
+function buildCategoryRow() {
   return new import_discord2.ActionRowBuilder().addComponents(
-    new import_discord2.StringSelectMenuBuilder().setCustomId(FILING_CAT_SELECT_ID).setPlaceholder("Select a seized item category\u2026").addOptions(options)
+    new import_discord2.StringSelectMenuBuilder().setCustomId(FILING_CAT_SELECT_ID).setPlaceholder("Select a seized item category\u2026").addOptions([
+      ...Object.entries(CATEGORIES).map(([key, cat]) => ({
+        label: cat.label,
+        value: key
+      })),
+      { label: "None / No Seizure", value: "none" }
+    ])
   );
+}
+function buildQtyModal(items) {
+  const modal = new import_discord2.ModalBuilder().setCustomId(FILING_QTY_MODAL_ID).setTitle("Enter quantities");
+  const capped = items.slice(0, 5);
+  for (let i = 0; i < capped.length; i++) {
+    const label = capped[i].length > 45 ? capped[i].slice(0, 42) + "\u2026" : capped[i];
+    modal.addComponents(
+      new import_discord2.ActionRowBuilder().addComponents(
+        new import_discord2.TextInputBuilder().setCustomId(`qty_${i}`).setLabel(label).setStyle(import_discord2.TextInputStyle.Short).setValue("1").setMinLength(1).setMaxLength(3).setPlaceholder("1\u201399").setRequired(true)
+      )
+    );
+  }
+  return modal;
 }
 function buildFilingModal() {
   return new import_discord2.ModalBuilder().setCustomId("filing_modal").setTitle("File a Record").addComponents(
@@ -76074,10 +76089,20 @@ function buildFilingModal() {
     )
   );
 }
+function buildSummaryComponents() {
+  return new import_discord2.ActionRowBuilder().addComponents(
+    new import_discord2.ButtonBuilder().setCustomId(FILING_ADD_MORE_BUTTON_ID).setLabel("\u2190 Add more items").setStyle(import_discord2.ButtonStyle.Secondary),
+    new import_discord2.ButtonBuilder().setCustomId(FILING_CONTINUE_BUTTON_ID).setLabel("Continue to filing \u2192").setStyle(import_discord2.ButtonStyle.Primary)
+  );
+}
+function formatAccumulated(items) {
+  return items.map((i) => `\u2022 ${i.qty}\xD7 ${i.name}`).join("\n");
+}
 async function showCategorySelectMenu(interaction) {
+  pendingState.set(interaction.user.id, { accumulated: [], draft: [] });
   await interaction.reply({
-    content: "**Step 1 of 2** \u2014 Select the category of seized items:",
-    components: [buildCategorySelect()],
+    content: "**Select a category of seized items** (pick None if nothing was seized):",
+    components: [buildCategoryRow()],
     flags: import_discord2.MessageFlags.Ephemeral
   });
 }
@@ -76095,7 +76120,8 @@ async function handleFilingCommand(interaction) {
 async function handleCatSelect(interaction) {
   const catKey = interaction.values[0];
   if (catKey === "none") {
-    pendingItems.set(interaction.user.id, []);
+    const state2 = pendingState.get(interaction.user.id) ?? { accumulated: [], draft: [] };
+    pendingState.set(interaction.user.id, { ...state2, draft: [] });
     await interaction.showModal(buildFilingModal());
     return;
   }
@@ -76108,28 +76134,65 @@ async function handleCatSelect(interaction) {
     label: item.length > 100 ? item.slice(0, 97) + "\u2026" : item,
     value: String(idx)
   }));
-  const row = new import_discord2.ActionRowBuilder().addComponents(
-    new import_discord2.StringSelectMenuBuilder().setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${catKey}`).setPlaceholder("Pick items (hold Ctrl/Cmd to select multiple)").setMinValues(1).setMaxValues(Math.min(options.length, 10)).addOptions(options)
-  );
+  const state = pendingState.get(interaction.user.id);
+  const accLine = state && state.accumulated.length > 0 ? `
+
+**Already added:** ${state.accumulated.map((i) => `${i.qty}\xD7 ${i.name}`).join(", ")}` : "";
   await interaction.update({
-    content: `**Step 2 of 2** \u2014 Select seized items from **${cat.label}**:`,
-    components: [row]
+    content: `**${cat.label}** \u2014 select items (up to 5):${accLine}`,
+    components: [
+      new import_discord2.ActionRowBuilder().addComponents(
+        new import_discord2.StringSelectMenuBuilder().setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${catKey}`).setPlaceholder("Pick items (hold Ctrl/Cmd to select multiple)").setMinValues(1).setMaxValues(Math.min(options.length, 5)).addOptions(options)
+      )
+    ]
   });
 }
 async function handleItemSelect(interaction) {
   const catKey = interaction.customId.slice(FILING_ITEM_SELECT_PREFIX.length + 1);
   const cat = CATEGORIES[catKey];
-  const items = interaction.values.map((val) => cat?.items[parseInt(val, 10)] ?? val);
-  pendingItems.set(interaction.user.id, items);
+  const draft = interaction.values.map((val) => cat?.items[parseInt(val, 10)] ?? val);
+  const state = pendingState.get(interaction.user.id) ?? { accumulated: [], draft: [] };
+  pendingState.set(interaction.user.id, { ...state, draft });
+  await interaction.showModal(buildQtyModal(draft));
+}
+async function handleQtyModal(interaction) {
+  const state = pendingState.get(interaction.user.id) ?? { accumulated: [], draft: [] };
+  const { draft } = state;
+  const newItems = draft.slice(0, 5).map((name, i) => {
+    const raw = interaction.fields.getTextInputValue(`qty_${i}`);
+    const qty = Math.min(99, Math.max(1, parseInt(raw, 10) || 1));
+    return { name, qty };
+  });
+  const accumulated = [...state.accumulated, ...newItems];
+  pendingState.set(interaction.user.id, { accumulated, draft: [] });
+  await interaction.reply({
+    content: `**Seized items (${accumulated.length} item${accumulated.length !== 1 ? "s" : ""}):**
+` + formatAccumulated(accumulated) + "\n\nAdd items from another category, or continue to the filing form.",
+    components: [buildSummaryComponents()],
+    flags: import_discord2.MessageFlags.Ephemeral
+  });
+}
+async function handleAddMoreButton(interaction) {
+  const state = pendingState.get(interaction.user.id);
+  const accLine = state && state.accumulated.length > 0 ? `**Already added:**
+${formatAccumulated(state.accumulated)}
+
+` : "";
+  await interaction.update({
+    content: `${accLine}**Select another category to add more items:**`,
+    components: [buildCategoryRow()]
+  });
+}
+async function handleContinueButton(interaction) {
   await interaction.showModal(buildFilingModal());
 }
 async function handleFilingModal(interaction) {
   await interaction.deferReply({ flags: import_discord2.MessageFlags.Ephemeral });
   const username = interaction.fields.getTextInputValue("username");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
-  const items = pendingItems.get(interaction.user.id) ?? [];
-  pendingItems.delete(interaction.user.id);
-  const seized = items.map((item) => `1x ${item}`).join(", ");
+  const state = pendingState.get(interaction.user.id) ?? { accumulated: [], draft: [] };
+  pendingState.delete(interaction.user.id);
+  const seized = state.accumulated.map((i) => `${i.qty}x ${i.name}`).join(", ");
   try {
     await appendFiling({
       username,
@@ -76141,7 +76204,7 @@ async function handleFilingModal(interaction) {
     const embed = new import_discord2.EmbedBuilder().setColor(5763719).setTitle("Filing Submitted").addFields(
       { name: "Offender's Username", value: username, inline: true },
       { name: "Date of Incident", value: dateOfIncident, inline: true },
-      ...items.length > 0 ? [{ name: "Seized", value: items.join("\n"), inline: false }] : []
+      ...state.accumulated.length > 0 ? [{ name: "Seized", value: formatAccumulated(state.accumulated), inline: false }] : []
     ).setFooter({ text: `Filed by ${interaction.user.tag} (${interaction.user.id})` }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
   } catch (err) {
@@ -77002,6 +77065,10 @@ async function startBot() {
       } else if (interaction.isButton()) {
         if (interaction.customId === PANEL_BUTTON_ID) {
           await handlePanelButton(interaction);
+        } else if (interaction.customId === FILING_ADD_MORE_BUTTON_ID) {
+          await handleAddMoreButton(interaction);
+        } else if (interaction.customId === FILING_CONTINUE_BUTTON_ID) {
+          await handleContinueButton(interaction);
         }
       } else if (interaction.isStringSelectMenu()) {
         if (interaction.customId === FILING_CAT_SELECT_ID) {
@@ -77010,7 +77077,9 @@ async function startBot() {
           await handleItemSelect(interaction);
         }
       } else if (interaction.isModalSubmit()) {
-        if (interaction.customId === "filing_modal") {
+        if (interaction.customId === FILING_QTY_MODAL_ID) {
+          await handleQtyModal(interaction);
+        } else if (interaction.customId === "filing_modal") {
           await handleFilingModal(interaction);
         }
       }

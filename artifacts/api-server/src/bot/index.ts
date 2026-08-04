@@ -10,8 +10,10 @@ import {
 import { logger } from "../lib/logger";
 import {
   filingCommand, handleFilingCommand, handleFilingModal,
-  handleCatSelect, handleItemSelect,
+  handleCatSelect, handleItemSelect, handleQtyModal,
+  handleAddMoreButton, handleContinueButton,
   FILING_CAT_SELECT_ID, FILING_ITEM_SELECT_PREFIX,
+  FILING_QTY_MODAL_ID, FILING_ADD_MORE_BUTTON_ID, FILING_CONTINUE_BUTTON_ID,
 } from "./commands/filing";
 import { statisticsCommand, handleStatisticsCommand } from "./commands/statistics";
 import { accessCommand, handleAccessCommand } from "./commands/access";
@@ -109,6 +111,10 @@ export async function startBot(): Promise<void> {
       } else if (interaction.isButton()) {
         if (interaction.customId === PANEL_BUTTON_ID) {
           await handlePanelButton(interaction);
+        } else if (interaction.customId === FILING_ADD_MORE_BUTTON_ID) {
+          await handleAddMoreButton(interaction);
+        } else if (interaction.customId === FILING_CONTINUE_BUTTON_ID) {
+          await handleContinueButton(interaction);
         }
       } else if (interaction.isStringSelectMenu()) {
         if (interaction.customId === FILING_CAT_SELECT_ID) {
@@ -117,7 +123,9 @@ export async function startBot(): Promise<void> {
           await handleItemSelect(interaction);
         }
       } else if (interaction.isModalSubmit()) {
-        if (interaction.customId === "filing_modal") {
+        if (interaction.customId === FILING_QTY_MODAL_ID) {
+          await handleQtyModal(interaction);
+        } else if (interaction.customId === "filing_modal") {
           await handleFilingModal(interaction);
         }
       }

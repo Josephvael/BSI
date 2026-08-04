@@ -5,6 +5,8 @@ import {
   TextInputStyle,
   ActionRowBuilder,
   StringSelectMenuBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   EmbedBuilder,
   MessageFlags,
   ChatInputCommandInteraction,
@@ -33,8 +35,7 @@ const CATEGORIES: Record<string, { label: string; items: string[] }> = {
       "Delino R21B", "Upgraded Delino R21B",
       "Delino XR21", "Upgraded Delino XR21",
       "Delino R20P", "Delino R21P",
-      "Ceremonial Delino R-1",
-      "Delino P45",
+      "Ceremonial Delino R-1", "Delino P45",
       "Delino Defender", "Upgraded Delino Defender",
       "Delino Special", "Upgraded Delino Special",
       "Delino Police",
@@ -81,14 +82,12 @@ const CATEGORIES: Record<string, { label: string; items: string[] }> = {
       "Krovin Vintovka 1891", "Upgraded Krovin Vintovka 1891",
       "Fedotovo Karabin 1949", "Upgraded Fedotovo Karabin 1949",
       "Krovin Strelok 1891", "Upgraded Krovin Strelok 1891",
-      "Klimovsk Drobovik Spetsialniy 23K",
-      "Afanasev Pistolet 1951",
+      "Klimovsk Drobovik Spetsialniy 23K", "Afanasev Pistolet 1951",
       "Kilikov Machinu 1962", "Upgraded Kilikov Machinu 1962",
       "Imported Kilikov 54U", "Kilikov 54U", "Upgraded Kilikov 54U",
       "Kovrovsky Avtomat 1941",
       "Kilikov Pulemyot 1971", "Upgraded Kilikov Pulemyot 1971",
-      "Protec DC9",
-      "Cobray MP18", "Upgraded Cobray MP18",
+      "Protec DC9", "Cobray MP18", "Upgraded Cobray MP18",
     ],
   },
   russian_ammo: {
@@ -96,12 +95,10 @@ const CATEGORIES: Record<string, { label: string; items: string[] }> = {
     items: [
       "5.45x39mm Kilkov Magazine", "5.45x39mm Kilikov Extended",
       "5.56x45mm STANORD (20rd & 30rd)", "5.56 Box Magazine", "5.56 Box Magazine (Tracer)",
-      "9x18mm Afanasev",
-      "7.62x25mm Tula Kovrovksy", "7.62x25mm 71rd Drum",
+      "9x18mm Afanasev", "7.62x25mm Tula Kovrovksy", "7.62x25mm 71rd Drum",
       "7.62x39mm Klikov", "7.62x39mm Klikov Extended",
       "7.62x39mm Klikov Drum", "7.62x39 Clip",
-      "7.62x54mmR Krovin", "7.62x54mm Rimmed",
-      "23x75mm Rimmed",
+      "7.62x54mmR Krovin", "7.62x54mm Rimmed", "23x75mm Rimmed",
       "Taser Cartridge",
     ],
   },
@@ -111,28 +108,62 @@ const CATEGORIES: Record<string, { label: string; items: string[] }> = {
 
 export const FILING_CAT_SELECT_ID = "filing_cat_select";
 export const FILING_ITEM_SELECT_PREFIX = "filing_item_select";
+export const FILING_QTY_MODAL_ID = "filing_qty_modal";
+export const FILING_ADD_MORE_BUTTON_ID = "filing_add_more";
+export const FILING_CONTINUE_BUTTON_ID = "filing_continue";
 
-// ─── Pending item store (category select → item select → modal) ───────────────
+// ─── Per-user session state ───────────────────────────────────────────────────
 
-/** Holds selected item names while the user fills in the modal. Keyed by userId. */
-const pendingItems = new Map<string, string[]>();
+interface FilingState {
+  /** Items confirmed with quantities so far this session. */
+  accumulated: { name: string; qty: number }[];
+  /** Items just selected from a category, awaiting quantity input. */
+  draft: string[];
+}
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+const pendingState = new Map<string, FilingState>();
 
-function buildCategorySelect(): ActionRowBuilder<StringSelectMenuBuilder> {
-  const options = [
-    ...Object.entries(CATEGORIES).map(([key, cat]) => ({
-      label: cat.label,
-      value: key,
-    })),
-    { label: "None / No Seizure", value: "none" },
-  ];
+// ─── UI builders ─────────────────────────────────────────────────────────────
+
+function buildCategoryRow(): ActionRowBuilder<StringSelectMenuBuilder> {
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId(FILING_CAT_SELECT_ID)
       .setPlaceholder("Select a seized item category…")
-      .addOptions(options),
+      .addOptions([
+        ...Object.entries(CATEGORIES).map(([key, cat]) => ({
+          label: cat.label,
+          value: key,
+        })),
+        { label: "None / No Seizure", value: "none" },
+      ]),
   );
+}
+
+function buildQtyModal(items: string[]): ModalBuilder {
+  const modal = new ModalBuilder()
+    .setCustomId(FILING_QTY_MODAL_ID)
+    .setTitle("Enter quantities");
+
+  // Discord modal limit: 5 components
+  const capped = items.slice(0, 5);
+  for (let i = 0; i < capped.length; i++) {
+    const label = capped[i].length > 45 ? capped[i].slice(0, 42) + "…" : capped[i];
+    modal.addComponents(
+      new ActionRowBuilder<TextInputBuilder>().addComponents(
+        new TextInputBuilder()
+          .setCustomId(`qty_${i}`)
+          .setLabel(label)
+          .setStyle(TextInputStyle.Short)
+          .setValue("1")
+          .setMinLength(1)
+          .setMaxLength(3)
+          .setPlaceholder("1–99")
+          .setRequired(true),
+      ),
+    );
+  }
+  return modal;
 }
 
 export function buildFilingModal(): ModalBuilder {
@@ -161,15 +192,34 @@ export function buildFilingModal(): ModalBuilder {
     );
 }
 
+function buildSummaryComponents(): ActionRowBuilder<ButtonBuilder> {
+  return new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder()
+      .setCustomId(FILING_ADD_MORE_BUTTON_ID)
+      .setLabel("← Add more items")
+      .setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder()
+      .setCustomId(FILING_CONTINUE_BUTTON_ID)
+      .setLabel("Continue to filing →")
+      .setStyle(ButtonStyle.Primary),
+  );
+}
+
+function formatAccumulated(items: { name: string; qty: number }[]): string {
+  return items.map((i) => `• ${i.qty}× ${i.name}`).join("\n");
+}
+
 // ─── Interaction handlers ─────────────────────────────────────────────────────
 
-/** Entry point from /filing and the panel button. Shows the category select. */
 export async function showCategorySelectMenu(
   interaction: ChatInputCommandInteraction | ButtonInteraction,
 ): Promise<void> {
+  // Fresh session — clear any leftover state for this user
+  pendingState.set(interaction.user.id, { accumulated: [], draft: [] });
+
   await interaction.reply({
-    content: "**Step 1 of 2** — Select the category of seized items:",
-    components: [buildCategorySelect()],
+    content: "**Select a category of seized items** (pick None if nothing was seized):",
+    components: [buildCategoryRow()],
     flags: MessageFlags.Ephemeral,
   });
 }
@@ -188,13 +238,15 @@ export async function handleFilingCommand(
   await showCategorySelectMenu(interaction);
 }
 
+/** Category picker — routes to item select or straight to modal for "none". */
 export async function handleCatSelect(
   interaction: StringSelectMenuInteraction,
 ): Promise<void> {
   const catKey = interaction.values[0];
 
   if (catKey === "none") {
-    pendingItems.set(interaction.user.id, []);
+    const state = pendingState.get(interaction.user.id) ?? { accumulated: [], draft: [] };
+    pendingState.set(interaction.user.id, { ...state, draft: [] });
     await interaction.showModal(buildFilingModal());
     return;
   }
@@ -210,33 +262,91 @@ export async function handleCatSelect(
     value: String(idx),
   }));
 
-  const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-    new StringSelectMenuBuilder()
-      .setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${catKey}`)
-      .setPlaceholder("Pick items (hold Ctrl/Cmd to select multiple)")
-      .setMinValues(1)
-      .setMaxValues(Math.min(options.length, 10))
-      .addOptions(options),
-  );
+  const state = pendingState.get(interaction.user.id);
+  const accLine =
+    state && state.accumulated.length > 0
+      ? `\n\n**Already added:** ${state.accumulated.map((i) => `${i.qty}× ${i.name}`).join(", ")}`
+      : "";
 
   await interaction.update({
-    content: `**Step 2 of 2** — Select seized items from **${cat.label}**:`,
-    components: [row],
+    content: `**${cat.label}** — select items (up to 5):${accLine}`,
+    components: [
+      new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+        new StringSelectMenuBuilder()
+          .setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${catKey}`)
+          .setPlaceholder("Pick items (hold Ctrl/Cmd to select multiple)")
+          .setMinValues(1)
+          .setMaxValues(Math.min(options.length, 5))
+          .addOptions(options),
+      ),
+    ],
   });
 }
 
+/** Item picker — stores draft and opens the quantity modal. */
 export async function handleItemSelect(
   interaction: StringSelectMenuInteraction,
 ): Promise<void> {
   const catKey = interaction.customId.slice(FILING_ITEM_SELECT_PREFIX.length + 1);
   const cat = CATEGORIES[catKey];
+  const draft = interaction.values.map((val) => cat?.items[parseInt(val, 10)] ?? val);
 
-  const items = interaction.values.map((val) => cat?.items[parseInt(val, 10)] ?? val);
-  pendingItems.set(interaction.user.id, items);
+  const state = pendingState.get(interaction.user.id) ?? { accumulated: [], draft: [] };
+  pendingState.set(interaction.user.id, { ...state, draft });
 
+  await interaction.showModal(buildQtyModal(draft));
+}
+
+/** Quantity modal — merges draft + quantities into accumulated, shows summary. */
+export async function handleQtyModal(
+  interaction: ModalSubmitInteraction,
+): Promise<void> {
+  const state = pendingState.get(interaction.user.id) ?? { accumulated: [], draft: [] };
+  const { draft } = state;
+
+  const newItems = draft.slice(0, 5).map((name, i) => {
+    const raw = interaction.fields.getTextInputValue(`qty_${i}`);
+    const qty = Math.min(99, Math.max(1, parseInt(raw, 10) || 1));
+    return { name, qty };
+  });
+
+  const accumulated = [...state.accumulated, ...newItems];
+  pendingState.set(interaction.user.id, { accumulated, draft: [] });
+
+  await interaction.reply({
+    content:
+      `**Seized items (${accumulated.length} item${accumulated.length !== 1 ? "s" : ""}):**\n` +
+      formatAccumulated(accumulated) +
+      "\n\nAdd items from another category, or continue to the filing form.",
+    components: [buildSummaryComponents()],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+/** "Add more items" button — returns to category picker while keeping accumulated items. */
+export async function handleAddMoreButton(
+  interaction: ButtonInteraction,
+): Promise<void> {
+  const state = pendingState.get(interaction.user.id);
+  const accLine =
+    state && state.accumulated.length > 0
+      ? `**Already added:**\n${formatAccumulated(state.accumulated)}\n\n`
+      : "";
+
+  await interaction.update({
+    content: `${accLine}**Select another category to add more items:**`,
+    components: [buildCategoryRow()],
+  });
+}
+
+/** "Continue to filing" button — opens the username/date modal. */
+export async function handleContinueButton(
+  interaction: ButtonInteraction,
+): Promise<void> {
   await interaction.showModal(buildFilingModal());
 }
 
+/** Filing modal — assembles the full record and saves it to the sheet. */
 export async function handleFilingModal(
   interaction: ModalSubmitInteraction,
 ): Promise<void> {
@@ -245,11 +355,10 @@ export async function handleFilingModal(
   const username = interaction.fields.getTextInputValue("username");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
 
-  const items = pendingItems.get(interaction.user.id) ?? [];
-  pendingItems.delete(interaction.user.id);
+  const state = pendingState.get(interaction.user.id) ?? { accumulated: [], draft: [] };
+  pendingState.delete(interaction.user.id);
 
-  // Store as "1x Item Name" so the /statistics seized parser counts correctly
-  const seized = items.map((item) => `1x ${item}`).join(", ");
+  const seized = state.accumulated.map((i) => `${i.qty}x ${i.name}`).join(", ");
 
   try {
     await appendFiling({
@@ -266,8 +375,8 @@ export async function handleFilingModal(
       .addFields(
         { name: "Offender's Username", value: username, inline: true },
         { name: "Date of Incident", value: dateOfIncident, inline: true },
-        ...(items.length > 0
-          ? [{ name: "Seized", value: items.join("\n"), inline: false }]
+        ...(state.accumulated.length > 0
+          ? [{ name: "Seized", value: formatAccumulated(state.accumulated), inline: false }]
           : []),
       )
       .setFooter({ text: `Filed by ${interaction.user.tag} (${interaction.user.id})` })
