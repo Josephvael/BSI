@@ -75767,7 +75767,7 @@ function buildFilingModal() {
   const modal = new import_discord2.ModalBuilder().setCustomId("filing_modal").setTitle("File a Record");
   modal.addComponents(
     new import_discord2.ActionRowBuilder().addComponents(
-      new import_discord2.TextInputBuilder().setCustomId("username").setLabel("Username").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. JohnDoe").setRequired(true).setMaxLength(100)
+      new import_discord2.TextInputBuilder().setCustomId("username").setLabel("Offender's Username").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. JohnDoe").setRequired(true).setMaxLength(100)
     ),
     new import_discord2.ActionRowBuilder().addComponents(
       new import_discord2.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50)
@@ -75792,7 +75792,7 @@ async function handleFilingModal(interaction) {
       timestamp: (/* @__PURE__ */ new Date()).toISOString()
     });
     const embed = new import_discord2.EmbedBuilder().setColor(5763719).setTitle("Filing Submitted").addFields(
-      { name: "Username", value: username, inline: true },
+      { name: "Offender's Username", value: username, inline: true },
       { name: "Date of Incident", value: dateOfIncident, inline: true },
       ...seized ? [{ name: "Seized", value: seized, inline: false }] : []
     ).setFooter({ text: `Filed by ${interaction.user.tag} (${interaction.user.id})` }).setTimestamp();

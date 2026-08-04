@@ -41,7 +41,7 @@ export function buildFilingModal(): ModalBuilder {
     new ActionRowBuilder<TextInputBuilder>().addComponents(
       new TextInputBuilder()
         .setCustomId("username")
-        .setLabel("Username")
+        .setLabel("Offender's Username")
         .setStyle(TextInputStyle.Short)
         .setPlaceholder("e.g. JohnDoe")
         .setRequired(true)
@@ -92,7 +92,7 @@ export async function handleFilingModal(
       .setColor(0x57f287)
       .setTitle("Filing Submitted")
       .addFields(
-        { name: "Username", value: username, inline: true },
+        { name: "Offender's Username", value: username, inline: true },
         { name: "Date of Incident", value: dateOfIncident, inline: true },
         ...(seized ? [{ name: "Seized", value: seized, inline: false }] : []),
       )
