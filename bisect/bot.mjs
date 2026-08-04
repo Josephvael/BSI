@@ -76059,7 +76059,7 @@ async function handleFilingModal(interaction) {
 
 // src/bot/commands/statistics.ts
 var import_discord3 = __toESM(require_src(), 1);
-var statisticsCommand = new import_discord3.SlashCommandBuilder().setName("statistics").setDescription("Show filing statistics \u2014 totals, recent trends, and seized item breakdown");
+var statisticsCommand = new import_discord3.SlashCommandBuilder().setName("statistics").setDescription("Show filing statistics \u2014 totals, daily trend, and seized item breakdown");
 function parseSeized(raw) {
   const out = /* @__PURE__ */ new Map();
   if (!raw?.trim() || raw.trim().toLowerCase() === "none") return out;
@@ -76075,22 +76075,28 @@ function parseSeized(raw) {
 }
 function mergeItemMaps(maps) {
   const result = /* @__PURE__ */ new Map();
-  for (const m of maps) {
-    for (const [k, v] of m) result.set(k, (result.get(k) ?? 0) + v);
-  }
+  for (const m of maps) for (const [k, v] of m) result.set(k, (result.get(k) ?? 0) + v);
   return result;
 }
 function formatItemMap(items, limit = 8) {
-  const sorted = [...items.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
-  return sorted.map(([name, count]) => `${name} \u2014 ${count}`).join("\n");
+  return [...items.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit).map(([name, count]) => `${name} \u2014 ${count}`).join("\n");
+}
+function toDateKey(d) {
+  return d.toISOString().slice(0, 10);
+}
+function formatDateKey(key) {
+  const d = /* @__PURE__ */ new Date(`${key}T12:00:00Z`);
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    weekday: "short",
+    timeZone: "UTC"
+  });
 }
 function filingDate(f) {
-  if (f.timestamp) {
-    const d = new Date(f.timestamp);
-    if (!isNaN(d.getTime())) return d;
-  }
-  if (f.dateOfIncident) {
-    const d = new Date(f.dateOfIncident);
+  for (const raw of [f.timestamp, f.dateOfIncident]) {
+    if (!raw) continue;
+    const d = new Date(raw);
     if (!isNaN(d.getTime())) return d;
   }
   return null;
@@ -76115,22 +76121,51 @@ async function handleStatisticsCommand(interaction) {
       });
       return;
     }
-    const allItemMaps = filings.map((f) => parseSeized(f.seized ?? ""));
-    const allTimeTotals = mergeItemMaps(allItemMaps);
+    const allTimeTotals = mergeItemMaps(filings.map((f) => parseSeized(f.seized ?? "")));
     const totalSeizedFilings = filings.filter((f) => f.seized?.trim()).length;
-    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1e3);
-    const recentFilings = filings.filter((f) => {
-      const d = filingDate(f);
-      return d !== null && d >= cutoff;
+    const now = /* @__PURE__ */ new Date();
+    const bucketKeys = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setUTCDate(d.getUTCDate() - i);
+      bucketKeys.push(toDateKey(d));
+    }
+    const bucketCounts = new Map(bucketKeys.map((k) => [k, 0]));
+    const bucketSeized = new Map(
+      bucketKeys.map((k) => [k, /* @__PURE__ */ new Map()])
+    );
+    for (const filing of filings) {
+      const d = filingDate(filing);
+      if (!d) continue;
+      const key = toDateKey(d);
+      if (!bucketCounts.has(key)) continue;
+      bucketCounts.set(key, (bucketCounts.get(key) ?? 0) + 1);
+      const merged = mergeItemMaps([
+        bucketSeized.get(key),
+        parseSeized(filing.seized ?? "")
+      ]);
+      bucketSeized.set(key, merged);
+    }
+    const trendLines = bucketKeys.map((key) => {
+      const count = bucketCounts.get(key) ?? 0;
+      const items = bucketSeized.get(key);
+      const label = formatDateKey(key);
+      const countStr = count === 0 ? "\u2014" : `${count} filing${count !== 1 ? "s" : ""}`;
+      if (items.size === 0) return `\`${label}\`  ${countStr}`;
+      const [topItem, topQty] = [...items.entries()].sort((a, b) => b[1] - a[1])[0];
+      const spikeHint = items.size > 1 ? `${topQty}\xD7 ${topItem} (+${items.size - 1} more)` : `${topQty}\xD7 ${topItem}`;
+      return `\`${label}\`  ${countStr} \xB7 ${spikeHint}`;
     });
-    const recentItemMaps = recentFilings.map((f) => parseSeized(f.seized ?? ""));
-    const recentTotals = mergeItemMaps(recentItemMaps);
+    const weekTotal = [...bucketCounts.values()].reduce((a, b) => a + b, 0);
     const recentList = filings.slice(-5).reverse().map((f) => `**${f.username || "?"}** | ${f.dateOfIncident || "?"}`).join("\n");
     const embed = new import_discord3.EmbedBuilder().setColor(5793266).setTitle("Filing Statistics").setURL(sheetUrl).addFields(
-      // Row 1 — headline numbers
       { name: "Total Filings", value: `${filings.length}`, inline: true },
       { name: "With Seized Items", value: `${totalSeizedFilings}`, inline: true },
-      { name: "Last 7 Days", value: `${recentFilings.length} filing${recentFilings.length !== 1 ? "s" : ""}`, inline: true }
+      { name: "Last 7 Days", value: `${weekTotal} filing${weekTotal !== 1 ? "s" : ""}`, inline: true },
+      {
+        name: "Daily Breakdown \u2014 Last 7 Days",
+        value: trendLines.join("\n")
+      }
     );
     if (allTimeTotals.size > 0) {
       embed.addFields({
@@ -76138,19 +76173,7 @@ async function handleStatisticsCommand(interaction) {
         value: formatItemMap(allTimeTotals)
       });
     }
-    if (recentTotals.size > 0) {
-      embed.addFields({
-        name: "Seized Items \u2014 Last 7 Days",
-        value: formatItemMap(recentTotals)
-      });
-    } else {
-      embed.addFields({
-        name: "Seized Items \u2014 Last 7 Days",
-        value: recentFilings.length > 0 ? "No seized items recorded this week." : "No filings in the last 7 days."
-      });
-    }
-    embed.addFields({ name: "Recent Filings", value: recentList });
-    embed.setFooter({ text: "Click the title to open the full spreadsheet" }).setTimestamp();
+    embed.addFields({ name: "Recent Filings", value: recentList }).setFooter({ text: "Click the title to open the full spreadsheet" }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
   } catch (err) {
     logger.error({ err }, "Failed to load statistics");
