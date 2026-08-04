@@ -75768,37 +75768,183 @@ function checkAccess(interaction, allowedRoles) {
 }
 
 // src/bot/commands/filing.ts
-var FILING_SEIZED_SELECT_ID = "filing_seized_select";
-var SEIZED_OPTIONS = [
-  // ── Firearms ──────────────────────────────────────────────────────────────
-  { label: "\u{1F52B}  Illegal Firearm(s)", value: "firearm", description: "Firearms \u2014 Illegal firearm(s)" },
-  { label: "\u{1F52B}  Unregistered Firearm(s)", value: "unreg_gun", description: "Firearms \u2014 Unregistered firearm(s)" },
-  { label: "\u{1F52B}  Ammunition", value: "ammo", description: "Firearms \u2014 Ammunition / rounds" },
-  { label: "\u{1F52B}  High-Cap Magazine(s)", value: "hicap_mag", description: "Firearms \u2014 High-capacity magazine(s)" },
-  { label: "\u{1F52B}  Suppressor(s)", value: "suppressor", description: "Firearms \u2014 Suppressor(s) / silencer(s)" },
-  // ── Narcotics ─────────────────────────────────────────────────────────────
-  { label: "\u{1F48A}  Cocaine", value: "cocaine", description: "Narcotics \u2014 Cocaine" },
-  { label: "\u{1F48A}  Methamphetamine", value: "meth", description: "Narcotics \u2014 Methamphetamine" },
-  { label: "\u{1F48A}  Heroin", value: "heroin", description: "Narcotics \u2014 Heroin" },
-  { label: "\u{1F48A}  Fentanyl", value: "fentanyl", description: "Narcotics \u2014 Fentanyl" },
-  { label: "\u{1F48A}  Marijuana", value: "marijuana", description: "Narcotics \u2014 Marijuana" },
-  { label: "\u{1F48A}  MDMA / Ecstasy", value: "mdma", description: "Narcotics \u2014 MDMA / Ecstasy" },
-  { label: "\u{1F48A}  Unprescribed Rx Drugs", value: "rx_drugs", description: "Narcotics \u2014 Unprescribed prescription drugs" },
-  // ── Paraphernalia ─────────────────────────────────────────────────────────
-  { label: "\u2697\uFE0F  Drug Paraphernalia", value: "paraphernalia", description: "Paraphernalia \u2014 General drug paraphernalia" },
-  { label: "\u2697\uFE0F  Scale(s)", value: "scales", description: "Paraphernalia \u2014 Scales / measuring tools" },
-  { label: "\u2697\uFE0F  Packaging Materials", value: "packaging", description: "Paraphernalia \u2014 Bags, wraps, packaging" },
-  { label: "\u2697\uFE0F  Pipe(s) / Smoking Device", value: "pipe", description: "Paraphernalia \u2014 Pipe(s) or smoking device(s)" },
-  // ── Other ─────────────────────────────────────────────────────────────────
-  { label: "\u{1F4E6}  Cash / Currency", value: "cash", description: "Other \u2014 Cash or currency" },
-  { label: "\u{1F4E6}  Stolen Property", value: "stolen", description: "Other \u2014 Stolen property" },
-  { label: "\u{1F4E6}  Other", value: "other", description: "Other \u2014 Other seized item(s)" },
-  // ── None ──────────────────────────────────────────────────────────────────
-  { label: "\u2705  None / N/A", value: "none", description: "Nothing was seized" }
-];
-function getSeizedLabel(value) {
-  const raw = SEIZED_OPTIONS.find((o) => o.value === value)?.label ?? value;
-  return raw.replace(/^.+?\s{2}/, "").trim();
+var FILING_CAT_SELECT_ID = "filing_cat_select";
+var FILING_ITEM_SELECT_PREFIX = "filing_item_select";
+var CATEGORIES = {
+  weapons_1: {
+    label: "\u{1F52B}  Weapons (1 / 2)",
+    prefix: "w1",
+    items: [
+      "Albert & Heinrich SM9",
+      "Albert & Heinrich LM2",
+      "Albert & Heinrich HR4",
+      "Afanasev Pistolet 1951",
+      "Bennetti 15",
+      "Bennetti 17",
+      "Cobray MP18",
+      "Delino R20",
+      "Delino R20P",
+      "Delino R21",
+      "Delino R21A",
+      "Delino R21B",
+      "Delino R21M",
+      "Delino XM21",
+      "Delino XR21",
+      "Delino Defender",
+      "Delino Special",
+      "Fedotovo Karabin 1949",
+      "Hawthorne 500",
+      "Hawthorne 800"
+    ]
+  },
+  weapons_2: {
+    label: "\u{1F52B}  Weapons (2 / 2)",
+    prefix: "w2",
+    items: [
+      "Hawthorne M80",
+      "Hawthorne M80A1",
+      "Hawthorne M80A2",
+      "Hawthorne M80T",
+      "Kilikov 54U",
+      "Kilikov M62",
+      "Krovin M9871",
+      "Krovin Strelok 1981",
+      "Krovin Vintovka 1891",
+      "Kilikov Machinu 1962",
+      "Kilikov Pulemyot 1971",
+      "Kovrovsky Avtomat 1941",
+      "Klimosvk Drobovik S23K",
+      "Millsburg 780A1",
+      "Mustang M45",
+      "Pietro 92P",
+      "Protec DC9",
+      "R84 Anti-Tank Launcher",
+      "Xion XI26"
+    ]
+  },
+  ammo_1: {
+    label: "\u{1F527}  Ammunition (1 / 2)",
+    prefix: "a1",
+    items: [
+      "5.45x39mm Kilkov Magazine",
+      "5.45x39mm Kilikov Extended",
+      "30rd 5.56x45mm STANORD",
+      "20rd 5.56x45mm STANORD",
+      "5.56 Box Magazine",
+      "5.56 Box Magazine (Tracer)",
+      "9x19mm Bennetti Magazine",
+      "9x19mm Straight Magazine",
+      "9x19mm Curved Magazine",
+      "9x19mm 33rd Magazine",
+      "9x18mm Afanasev",
+      ".40 Automatic Pierto",
+      ".45 Automatic Delino Magazine",
+      ".45 Mitch & Kosi Magazine",
+      "7.62x25mm Tula Kovrovksy",
+      "7.62x25mm 71rd Drum",
+      "7.62x39mm Klikov Drum",
+      "7.62x39mm Klikov",
+      "7.62x39mm Klikov Extended",
+      "7.62x39 Clip"
+    ]
+  },
+  ammo_2: {
+    label: "\u{1F527}  Ammunition (2 / 2)",
+    prefix: "a2",
+    items: [
+      "7.62x51mm Albert & Heinrich",
+      "7.62x54mmR Krovin",
+      "7.62x54mm Rimmed",
+      "23x75mm Rimmed",
+      "10rd .308 Frankford Hawthorne",
+      "5rd .308 Frankford",
+      ".44 Delino",
+      "12 Gauge",
+      "Taser Cartridge"
+    ]
+  },
+  kits: {
+    label: "\u{1F392}  Weapon Kits",
+    prefix: "k",
+    items: [
+      "Assault Rifle Kit",
+      "Assault Carbine Kit",
+      "Battle Rifle Kit",
+      "Carbine Kit",
+      "Light Machine Gun Kit",
+      "Machine Pistol Kit",
+      "Pistol Kit",
+      "Revolver Kit",
+      "Rifle Kit",
+      "Shotgun Kit",
+      "Sniper Rifle Kit",
+      "Submachine Gun Kit"
+    ]
+  },
+  stolen: {
+    label: "\u{1F4B0}  Stolen Goods",
+    prefix: "s",
+    items: [
+      "Bag of Dirty Money",
+      "Folder of Military Intelligence",
+      "Military Encryption Card"
+    ]
+  },
+  narcotics: {
+    label: "\u{1F48A}  Narcotics",
+    prefix: "n",
+    items: [
+      "Bag of Nopyfruit",
+      "Barrel of Nopyfruit Concentrate",
+      "Bag of Gushie",
+      "Barrel of Solution",
+      "Box of Plastic Bags",
+      "Jarniwus",
+      "Jarniwus Seeds"
+    ]
+  },
+  cargo: {
+    label: "\u{1F4E6}  Illicit Cargo",
+    prefix: "c",
+    items: [
+      "Crate of Illegal Firearm Parts",
+      "Crate of Illegal Ammunition",
+      "Coin-o-Matic Business Conveyer"
+    ]
+  },
+  devices: {
+    label: "\u{1F4A3}  Destructive Devices",
+    prefix: "d",
+    items: [
+      "Barrel of Thermite",
+      "Detonator",
+      "Encrypted Phone",
+      "Jerrybomb",
+      "Molotov",
+      "Tear Gas"
+    ]
+  },
+  misc: {
+    label: "\u{1F50D}  Misc. Items",
+    prefix: "m",
+    items: [
+      "Cones",
+      "Handcuffs",
+      "Highland NR28",
+      "Lockpicks",
+      "Spike Strips",
+      "The Underground' Business Card"
+    ]
+  }
+};
+var ITEM_LABEL = {};
+for (const cat of Object.values(CATEGORIES)) {
+  cat.items.forEach((item, idx) => {
+    ITEM_LABEL[`${cat.prefix}_${idx}`] = item;
+  });
+}
+function getItemLabel(code) {
+  return ITEM_LABEL[code] ?? code;
 }
 var filingCommand = new import_discord2.SlashCommandBuilder().setName("filing").setDescription("File a new record");
 async function handleFilingCommand(interaction) {
@@ -75810,25 +75956,52 @@ async function handleFilingCommand(interaction) {
     });
     return;
   }
-  await showSeizedSelectMenu(interaction);
+  await showCategorySelectMenu(interaction);
 }
-async function showSeizedSelectMenu(interaction) {
-  const select = new import_discord2.StringSelectMenuBuilder().setCustomId(FILING_SEIZED_SELECT_ID).setPlaceholder("Select seized item(s)\u2026").setMinValues(1).setMaxValues(3).addOptions(SEIZED_OPTIONS);
+async function showCategorySelectMenu(interaction) {
+  const options = [
+    ...Object.entries(CATEGORIES).map(([key, cat]) => ({
+      label: cat.label,
+      value: key
+    })),
+    { label: "\u2705  None / N/A", value: "none" }
+  ];
+  const select = new import_discord2.StringSelectMenuBuilder().setCustomId(FILING_CAT_SELECT_ID).setPlaceholder("Select a seized item category\u2026").addOptions(options);
   const row = new import_discord2.ActionRowBuilder().addComponents(select);
   await interaction.reply({
-    content: "**Step 1 of 2** \u2014 Select what was seized *(choose up to 3 items, or None)*:",
+    content: "**Step 1 of 3** \u2014 Choose a seized item category *(or None)*:",
     components: [row],
     flags: import_discord2.MessageFlags.Ephemeral
   });
 }
-async function handleSeizedSelect(interaction) {
-  const values = interaction.values;
-  const isNone = values.includes("none");
-  const items = isNone ? [] : values;
-  const customId = `filing_modal:${items.length ? items.join(",") : "none"}`;
-  await interaction.showModal(buildFilingModal(customId, items));
+async function handleCatSelect(interaction) {
+  const categoryKey = interaction.values[0];
+  if (categoryKey === "none") {
+    await interaction.showModal(buildFilingModal("filing_modal:none", []));
+    return;
+  }
+  const cat = CATEGORIES[categoryKey];
+  if (!cat) {
+    await interaction.update({ content: "Unknown category. Please try again.", components: [] });
+    return;
+  }
+  const itemOptions = cat.items.map((item, idx) => ({
+    label: item,
+    value: `${cat.prefix}_${idx}`
+  }));
+  const select = new import_discord2.StringSelectMenuBuilder().setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${categoryKey}`).setPlaceholder(`Select item(s) from ${cat.label.replace(/^.+?\s{2}/, "")}\u2026`).setMinValues(1).setMaxValues(Math.min(3, itemOptions.length)).addOptions(itemOptions);
+  const row = new import_discord2.ActionRowBuilder().addComponents(select);
+  await interaction.update({
+    content: `**Step 2 of 3** \u2014 Select up to **3** items from ${cat.label}:`,
+    components: [row]
+  });
 }
-function buildFilingModal(customId, seizedItems) {
+async function handleItemSelect(interaction) {
+  const itemCodes = interaction.values;
+  const customId = `filing_modal:${itemCodes.join(",")}`;
+  await interaction.showModal(buildFilingModal(customId, itemCodes));
+}
+function buildFilingModal(customId, itemCodes) {
   const modal = new import_discord2.ModalBuilder().setCustomId(customId).setTitle("File a Record");
   const rows = [
     new import_discord2.ActionRowBuilder().addComponents(
@@ -75838,11 +76011,11 @@ function buildFilingModal(customId, seizedItems) {
       new import_discord2.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50)
     )
   ];
-  for (const item of seizedItems) {
-    const label = getSeizedLabel(item);
+  for (const code of itemCodes.slice(0, 3)) {
+    const label = getItemLabel(code);
     rows.push(
       new import_discord2.ActionRowBuilder().addComponents(
-        new import_discord2.TextInputBuilder().setCustomId(`seized_${item}`).setLabel(`Amount of ${label}`).setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2").setRequired(true).setMaxLength(50)
+        new import_discord2.TextInputBuilder().setCustomId(`amt_${code}`).setLabel(`Amount \u2014 ${label}`).setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2").setRequired(true).setMaxLength(20)
       )
     );
   }
@@ -75851,14 +76024,14 @@ function buildFilingModal(customId, seizedItems) {
 }
 async function handleFilingModal(interaction) {
   await interaction.deferReply({ flags: import_discord2.MessageFlags.Ephemeral });
-  const rawItems = interaction.customId.split(":")[1] ?? "none";
-  const seizedItems = rawItems === "none" ? [] : rawItems.split(",");
+  const rawCodes = interaction.customId.split(":")[1] ?? "none";
+  const itemCodes = rawCodes === "none" ? [] : rawCodes.split(",");
   const username = interaction.fields.getTextInputValue("username");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
   const seizedParts = [];
-  for (const item of seizedItems) {
-    const amount = interaction.fields.getTextInputValue(`seized_${item}`);
-    const label = getSeizedLabel(item);
+  for (const code of itemCodes) {
+    const amount = interaction.fields.getTextInputValue(`amt_${code}`);
+    const label = getItemLabel(code);
     seizedParts.push(`${amount}x ${label}`);
   }
   const seized = seizedParts.join(", ");
@@ -76458,7 +76631,7 @@ async function handlePanelButton(interaction) {
     });
     return;
   }
-  await showSeizedSelectMenu(interaction);
+  await showCategorySelectMenu(interaction);
 }
 
 // src/bot/index.ts
@@ -76540,8 +76713,10 @@ async function startBot() {
           await handlePanelButton(interaction);
         }
       } else if (interaction.isStringSelectMenu()) {
-        if (interaction.customId === FILING_SEIZED_SELECT_ID) {
-          await handleSeizedSelect(interaction);
+        if (interaction.customId === FILING_CAT_SELECT_ID) {
+          await handleCatSelect(interaction);
+        } else if (interaction.customId.startsWith(`${FILING_ITEM_SELECT_PREFIX}:`)) {
+          await handleItemSelect(interaction);
         }
       } else if (interaction.isModalSubmit()) {
         if (interaction.customId.startsWith("filing_modal")) {

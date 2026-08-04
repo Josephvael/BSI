@@ -12,8 +12,10 @@ import {
   filingCommand,
   handleFilingCommand,
   handleFilingModal,
-  handleSeizedSelect,
-  FILING_SEIZED_SELECT_ID,
+  handleCatSelect,
+  handleItemSelect,
+  FILING_CAT_SELECT_ID,
+  FILING_ITEM_SELECT_PREFIX,
 } from "./commands/filing";
 import { statisticsCommand, handleStatisticsCommand } from "./commands/statistics";
 import { accessCommand, handleAccessCommand } from "./commands/access";
@@ -113,8 +115,10 @@ export async function startBot(): Promise<void> {
           await handlePanelButton(interaction);
         }
       } else if (interaction.isStringSelectMenu()) {
-        if (interaction.customId === FILING_SEIZED_SELECT_ID) {
-          await handleSeizedSelect(interaction);
+        if (interaction.customId === FILING_CAT_SELECT_ID) {
+          await handleCatSelect(interaction);
+        } else if (interaction.customId.startsWith(`${FILING_ITEM_SELECT_PREFIX}:`)) {
+          await handleItemSelect(interaction);
         }
       } else if (interaction.isModalSubmit()) {
         if (interaction.customId.startsWith("filing_modal")) {
