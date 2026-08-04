@@ -61,6 +61,12 @@ function formatDateKey(key: string): string {
   });
 }
 
+/** Short "Aug 04" label for week-bucket range endpoints. */
+function formatShortDate(key: string): string {
+  const d = new Date(`${key}T12:00:00Z`);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
 function filingDate(f: FilingRecord): Date | null {
   for (const raw of [f.timestamp, f.dateOfIncident]) {
     if (!raw) continue;
@@ -152,23 +158,24 @@ export async function handleStatisticsCommand(
       );
       trendTitle = "Daily Breakdown — Last 7 Days";
     } else {
-      // Weekly summary rows for 30-day view (5 buckets: weeks 1-5)
-      // Each bucket covers Mon–Sun; we group the 30 days into ~5 week buckets
+      // Proper 7-day buckets for 30-day view.
+      // 30 days = four 7-day buckets + one 2-day partial bucket at the end.
+      // Partial buckets are labeled with their actual day count so staff aren't misled.
+      // Verification: sum of bucket sizes = 7+7+7+7+2 = 30 = days ✓
       const weekBuckets: { label: string; count: number; seized: Map<string, number> }[] = [];
-      for (let w = 0; w < 5; w++) {
-        const weekDays = dailyKeys.slice(w * 6, w * 6 + 6); // ~6 days per bucket across 5 buckets
-        if (weekDays.length === 0) continue;
-        const weekStart = weekDays[0];
-        const weekEnd = weekDays[weekDays.length - 1];
-        const startLabel = new Date(`${weekStart}T12:00:00Z`).toLocaleDateString("en-US", {
-          month: "short", day: "numeric", timeZone: "UTC",
-        });
-        const endLabel = new Date(`${weekEnd}T12:00:00Z`).toLocaleDateString("en-US", {
-          month: "short", day: "numeric", timeZone: "UTC",
-        });
-        const count = weekDays.reduce((s, k) => s + (dailyCounts.get(k) ?? 0), 0);
-        const seized = mergeItemMaps(weekDays.map((k) => dailySeized.get(k)!));
-        weekBuckets.push({ label: `${startLabel}–${endLabel}`, count, seized });
+      let i = 0;
+      while (i < days) {
+        const bucketDays = dailyKeys.slice(i, i + 7);
+        const isPartial = bucketDays.length < 7;
+        const startLabel = formatShortDate(bucketDays[0]);
+        const endLabel = formatShortDate(bucketDays[bucketDays.length - 1]);
+        const rangeLabel = isPartial
+          ? `${startLabel}–${endLabel} (${bucketDays.length}d)`
+          : `${startLabel}–${endLabel}`;
+        const count = bucketDays.reduce((s, k) => s + (dailyCounts.get(k) ?? 0), 0);
+        const seized = mergeItemMaps(bucketDays.map((k) => dailySeized.get(k)!));
+        weekBuckets.push({ label: rangeLabel, count, seized });
+        i += 7;
       }
       trendLines = weekBuckets.map((b) => trendLine(b.label, b.count, b.seized));
       trendTitle = "Weekly Breakdown — Last 30 Days";

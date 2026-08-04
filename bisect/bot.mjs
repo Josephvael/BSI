@@ -76007,6 +76007,10 @@ function formatDateKey(key) {
     timeZone: "UTC"
   });
 }
+function formatShortDate(key) {
+  const d = /* @__PURE__ */ new Date(`${key}T12:00:00Z`);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
 function filingDate(f) {
   for (const raw of [f.timestamp, f.dateOfIncident]) {
     if (!raw) continue;
@@ -76073,24 +76077,17 @@ async function handleStatisticsCommand(interaction) {
       trendTitle = "Daily Breakdown \u2014 Last 7 Days";
     } else {
       const weekBuckets = [];
-      for (let w = 0; w < 5; w++) {
-        const weekDays = dailyKeys.slice(w * 6, w * 6 + 6);
-        if (weekDays.length === 0) continue;
-        const weekStart = weekDays[0];
-        const weekEnd = weekDays[weekDays.length - 1];
-        const startLabel = (/* @__PURE__ */ new Date(`${weekStart}T12:00:00Z`)).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          timeZone: "UTC"
-        });
-        const endLabel = (/* @__PURE__ */ new Date(`${weekEnd}T12:00:00Z`)).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          timeZone: "UTC"
-        });
-        const count = weekDays.reduce((s, k) => s + (dailyCounts.get(k) ?? 0), 0);
-        const seized = mergeItemMaps(weekDays.map((k) => dailySeized.get(k)));
-        weekBuckets.push({ label: `${startLabel}\u2013${endLabel}`, count, seized });
+      let i = 0;
+      while (i < days) {
+        const bucketDays = dailyKeys.slice(i, i + 7);
+        const isPartial = bucketDays.length < 7;
+        const startLabel = formatShortDate(bucketDays[0]);
+        const endLabel = formatShortDate(bucketDays[bucketDays.length - 1]);
+        const rangeLabel = isPartial ? `${startLabel}\u2013${endLabel} (${bucketDays.length}d)` : `${startLabel}\u2013${endLabel}`;
+        const count = bucketDays.reduce((s, k) => s + (dailyCounts.get(k) ?? 0), 0);
+        const seized = mergeItemMaps(bucketDays.map((k) => dailySeized.get(k)));
+        weekBuckets.push({ label: rangeLabel, count, seized });
+        i += 7;
       }
       trendLines = weekBuckets.map((b) => trendLine(b.label, b.count, b.seized));
       trendTitle = "Weekly Breakdown \u2014 Last 30 Days";
