@@ -4,10 +4,12 @@ import {
   TextInputBuilder,
   TextInputStyle,
   ActionRowBuilder,
+  StringSelectMenuBuilder,
   EmbedBuilder,
   MessageFlags,
   ChatInputCommandInteraction,
   ButtonInteraction,
+  StringSelectMenuInteraction,
   ModalSubmitInteraction,
 } from "discord.js";
 import { appendFiling } from "../sheets";
@@ -18,26 +20,119 @@ export const filingCommand = new SlashCommandBuilder()
   .setName("filing")
   .setDescription("File a new record");
 
-/** Opens the filing modal directly — no pre-steps. */
-export async function handleFilingCommand(
-  interaction: ChatInputCommandInteraction,
-): Promise<void> {
-  const allowed = await getAllowedRoles();
-  if (!checkAccess(interaction, allowed)) {
-    await interaction.reply({
-      content: "You do not have access to this command.",
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
-  await interaction.showModal(buildFilingModal());
-}
+// ─── Seized item catalogue ────────────────────────────────────────────────────
 
-/** Shared between /filing and the panel button. */
-export async function showFilingModal(
-  interaction: ChatInputCommandInteraction | ButtonInteraction,
-): Promise<void> {
-  await interaction.showModal(buildFilingModal());
+const CATEGORIES: Record<string, { label: string; items: string[] }> = {
+  delino: {
+    label: "Delino Firearms",
+    items: [
+      "Delino R20", "Upgraded Delino R20",
+      "Delino R21", "Delino R21 'Canner'", "Upgrade Delino R21",
+      "Delino R21M", "Upgraded Delino R21M",
+      "Delino R21A", "Upgraded Delino R21A", "Imported Delino R21A",
+      "Delino R21B", "Upgraded Delino R21B",
+      "Delino XR21", "Upgraded Delino XR21",
+      "Delino R20P", "Delino R21P",
+      "Ceremonial Delino R-1",
+      "Delino P45",
+      "Delino Defender", "Upgraded Delino Defender",
+      "Delino Special", "Upgraded Delino Special",
+      "Delino Police",
+      ".45 Automatic Delino Magazine", ".44 Delino",
+    ],
+  },
+  hawthorn: {
+    label: "Hawthorn Firearms",
+    items: [
+      "Hawthorn 500", "Upgraded Hawthorn 500",
+      "Hawthorn 800", "Upgraded Hawthorn 800",
+      "Hawthorn M80A1", "Upgraded Hawthorn M80A1",
+      "Hawthorn M80A2", "Upgraded Hawthorn M80A2",
+      "10rd .308 Frankford Hawthorne", "5rd .308 Frankford",
+    ],
+  },
+  bennetti: {
+    label: "Bennetti Firearms",
+    items: [
+      "Bennetti 15", "Upgraded Bennetti 15",
+      "Bennetti 17", "Upgraded Bennetti 17",
+      "Pietro 86P", "Upgraded Pietro 86P",
+      "Pietro 92P", "Upgraded Pietro 92P",
+      "Mustang M45", "Mustang M45 Surplus",
+      "Mich & Kosi 4605", "Upgraded Mich & Kosi 4605",
+      "Neuhausen P9A", "Updated Neuhausen P9A",
+      "Millsburg 780A1", "Upgraded Millsburg 780A1",
+      "9x19mm Bennetti Magazine", ".40 Automatic Pierto",
+      ".45 Mitch & Kosi Magazine", "9x19mm Straight Magazine",
+      "9x19mm Curved Magazine", "9x19mm 33rd Magazine", "12 Gauge",
+    ],
+  },
+  albert: {
+    label: "Albert & Heinrich Arms",
+    items: [
+      "Albert & Heinrich SM9", "Upgraded Albert & Heinrich SM9",
+      "Albert & Heinrich LM2", "Albert & Heinrich HR4",
+      "7.62x51mm Albert & Heinrich",
+    ],
+  },
+  russian_firearms: {
+    label: "Russian Firearms",
+    items: [
+      "Krovin Vintovka 1891", "Upgraded Krovin Vintovka 1891",
+      "Fedotovo Karabin 1949", "Upgraded Fedotovo Karabin 1949",
+      "Krovin Strelok 1891", "Upgraded Krovin Strelok 1891",
+      "Klimovsk Drobovik Spetsialniy 23K",
+      "Afanasev Pistolet 1951",
+      "Kilikov Machinu 1962", "Upgraded Kilikov Machinu 1962",
+      "Imported Kilikov 54U", "Kilikov 54U", "Upgraded Kilikov 54U",
+      "Kovrovsky Avtomat 1941",
+      "Kilikov Pulemyot 1971", "Upgraded Kilikov Pulemyot 1971",
+      "Protec DC9",
+      "Cobray MP18", "Upgraded Cobray MP18",
+    ],
+  },
+  russian_ammo: {
+    label: "Russian Ammunition & Other",
+    items: [
+      "5.45x39mm Kilkov Magazine", "5.45x39mm Kilikov Extended",
+      "5.56x45mm STANORD (20rd & 30rd)", "5.56 Box Magazine", "5.56 Box Magazine (Tracer)",
+      "9x18mm Afanasev",
+      "7.62x25mm Tula Kovrovksy", "7.62x25mm 71rd Drum",
+      "7.62x39mm Klikov", "7.62x39mm Klikov Extended",
+      "7.62x39mm Klikov Drum", "7.62x39 Clip",
+      "7.62x54mmR Krovin", "7.62x54mm Rimmed",
+      "23x75mm Rimmed",
+      "Taser Cartridge",
+    ],
+  },
+};
+
+// ─── CustomId constants ───────────────────────────────────────────────────────
+
+export const FILING_CAT_SELECT_ID = "filing_cat_select";
+export const FILING_ITEM_SELECT_PREFIX = "filing_item_select";
+
+// ─── Pending item store (category select → item select → modal) ───────────────
+
+/** Holds selected item names while the user fills in the modal. Keyed by userId. */
+const pendingItems = new Map<string, string[]>();
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function buildCategorySelect(): ActionRowBuilder<StringSelectMenuBuilder> {
+  const options = [
+    ...Object.entries(CATEGORIES).map(([key, cat]) => ({
+      label: cat.label,
+      value: key,
+    })),
+    { label: "None / No Seizure", value: "none" },
+  ];
+  return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+    new StringSelectMenuBuilder()
+      .setCustomId(FILING_CAT_SELECT_ID)
+      .setPlaceholder("Select a seized item category…")
+      .addOptions(options),
+  );
 }
 
 export function buildFilingModal(): ModalBuilder {
@@ -63,16 +158,83 @@ export function buildFilingModal(): ModalBuilder {
           .setRequired(true)
           .setMaxLength(50),
       ),
-      new ActionRowBuilder<TextInputBuilder>().addComponents(
-        new TextInputBuilder()
-          .setCustomId("seized")
-          .setLabel("Seized Items (optional)")
-          .setStyle(TextInputStyle.Paragraph)
-          .setPlaceholder("One item per line, e.g.:\n2x Hawthorne M80\n1x Bag of Nopyfruit")
-          .setRequired(false)
-          .setMaxLength(1000),
-      ),
     );
+}
+
+// ─── Interaction handlers ─────────────────────────────────────────────────────
+
+/** Entry point from /filing and the panel button. Shows the category select. */
+export async function showCategorySelectMenu(
+  interaction: ChatInputCommandInteraction | ButtonInteraction,
+): Promise<void> {
+  await interaction.reply({
+    content: "**Step 1 of 2** — Select the category of seized items:",
+    components: [buildCategorySelect()],
+    flags: MessageFlags.Ephemeral,
+  });
+}
+
+export async function handleFilingCommand(
+  interaction: ChatInputCommandInteraction,
+): Promise<void> {
+  const allowed = await getAllowedRoles();
+  if (!checkAccess(interaction, allowed)) {
+    await interaction.reply({
+      content: "You do not have access to this command.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+  await showCategorySelectMenu(interaction);
+}
+
+export async function handleCatSelect(
+  interaction: StringSelectMenuInteraction,
+): Promise<void> {
+  const catKey = interaction.values[0];
+
+  if (catKey === "none") {
+    pendingItems.set(interaction.user.id, []);
+    await interaction.showModal(buildFilingModal());
+    return;
+  }
+
+  const cat = CATEGORIES[catKey];
+  if (!cat) {
+    await interaction.update({ content: "Unknown category — please try again.", components: [] });
+    return;
+  }
+
+  const options = cat.items.map((item, idx) => ({
+    label: item.length > 100 ? item.slice(0, 97) + "…" : item,
+    value: String(idx),
+  }));
+
+  const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+    new StringSelectMenuBuilder()
+      .setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${catKey}`)
+      .setPlaceholder("Pick items (hold Ctrl/Cmd to select multiple)")
+      .setMinValues(1)
+      .setMaxValues(Math.min(options.length, 10))
+      .addOptions(options),
+  );
+
+  await interaction.update({
+    content: `**Step 2 of 2** — Select seized items from **${cat.label}**:`,
+    components: [row],
+  });
+}
+
+export async function handleItemSelect(
+  interaction: StringSelectMenuInteraction,
+): Promise<void> {
+  const catKey = interaction.customId.slice(FILING_ITEM_SELECT_PREFIX.length + 1);
+  const cat = CATEGORIES[catKey];
+
+  const items = interaction.values.map((val) => cat?.items[parseInt(val, 10)] ?? val);
+  pendingItems.set(interaction.user.id, items);
+
+  await interaction.showModal(buildFilingModal());
 }
 
 export async function handleFilingModal(
@@ -82,7 +244,12 @@ export async function handleFilingModal(
 
   const username = interaction.fields.getTextInputValue("username");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
-  const seized = interaction.fields.getTextInputValue("seized").trim();
+
+  const items = pendingItems.get(interaction.user.id) ?? [];
+  pendingItems.delete(interaction.user.id);
+
+  // Store as "1x Item Name" so the /statistics seized parser counts correctly
+  const seized = items.map((item) => `1x ${item}`).join(", ");
 
   try {
     await appendFiling({
@@ -99,7 +266,9 @@ export async function handleFilingModal(
       .addFields(
         { name: "Offender's Username", value: username, inline: true },
         { name: "Date of Incident", value: dateOfIncident, inline: true },
-        ...(seized ? [{ name: "Seized", value: seized, inline: false }] : []),
+        ...(items.length > 0
+          ? [{ name: "Seized", value: items.join("\n"), inline: false }]
+          : []),
       )
       .setFooter({ text: `Filed by ${interaction.user.tag} (${interaction.user.id})` })
       .setTimestamp();

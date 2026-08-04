@@ -10,7 +10,7 @@ import {
   PermissionFlagsBits,
 } from "discord.js";
 import { getAllowedRoles, checkAccess } from "../access";
-import { showFilingModal } from "./filing";
+import { showCategorySelectMenu } from "./filing";
 
 export const PANEL_BUTTON_ID = "panel_file_report";
 
@@ -62,5 +62,5 @@ export async function handlePanelButton(
     return;
   }
 
-  await showFilingModal(interaction);
+  await showCategorySelectMenu(interaction);
 }
