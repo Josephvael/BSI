@@ -43,9 +43,8 @@ export async function handleStatisticsCommand(
       .slice(-5)
       .reverse()
       .map((f) => {
-        const plate = f.licensePlateAndVehicle || "—";
         const date = f.dateOfIncident || "?";
-        return `**${f.username}** | ${plate} | ${date}`;
+        return `**${f.username}** | ${date}`;
       })
       .join("\n");
 

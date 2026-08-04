@@ -24,8 +24,6 @@ const SHEET_ID_FILE = "./.bot-data/sheet-id.json";
 export interface FilingRecord {
   username: string;
   dateOfIncident: string;
-  licensePlateAndVehicle: string;
-  charges: string;
   seized: string;
   discordUserAndId: string;
   timestamp: string;
@@ -199,13 +197,11 @@ async function createSpreadsheet(): Promise<string> {
 
 export async function appendFiling(record: FilingRecord): Promise<void> {
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:G");
+  const range = encodeURIComponent("Sheet1!A:E");
   const body = JSON.stringify({
     values: [[
       record.username,
       record.dateOfIncident,
-      record.licensePlateAndVehicle,
-      record.charges,
       record.seized,
       record.discordUserAndId,
       record.timestamp,
@@ -223,7 +219,7 @@ export async function appendFiling(record: FilingRecord): Promise<void> {
     await writeFile(SHEET_ID_FILE, JSON.stringify({ sheetId: "" })).catch(() => {});
     sheetId = await createSpreadsheet();
     res = await sheetsRequest(
-      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:G")}:append?valueInputOption=USER_ENTERED`,
+      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:E")}:append?valueInputOption=USER_ENTERED`,
       { method: "POST", body },
     );
   }
@@ -236,7 +232,7 @@ export async function appendFiling(record: FilingRecord): Promise<void> {
 
 export async function getFilings(): Promise<FilingRecord[]> {
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:G");
+  const range = encodeURIComponent("Sheet1!A:E");
 
   let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}`,
@@ -264,16 +260,13 @@ export async function getFilings(): Promise<FilingRecord[]> {
   const rows = data.values ?? [];
 
   // Skip header row — columns:
-  // A: Username, B: Date of Incident, C: License Plate + Vehicle,
-  // D: Charges, E: Seized, F: Discord User + ID, G: Timestamp
+  // A: Username, B: Date of Incident, C: Seized, D: Discord User + ID, E: Timestamp
   return rows.slice(1).map((row) => ({
     username: row[0] ?? "",
     dateOfIncident: row[1] ?? "",
-    licensePlateAndVehicle: row[2] ?? "",
-    charges: row[3] ?? "",
-    seized: row[4] ?? "",
-    discordUserAndId: row[5] ?? "",
-    timestamp: row[6] ?? "",
+    seized: row[2] ?? "",
+    discordUserAndId: row[3] ?? "",
+    timestamp: row[4] ?? "",
   }));
 }
 

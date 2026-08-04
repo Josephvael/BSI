@@ -75623,13 +75623,11 @@ async function createSpreadsheet() {
 }
 async function appendFiling(record) {
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:G");
+  const range = encodeURIComponent("Sheet1!A:E");
   const body = JSON.stringify({
     values: [[
       record.username,
       record.dateOfIncident,
-      record.licensePlateAndVehicle,
-      record.charges,
       record.seized,
       record.discordUserAndId,
       record.timestamp
@@ -75645,7 +75643,7 @@ async function appendFiling(record) {
     });
     sheetId = await createSpreadsheet();
     res = await sheetsRequest(
-      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:G")}:append?valueInputOption=USER_ENTERED`,
+      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:E")}:append?valueInputOption=USER_ENTERED`,
       { method: "POST", body }
     );
   }
@@ -75656,7 +75654,7 @@ async function appendFiling(record) {
 }
 async function getFilings() {
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:G");
+  const range = encodeURIComponent("Sheet1!A:E");
   let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}`,
     { method: "GET" }
@@ -75680,11 +75678,9 @@ async function getFilings() {
   return rows.slice(1).map((row) => ({
     username: row[0] ?? "",
     dateOfIncident: row[1] ?? "",
-    licensePlateAndVehicle: row[2] ?? "",
-    charges: row[3] ?? "",
-    seized: row[4] ?? "",
-    discordUserAndId: row[5] ?? "",
-    timestamp: row[6] ?? ""
+    seized: row[2] ?? "",
+    discordUserAndId: row[3] ?? "",
+    timestamp: row[4] ?? ""
   }));
 }
 async function getSheetUrl() {
@@ -75777,12 +75773,6 @@ function buildFilingModal() {
       new import_discord2.TextInputBuilder().setCustomId("date_of_incident").setLabel("Date of Incident").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. 2024-01-15 or Jan 15, 2024").setRequired(true).setMaxLength(50)
     ),
     new import_discord2.ActionRowBuilder().addComponents(
-      new import_discord2.TextInputBuilder().setCustomId("license_plate_vehicle").setLabel("License Plate + Vehicle Type & Color").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. ABC-1234 | Blue Honda Civic").setRequired(true).setMaxLength(150)
-    ),
-    new import_discord2.ActionRowBuilder().addComponents(
-      new import_discord2.TextInputBuilder().setCustomId("charges").setLabel("Charges").setStyle(import_discord2.TextInputStyle.Paragraph).setPlaceholder("List all charges, one per line").setRequired(true).setMaxLength(1e3)
-    ),
-    new import_discord2.ActionRowBuilder().addComponents(
       new import_discord2.TextInputBuilder().setCustomId("seized").setLabel("Seized (optional)").setStyle(import_discord2.TextInputStyle.Short).setPlaceholder("e.g. Firearm, 2x bags narcotics").setRequired(false).setMaxLength(300)
     )
   );
@@ -75792,15 +75782,11 @@ async function handleFilingModal(interaction) {
   await interaction.deferReply({ flags: import_discord2.MessageFlags.Ephemeral });
   const username = interaction.fields.getTextInputValue("username");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
-  const licensePlateAndVehicle = interaction.fields.getTextInputValue("license_plate_vehicle");
-  const charges = interaction.fields.getTextInputValue("charges");
   const seized = interaction.fields.getTextInputValue("seized") || "";
   try {
     await appendFiling({
       username,
       dateOfIncident,
-      licensePlateAndVehicle,
-      charges,
       seized,
       discordUserAndId: `${interaction.user.tag} | ${interaction.user.id}`,
       timestamp: (/* @__PURE__ */ new Date()).toISOString()
@@ -75808,8 +75794,6 @@ async function handleFilingModal(interaction) {
     const embed = new import_discord2.EmbedBuilder().setColor(5763719).setTitle("Filing Submitted").addFields(
       { name: "Username", value: username, inline: true },
       { name: "Date of Incident", value: dateOfIncident, inline: true },
-      { name: "License Plate + Vehicle", value: licensePlateAndVehicle, inline: false },
-      { name: "Charges", value: charges, inline: false },
       ...seized ? [{ name: "Seized", value: seized, inline: false }] : []
     ).setFooter({ text: `Filed by ${interaction.user.tag} (${interaction.user.id})` }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
@@ -75843,9 +75827,8 @@ async function handleStatisticsCommand(interaction) {
     }
     const seizedCount = filings.filter((f) => f.seized && f.seized.trim().length > 0).length;
     const recent = filings.slice(-5).reverse().map((f) => {
-      const plate = f.licensePlateAndVehicle || "\u2014";
       const date = f.dateOfIncident || "?";
-      return `**${f.username}** | ${plate} | ${date}`;
+      return `**${f.username}** | ${date}`;
     }).join("\n");
     const embed = new import_discord3.EmbedBuilder().setColor(5793266).setTitle("Filing Statistics").setURL(sheetUrl).addFields(
       { name: "Total Filings", value: `${filings.length}`, inline: true },

@@ -58,24 +58,6 @@ export function buildFilingModal(): ModalBuilder {
     ),
     new ActionRowBuilder<TextInputBuilder>().addComponents(
       new TextInputBuilder()
-        .setCustomId("license_plate_vehicle")
-        .setLabel("License Plate + Vehicle Type & Color")
-        .setStyle(TextInputStyle.Short)
-        .setPlaceholder("e.g. ABC-1234 | Blue Honda Civic")
-        .setRequired(true)
-        .setMaxLength(150),
-    ),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(
-      new TextInputBuilder()
-        .setCustomId("charges")
-        .setLabel("Charges")
-        .setStyle(TextInputStyle.Paragraph)
-        .setPlaceholder("List all charges, one per line")
-        .setRequired(true)
-        .setMaxLength(1000),
-    ),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(
-      new TextInputBuilder()
         .setCustomId("seized")
         .setLabel("Seized (optional)")
         .setStyle(TextInputStyle.Short)
@@ -95,16 +77,12 @@ export async function handleFilingModal(
 
   const username = interaction.fields.getTextInputValue("username");
   const dateOfIncident = interaction.fields.getTextInputValue("date_of_incident");
-  const licensePlateAndVehicle = interaction.fields.getTextInputValue("license_plate_vehicle");
-  const charges = interaction.fields.getTextInputValue("charges");
   const seized = interaction.fields.getTextInputValue("seized") || "";
 
   try {
     await appendFiling({
       username,
       dateOfIncident,
-      licensePlateAndVehicle,
-      charges,
       seized,
       discordUserAndId: `${interaction.user.tag} | ${interaction.user.id}`,
       timestamp: new Date().toISOString(),
@@ -116,8 +94,6 @@ export async function handleFilingModal(
       .addFields(
         { name: "Username", value: username, inline: true },
         { name: "Date of Incident", value: dateOfIncident, inline: true },
-        { name: "License Plate + Vehicle", value: licensePlateAndVehicle, inline: false },
-        { name: "Charges", value: charges, inline: false },
         ...(seized ? [{ name: "Seized", value: seized, inline: false }] : []),
       )
       .setFooter({ text: `Filed by ${interaction.user.tag} (${interaction.user.id})` })
