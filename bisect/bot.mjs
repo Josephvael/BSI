@@ -75504,6 +75504,8 @@ import { existsSync } from "node:fs";
 var SHEET_ID_FILE = "./.bot-data/sheet-id.json";
 var cachedToken = null;
 var cachedSheetId = null;
+var FILINGS_CACHE_TTL_MS = Number(process.env.FILINGS_CACHE_TTL_MS ?? 6e4);
+var filingsCache = null;
 function fixPrivateKey(key) {
   let fixed = key.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n").trim();
   const header = "-----BEGIN PRIVATE KEY-----";
@@ -75658,8 +75660,13 @@ async function appendFiling(record) {
     const err = await res.text();
     throw new Error(`Sheets append failed (${res.status}): ${err}`);
   }
+  filingsCache = null;
 }
 async function getFilings() {
+  const now = Date.now();
+  if (filingsCache && now - filingsCache.fetchedAt < FILINGS_CACHE_TTL_MS) {
+    return { records: filingsCache.records, fetchedAt: filingsCache.fetchedAt };
+  }
   let sheetId = await getSheetId();
   const range = encodeURIComponent("Sheet1!A:E");
   let res = await sheetsRequest(
@@ -75683,13 +75690,16 @@ async function getFilings() {
   }
   const data = await res.json();
   const rows = data.values ?? [];
-  return rows.slice(1).map((row) => ({
+  const records = rows.slice(1).map((row) => ({
     username: row[0] ?? "",
     dateOfIncident: row[1] ?? "",
     seized: row[2] ?? "",
     discordUserAndId: row[3] ?? "",
     timestamp: row[4] ?? ""
   }));
+  const fetchedAt = Date.now();
+  filingsCache = { records, fetchedAt };
+  return { records, fetchedAt };
 }
 async function getSheetUrl() {
   const sheetId = await getSheetId();
@@ -76216,7 +76226,8 @@ async function handleStatisticsCommand(interaction) {
   try {
     const windowOpt = interaction.options.getString("window") ?? "7d";
     const days = windowOpt === "30d" ? 30 : 7;
-    const [filings, sheetUrl] = await Promise.all([getFilings(), getSheetUrl()]);
+    const [filingsResult, sheetUrl] = await Promise.all([getFilings(), getSheetUrl()]);
+    const filings = filingsResult.records;
     if (filings.length === 0) {
       await interaction.editReply({
         embeds: [
@@ -76755,6 +76766,18 @@ async function handleGroupsCommand(interaction) {
 
 // src/bot/commands/search.ts
 var import_discord7 = __toESM(require_src(), 1);
+
+// src/bot/commands/search-match.ts
+function matchFilings(filings, query) {
+  const q = query.toLowerCase();
+  const exact = filings.filter((f) => f.username.toLowerCase() === q);
+  const near = filings.filter(
+    (f) => f.username.toLowerCase() !== q && f.username.toLowerCase().includes(q)
+  );
+  return { exact, near };
+}
+
+// src/bot/commands/search.ts
 var searchCommand = new import_discord7.SlashCommandBuilder().setName("search").setDescription("Look up a Roblox user and check all registered group memberships").addStringOption(
   (opt) => opt.setName("username").setDescription("Roblox username to search").setRequired(true)
 );
@@ -76770,13 +76793,14 @@ async function handleSearchCommand(interaction) {
   await interaction.deferReply();
   const username = interaction.options.getString("username", true);
   try {
-    const fetchedAt = Math.floor(Date.now() / 1e3);
-    const [user, groups, allFilings, sheetUrl] = await Promise.all([
+    const [user, groups, filingsResult, sheetUrl] = await Promise.all([
       getUserByUsername(username),
       getGroups(),
       getFilings(),
       getSheetUrl()
     ]);
+    const allFilings = filingsResult.records;
+    const fetchedAt = Math.floor(filingsResult.fetchedAt / 1e3);
     if (!user) {
       await interaction.editReply({
         content: `No Roblox user found with username **${username}**.`
@@ -76823,11 +76847,8 @@ async function handleSearchCommand(interaction) {
         inline: false
       });
     }
-    const usernameLower = username.toLowerCase();
-    const userFilings = allFilings.filter(
-      (f) => f.username.toLowerCase() === usernameLower
-    );
-    if (userFilings.length === 0) {
+    const { exact: exactFilings, near: nearFilings } = matchFilings(allFilings, username);
+    if (exactFilings.length === 0 && nearFilings.length === 0) {
       embed.addFields({
         name: "Filing History",
         value: `No filings on record.
@@ -76835,15 +76856,35 @@ async function handleSearchCommand(interaction) {
         inline: false
       });
     } else {
-      const recent = userFilings.slice(-5).reverse();
-      const lines = recent.map((f) => `\u2022 **${f.dateOfIncident}** \u2014 ${f.seized}`);
-      if (userFilings.length > 5) {
-        lines.push(`[View all ${userFilings.length} filings](${sheetUrl})`);
+      const filingLines = [];
+      if (exactFilings.length > 0) {
+        const recent = exactFilings.slice(-5).reverse();
+        const lines = recent.map((f) => `\u2022 **${f.dateOfIncident}** \u2014 ${f.seized}`);
+        if (exactFilings.length > 5) {
+          lines.push(`[View all ${exactFilings.length} filings](${sheetUrl})`);
+        }
+        filingLines.push(...lines);
+      } else {
+        filingLines.push("No exact matches on record.");
       }
-      lines.push(`-# Last updated: <t:${fetchedAt}:R>`);
+      if (nearFilings.length > 0) {
+        filingLines.push("\n**Possible matches**");
+        const recentNear = nearFilings.slice(-5).reverse();
+        const nearLines = recentNear.map(
+          (f) => `\u2022 **${f.dateOfIncident}** \u2014 ${f.seized} *(stored as: ${f.username})*`
+        );
+        if (nearFilings.length > 5) {
+          nearLines.push(`[View all ${nearFilings.length} near-matches](${sheetUrl})`);
+        }
+        filingLines.push(...nearLines);
+      }
+      filingLines.push(`-# Last updated: <t:${fetchedAt}:R>`);
+      const totalExact = exactFilings.length;
+      const totalNear = nearFilings.length;
+      const headerLabel = totalNear > 0 ? `Filing History (${totalExact} exact, ${totalNear} possible)` : `Filing History (${totalExact} total)`;
       embed.addFields({
-        name: `Filing History (${userFilings.length} total)`,
-        value: lines.join("\n"),
+        name: headerLabel,
+        value: filingLines.join("\n"),
         inline: false
       });
     }

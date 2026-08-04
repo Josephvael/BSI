@@ -4,6 +4,7 @@ import { getGroups } from "../groupRegistry";
 import { getFilings, getSheetUrl } from "../sheets";
 import { getAllowedRoles, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
+import { matchFilings } from "./search-match";
 
 export const searchCommand = new SlashCommandBuilder()
   .setName("search")
@@ -107,15 +108,7 @@ export async function handleSearchCommand(
     }
 
     // Filing history section — exact match first, then partial/contains near-matches
-    const usernameLower = username.toLowerCase();
-    const exactFilings = allFilings.filter(
-      (f) => f.username.toLowerCase() === usernameLower,
-    );
-    const nearFilings = allFilings.filter(
-      (f) =>
-        f.username.toLowerCase() !== usernameLower &&
-        f.username.toLowerCase().includes(usernameLower),
-    );
+    const { exact: exactFilings, near: nearFilings } = matchFilings(allFilings, username);
 
     if (exactFilings.length === 0 && nearFilings.length === 0) {
       embed.addFields({
