@@ -75552,13 +75552,13 @@ function transformDataRows(rows) {
   return result;
 }
 async function runHeaderMigration(sheetId, request) {
-  const range = encodeURIComponent("Sheet1!A:G");
-  const getRes = await request(`/v4/spreadsheets/${sheetId}/values/${range}`, { method: "GET" });
+  const readRange = encodeURIComponent("Sheet1!A:G");
+  const getRes = await request(`/v4/spreadsheets/${sheetId}/values/${readRange}`, { method: "GET" });
   if (!getRes.ok) return { outcome: "get-failed", status: getRes.status };
   const data = await getRes.json();
   const rows = data.values ?? [];
   const existingHeader = rows[0] ?? [];
-  if (NEW_HEADER.every((col, i) => existingHeader[i] === col) && existingHeader.length === NEW_HEADER.length) {
+  if (existingHeader.length === NEW_HEADER.length && NEW_HEADER.every((col, i) => existingHeader[i] === col)) {
     return { outcome: "up-to-date" };
   }
   const isEmpty = existingHeader.length === 0;
@@ -75569,14 +75569,11 @@ async function runHeaderMigration(sheetId, request) {
   const dataRows = rows.slice(1);
   const newDataRows = transformDataRows(dataRows);
   const nonBlankOld = dataRows.filter((r) => r.some((c) => c?.trim())).length;
-  const clearRes = await request(
-    `/v4/spreadsheets/${sheetId}/values/${range}:clear`,
-    { method: "POST" }
-  );
-  if (!clearRes.ok) return { outcome: "clear-failed", status: clearRes.status };
   const allRows = [[...NEW_HEADER], ...newDataRows];
+  const rowSpan = Math.max(rows.length, allRows.length);
+  const writeRange = encodeURIComponent(`Sheet1!A1:G${rowSpan}`);
   const putRes = await request(
-    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A1")}?valueInputOption=USER_ENTERED`,
+    `/v4/spreadsheets/${sheetId}/values/${writeRange}?valueInputOption=USER_ENTERED`,
     { method: "PUT", body: JSON.stringify({ values: allRows }) }
   );
   if (!putRes.ok) {
@@ -75593,6 +75590,7 @@ var cachedSheetId = null;
 var FILINGS_CACHE_TTL_MS = Number(process.env.FILINGS_CACHE_TTL_MS ?? 6e4);
 var filingsCache = null;
 var headerMigrated = false;
+var migrationInFlight = null;
 function fixPrivateKey(key) {
   let fixed = key.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n").trim();
   const header = "-----BEGIN PRIVATE KEY-----";
@@ -75716,8 +75714,7 @@ async function createSpreadsheet() {
   );
   return sheetId;
 }
-async function migrateSheetHeader(sheetId) {
-  if (headerMigrated) return;
+async function doMigration(sheetId) {
   const result = await runHeaderMigration(
     sheetId,
     (path, options) => sheetsRequest(path, options)
@@ -75726,27 +75723,39 @@ async function migrateSheetHeader(sheetId) {
     case "up-to-date":
       logger.info("Sheet header migration: already up to date (7-column)");
       headerMigrated = true;
-      break;
+      return;
     case "migrated":
-      logger.info("Sheet header migration: upgraded from 5-column to 7-column header");
+      logger.info(
+        { rowsTransformed: result.rowsTransformed },
+        "Sheet header migration: upgraded to 7-column schema"
+      );
       headerMigrated = true;
-      break;
+      return;
     case "unknown-header":
       throw new Error(
-        `Sheet header migration: unrecognised header [${result.existingHeader.join(" | ")}] \u2014 filing aborted to prevent data misalignment. Fix the sheet header manually and restart the bot.`
+        `Sheet header migration: unrecognised header [${result.existingHeader.join(" | ")}] \u2014 filing aborted. Fix column A1 of Sheet1 to match the expected header and restart the bot.`
       );
     case "get-failed":
       throw new Error(
         `Sheet header migration: failed to read sheet (HTTP ${result.status}) \u2014 filing aborted`
       );
-    case "clear-failed":
-      throw new Error(
-        `Sheet header migration: failed to clear sheet before rewrite (HTTP ${result.status}) \u2014 filing aborted`
-      );
     case "put-failed":
       throw new Error(
         `Sheet header migration: failed to write updated schema (HTTP ${result.status}): ${result.body} \u2014 filing aborted`
       );
+  }
+}
+async function migrateSheetHeader(sheetId) {
+  if (headerMigrated) return;
+  if (migrationInFlight) {
+    await migrationInFlight;
+    return;
+  }
+  migrationInFlight = doMigration(sheetId);
+  try {
+    await migrationInFlight;
+  } finally {
+    migrationInFlight = null;
   }
 }
 function parseSeizedItems(seized) {

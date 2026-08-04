@@ -49,8 +49,14 @@ interface FilingsCache {
 
 let filingsCache: FilingsCache | null = null;
 
-/** Tracks whether the header migration has already run this session. */
+/** Tracks whether the header migration has already completed this session. */
 let headerMigrated = false;
+/**
+ * In-flight migration promise. If a second `appendFiling` call arrives while
+ * migration is running, it awaits this promise rather than starting a duplicate
+ * migration — preventing concurrent clear+write races.
+ */
+let migrationInFlight: Promise<void> | null = null;
 
 /**
  * Normalises a private key that may have been pasted with literal \n instead
@@ -224,9 +230,7 @@ async function createSpreadsheet(): Promise<string> {
  * Throws on Sheets API failures so `appendFiling` aborts rather than writing
  * new 7-column rows under a misaligned header.
  */
-async function migrateSheetHeader(sheetId: string): Promise<void> {
-  if (headerMigrated) return;
-
+async function doMigration(sheetId: string): Promise<void> {
   const result = await runHeaderMigration(sheetId, (path, options) =>
     sheetsRequest(path, options),
   );
@@ -235,19 +239,21 @@ async function migrateSheetHeader(sheetId: string): Promise<void> {
     case "up-to-date":
       logger.info("Sheet header migration: already up to date (7-column)");
       headerMigrated = true;
-      break;
+      return;
 
     case "migrated":
-      logger.info("Sheet header migration: upgraded from 5-column to 7-column header");
+      logger.info(
+        { rowsTransformed: result.rowsTransformed },
+        "Sheet header migration: upgraded to 7-column schema",
+      );
       headerMigrated = true;
-      break;
+      return;
 
     case "unknown-header":
-      // Cannot safely migrate or verify — abort so misaligned rows are never written.
-      // The session flag is intentionally NOT set so the next filing retries.
+      // Flag intentionally NOT set — allow retry after staff corrects the header.
       throw new Error(
         `Sheet header migration: unrecognised header [${result.existingHeader.join(" | ")}] — ` +
-        "filing aborted to prevent data misalignment. Fix the sheet header manually and restart the bot.",
+        "filing aborted. Fix column A1 of Sheet1 to match the expected header and restart the bot.",
       );
 
     case "get-failed":
@@ -255,15 +261,32 @@ async function migrateSheetHeader(sheetId: string): Promise<void> {
         `Sheet header migration: failed to read sheet (HTTP ${result.status}) — filing aborted`,
       );
 
-    case "clear-failed":
-      throw new Error(
-        `Sheet header migration: failed to clear sheet before rewrite (HTTP ${result.status}) — filing aborted`,
-      );
-
     case "put-failed":
       throw new Error(
         `Sheet header migration: failed to write updated schema (HTTP ${result.status}): ${result.body} — filing aborted`,
       );
+  }
+}
+
+/**
+ * Ensures the sheet header is on the current 7-column schema before any row is
+ * appended. Runs at most once per session; concurrent calls await a single
+ * in-flight migration rather than racing.
+ */
+async function migrateSheetHeader(sheetId: string): Promise<void> {
+  if (headerMigrated) return;
+
+  // Second caller waits for the already-running migration to finish.
+  if (migrationInFlight) {
+    await migrationInFlight;
+    return;
+  }
+
+  migrationInFlight = doMigration(sheetId);
+  try {
+    await migrationInFlight;
+  } finally {
+    migrationInFlight = null;
   }
 }
 

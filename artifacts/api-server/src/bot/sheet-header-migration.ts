@@ -1,6 +1,14 @@
 /**
  * Pure header-migration logic, decoupled from the Sheets HTTP layer so it can
  * be unit-tested without network calls or Google credentials.
+ *
+ * Atomicity contract
+ * ──────────────────
+ * There is no separate clear step. Instead, `runHeaderMigration` issues a single
+ * PUT to a range that spans max(oldRowCount, newRowCount). The Sheets API clears
+ * cells inside the range that are not covered by the provided values, so excess
+ * legacy rows are wiped as part of the same write. If the PUT fails, the sheet
+ * is untouched — historical data is never lost.
  */
 
 export const OLD_HEADER = [
@@ -17,7 +25,6 @@ export type MigrationResult =
   | { outcome: "migrated"; rowsTransformed: number }
   | { outcome: "unknown-header"; existingHeader: string[] }
   | { outcome: "get-failed"; status: number }
-  | { outcome: "clear-failed"; status: number }
   | { outcome: "put-failed"; status: number; body: string };
 
 export interface MigrationResponse {
@@ -44,12 +51,12 @@ function parseOldSeized(seized: string): { name: string; qty: number }[] {
 }
 
 /**
- * Converts a list of raw sheet data rows (everything after the header) into
- * the new 7-column per-item format.
+ * Converts data rows (everything below the header) into the new 7-column
+ * per-item format.
  *
- * - New-format rows (column A starts with "FID-") pass through unchanged.
- * - Old-format rows (5-column) are expanded: one row per seized item, with a
- *   generated FID-legacy-XXXX Filing ID grouping the items together.
+ * - New-format rows (col A starts with "FID-") pass through unchanged.
+ * - Old-format rows (5-column) are expanded — one row per seized item —
+ *   grouped under a generated FID-legacy-XXXX Filing ID.
  * - Blank rows are dropped.
  */
 export function transformDataRows(rows: string[][]): string[][] {
@@ -60,7 +67,7 @@ export function transformDataRows(rows: string[][]): string[][] {
     if (!row.some((cell) => cell?.trim())) continue; // skip blank rows
 
     if (row[0]?.startsWith("FID-")) {
-      result.push(row); // already new format — pass through
+      result.push(row); // already new format
     } else {
       const [username = "", date = "", seized = "", discord = "", timestamp = ""] = row;
       const filingId = `FID-legacy-${String(legacyIdx++).padStart(4, "0")}`;
@@ -85,27 +92,32 @@ export function transformDataRows(rows: string[][]): string[][] {
  * Reads the full Sheet1 content, determines the current schema, and migrates
  * it to the 7-column layout when safe to do so.
  *
- * The old header is accepted only when ALL five columns match OLD_HEADER exactly
- * (not just the first column).  An unknown layout is never overwritten.
+ * Old-header detection requires ALL five column names to match OLD_HEADER exactly —
+ * not just the first column.  An unrecognised layout is never overwritten.
  *
- * On success the old data rows are also rewritten in the new per-item format so
- * Sheets formulas (=SUMIF, =SUM, pivot tables) work across historical filings.
+ * On success, legacy data rows are also rewritten in the new per-item format so
+ * Sheets formulas (=SUMIF, =SUM, pivot tables) work across all historical filings.
  *
- * Returns a discriminated union so the caller can decide how to handle each case:
- *   "up-to-date"    — header matches NEW_HEADER exactly; no work needed
+ * The write is atomic with respect to data loss:
+ *   • A single PUT covering max(oldRows, newRows) replaces all content in one call.
+ *   • The Sheets API clears cells within the range that have no corresponding value,
+ *     removing excess legacy rows without a separate clear request.
+ *   • If the PUT fails, the original sheet is untouched.
+ *
+ * Outcome discriminants:
+ *   "up-to-date"    — header matches NEW_HEADER exactly; no write issued
  *   "migrated"      — schema successfully upgraded
- *   "unknown-header"— unrecognised layout; caller must abort rather than append
+ *   "unknown-header"— unrecognised layout; caller must abort, not append
  *   "get-failed"    — Sheets GET returned non-OK; caller must abort
- *   "clear-failed"  — sheet clear returned non-OK; caller must abort
- *   "put-failed"    — Sheets PUT returned non-OK; caller must abort
+ *   "put-failed"    — Sheets PUT returned non-OK; original data intact; caller must abort
  */
 export async function runHeaderMigration(
   sheetId: string,
   request: SheetRequestFn,
 ): Promise<MigrationResult> {
-  // 1. Read ALL rows so data can be transformed alongside the header
-  const range = encodeURIComponent("Sheet1!A:G");
-  const getRes = await request(`/v4/spreadsheets/${sheetId}/values/${range}`, { method: "GET" });
+  // 1. Read ALL rows — needed both to inspect the header and to transform data
+  const readRange = encodeURIComponent("Sheet1!A:G");
+  const getRes = await request(`/v4/spreadsheets/${sheetId}/values/${readRange}`, { method: "GET" });
   if (!getRes.ok) return { outcome: "get-failed", status: getRes.status };
 
   const data = (await getRes.json()) as { values?: string[][] };
@@ -113,11 +125,14 @@ export async function runHeaderMigration(
   const existingHeader = rows[0] ?? [];
 
   // 2. Already on new schema — every column must match exactly
-  if (NEW_HEADER.every((col, i) => existingHeader[i] === col) && existingHeader.length === NEW_HEADER.length) {
+  if (
+    existingHeader.length === NEW_HEADER.length &&
+    NEW_HEADER.every((col, i) => existingHeader[i] === col)
+  ) {
     return { outcome: "up-to-date" };
   }
 
-  // 3. Classify: empty sheet OR exact old schema OR unknown
+  // 3. Classify: empty sheet OR exact old schema OR unknown (all columns must match)
   const isEmpty = existingHeader.length === 0;
   const isOldSchema =
     !isEmpty &&
@@ -128,22 +143,21 @@ export async function runHeaderMigration(
     return { outcome: "unknown-header", existingHeader };
   }
 
-  // 4. Transform data rows (old-format → new per-item format; new rows pass through)
+  // 4. Transform data rows to the new per-item format
   const dataRows = rows.slice(1);
   const newDataRows = transformDataRows(dataRows);
   const nonBlankOld = dataRows.filter((r) => r.some((c) => c?.trim())).length;
 
-  // 5. Clear the sheet so no old data remains under wrong headers
-  const clearRes = await request(
-    `/v4/spreadsheets/${sheetId}/values/${range}:clear`,
-    { method: "POST" },
-  );
-  if (!clearRes.ok) return { outcome: "clear-failed", status: clearRes.status };
-
-  // 6. Write new header + transformed rows in one PUT
+  // 5. Atomic overwrite: use a PUT range spanning max(old, new) row count so:
+  //    - All new rows are written
+  //    - Cells in range beyond the new data are cleared by the Sheets API in the
+  //      same request — no separate clear needed, no data loss if PUT fails
   const allRows: string[][] = [[...NEW_HEADER], ...newDataRows];
+  const rowSpan = Math.max(rows.length, allRows.length);
+  const writeRange = encodeURIComponent(`Sheet1!A1:G${rowSpan}`);
+
   const putRes = await request(
-    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A1")}?valueInputOption=USER_ENTERED`,
+    `/v4/spreadsheets/${sheetId}/values/${writeRange}?valueInputOption=USER_ENTERED`,
     { method: "PUT", body: JSON.stringify({ values: allRows }) },
   );
   if (!putRes.ok) {
