@@ -76831,13 +76831,43 @@ async function handleGroupsCommand(interaction) {
 var import_discord7 = __toESM(require_src(), 1);
 
 // src/bot/commands/search-match.ts
+function levenshteinDistance(a, b) {
+  const m = a.length;
+  const n = b.length;
+  let prev = Array.from({ length: n + 1 }, (_, i) => i);
+  for (let i = 1; i <= m; i++) {
+    const curr = [i];
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(
+        curr[j - 1] + 1,
+        // insertion
+        prev[j] + 1,
+        // deletion
+        prev[j - 1] + cost
+        // substitution
+      );
+    }
+    prev = curr;
+  }
+  return prev[n];
+}
 function matchFilings(filings, query) {
   const q = query.toLowerCase();
   const exact = filings.filter((f) => f.username.toLowerCase() === q);
   const near = filings.filter(
     (f) => f.username.toLowerCase() !== q && f.username.toLowerCase().includes(q)
   );
-  return { exact, near };
+  const exactAndNearLower = /* @__PURE__ */ new Set([
+    ...exact.map((f) => f.username.toLowerCase()),
+    ...near.map((f) => f.username.toLowerCase())
+  ]);
+  const fuzzy = filings.filter((f) => {
+    const storedLower = f.username.toLowerCase();
+    if (exactAndNearLower.has(storedLower)) return false;
+    return levenshteinDistance(storedLower, q) <= 2;
+  });
+  return { exact, near, fuzzy };
 }
 
 // src/bot/commands/search.ts
@@ -76910,8 +76940,8 @@ async function handleSearchCommand(interaction) {
         inline: false
       });
     }
-    const { exact: exactFilings, near: nearFilings } = matchFilings(allFilings, username);
-    if (exactFilings.length === 0 && nearFilings.length === 0) {
+    const { exact: exactFilings, near: nearFilings, fuzzy: fuzzyFilings } = matchFilings(allFilings, username);
+    if (exactFilings.length === 0 && nearFilings.length === 0 && fuzzyFilings.length === 0) {
       embed.addFields({
         name: "Filing History",
         value: `No filings on record.
@@ -76941,10 +76971,30 @@ async function handleSearchCommand(interaction) {
         }
         filingLines.push(...nearLines);
       }
+      if (fuzzyFilings.length > 0) {
+        filingLines.push("\n**Fuzzy matches (possible typos)**");
+        const recentFuzzy = fuzzyFilings.slice(-5).reverse();
+        const fuzzyLines = recentFuzzy.map(
+          (f) => `\u2022 **${f.dateOfIncident}** \u2014 ${f.seized} *(stored as: ${f.username})*`
+        );
+        if (fuzzyFilings.length > 5) {
+          fuzzyLines.push(`[View all ${fuzzyFilings.length} fuzzy matches](${sheetUrl})`);
+        }
+        filingLines.push(...fuzzyLines);
+      }
       filingLines.push(`-# Last updated: <t:${fetchedAt}:R>`);
       const totalExact = exactFilings.length;
       const totalNear = nearFilings.length;
-      const headerLabel = totalNear > 0 ? `Filing History (${totalExact} exact, ${totalNear} possible)` : `Filing History (${totalExact} total)`;
+      const totalFuzzy = fuzzyFilings.length;
+      let headerLabel;
+      if (totalNear > 0 || totalFuzzy > 0) {
+        const parts = [`${totalExact} exact`];
+        if (totalNear > 0) parts.push(`${totalNear} possible`);
+        if (totalFuzzy > 0) parts.push(`${totalFuzzy} fuzzy`);
+        headerLabel = `Filing History (${parts.join(", ")})`;
+      } else {
+        headerLabel = `Filing History (${totalExact} total)`;
+      }
       embed.addFields({
         name: headerLabel,
         value: filingLines.join("\n"),

@@ -107,10 +107,10 @@ export async function handleSearchCommand(
       });
     }
 
-    // Filing history section — exact match first, then partial/contains near-matches
-    const { exact: exactFilings, near: nearFilings } = matchFilings(allFilings, username);
+    // Filing history section — exact match first, then partial/contains, then fuzzy
+    const { exact: exactFilings, near: nearFilings, fuzzy: fuzzyFilings } = matchFilings(allFilings, username);
 
-    if (exactFilings.length === 0 && nearFilings.length === 0) {
+    if (exactFilings.length === 0 && nearFilings.length === 0 && fuzzyFilings.length === 0) {
       embed.addFields({
         name: "Filing History",
         value: `No filings on record.\n-# Last updated: <t:${fetchedAt}:R>`,
@@ -143,14 +143,32 @@ export async function handleSearchCommand(
         filingLines.push(...nearLines);
       }
 
+      if (fuzzyFilings.length > 0) {
+        filingLines.push("\n**Fuzzy matches (possible typos)**");
+        const recentFuzzy = fuzzyFilings.slice(-5).reverse();
+        const fuzzyLines = recentFuzzy.map(
+          (f) => `• **${f.dateOfIncident}** — ${f.seized} *(stored as: ${f.username})*`,
+        );
+        if (fuzzyFilings.length > 5) {
+          fuzzyLines.push(`[View all ${fuzzyFilings.length} fuzzy matches](${sheetUrl})`);
+        }
+        filingLines.push(...fuzzyLines);
+      }
+
       filingLines.push(`-# Last updated: <t:${fetchedAt}:R>`);
 
       const totalExact = exactFilings.length;
       const totalNear = nearFilings.length;
-      const headerLabel =
-        totalNear > 0
-          ? `Filing History (${totalExact} exact, ${totalNear} possible)`
-          : `Filing History (${totalExact} total)`;
+      const totalFuzzy = fuzzyFilings.length;
+      let headerLabel: string;
+      if (totalNear > 0 || totalFuzzy > 0) {
+        const parts = [`${totalExact} exact`];
+        if (totalNear > 0) parts.push(`${totalNear} possible`);
+        if (totalFuzzy > 0) parts.push(`${totalFuzzy} fuzzy`);
+        headerLabel = `Filing History (${parts.join(", ")})`;
+      } else {
+        headerLabel = `Filing History (${totalExact} total)`;
+      }
 
       embed.addFields({
         name: headerLabel,
