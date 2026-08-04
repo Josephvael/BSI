@@ -1,0 +1,120 @@
+WEAPONS
+Albert & Heinrich SM9
+Albert & Heinrich LM2
+Albert & Heinrich HR4
+Afanasev Pistolet 1951
+Bennetti 15
+Bennetti 17
+Cobray MP18
+Delino R20
+Delino R20P
+Delino R21
+Delino R21A
+Delino R21B
+Delino R21M
+Delino XM21
+Delino XR21
+Delino Defender
+Delino Special
+Fedotovo Karabin 1949
+Hawthorne 500
+Hawthorne 800
+Hawthorne M80
+Hawthorne M80A1
+Hawthorne M80A2
+Hawthorne M80T
+Kilikov 54U
+Kilikov M62
+Krovin M9871
+Krovin Strelok 1981
+Krovin Vintovka 1891
+Kilikov Machinu 1962
+Kilikov Pulemyot 1971
+Kovrovsky Avtomat 1941
+Klimosvk Drobovik S23K
+Millsburg 780A1
+Mustang M45
+Pietro 92P
+Protec DC9
+R84 Anti-Tank Launcher
+Xion XI26
+
+AMMUNITION
+5.45x39mm Kilkov Magazine
+5.45x39mm Kilikov Extended
+30rd 5.56x45mm STANORD
+20rd 5.56x45mm STANORD
+5.56 Box Magazine
+5.56 Box Magazine (Tracer)
+9x19mm Bennetti Magazine
+9x19mm Straight Magazine
+9x19mm Curved Magazine
+9x19mm 33rd Magazine
+9x18mm Afanasev
+.40 Automatic Pierto
+.45 Automatic Delino Magazine
+.45 Mitch & Kosi Magazine
+7.62x25mm Tula Kovrovksy
+7.62x25mm 71rd Drum
+7.62x39mm Klikov Drum
+7.62x39mm Klikov
+7.62x39mm Klikov Extended
+7.62x39 Clip
+7.62x51mm Albert & Heinrich
+7.62x54mmR Krovin
+7.62x54mm Rimmed
+23x75mm Rimmed
+10rd .308 Frankford Hawthorne
+5rd .308 Frankford
+.44 Delino
+12 Gauge
+Taser Cartridge
+
+WEAPON KITS
+Assault Rifle Kit
+Assault Carbine Kit
+Battle Rifle Kit
+Carbine Kit
+Light Machine Gun Kit
+Machine Pistol Kit
+Pistol Kit
+Revolver Kit
+Rifle Kit
+Shotgun Kit
+Sniper Rifle Kit
+Submachine Gun Kit
+
+STOLEN GOODS
+Bag of Dirty Money
+Folder of Military Intelligence
+Military Encryption Card
+
+NARCOTICS
+Bag of Nopyfruit
+Barrel of Nopyfruit Concentrate
+Bag of Gushie
+Barrel of Solution
+Box of Plastic Bags
+Jarniwus
+Jarniwus Seeds
+
+ILLICIT CARGO
+Crate of Illegal Firearm Parts
+Crate of Illegal Ammunition
+Coin-o-Matic Business Conveyer
+
+DESTRUCTIVE DEVICES
+Barrel of Thermite
+Detonator
+Encrypted Phone
+Jerrybomb
+Molotov
+Tear Gas
+
+MISC. ITEMS
+Cones
+Handcuffs
+Highland NR28
+Lockpicks
+Spike Strips
+The Underground' Business Card
