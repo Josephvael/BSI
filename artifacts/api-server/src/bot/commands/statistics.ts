@@ -1,11 +1,62 @@
 import { SlashCommandBuilder, EmbedBuilder, MessageFlags, ChatInputCommandInteraction } from "discord.js";
-import { getFilings, getSheetUrl } from "../sheets";
+import { getFilings, getSheetUrl, type FilingRecord } from "../sheets";
 import { getAllowedRoles, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
 
 export const statisticsCommand = new SlashCommandBuilder()
   .setName("statistics")
-  .setDescription("Show filing statistics — total count, top charges, and recent entries");
+  .setDescription("Show filing statistics — totals, recent trends, and seized item breakdown");
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Parse seized string "2x Hawthorne M80, 1x Jarniwus" → Map of item → total qty */
+function parseSeized(raw: string): Map<string, number> {
+  const out = new Map<string, number>();
+  if (!raw?.trim() || raw.trim().toLowerCase() === "none") return out;
+  for (const part of raw.split(",")) {
+    const match = part.trim().match(/^(\d+)x\s+(.+)$/i);
+    if (match) {
+      const qty = parseInt(match[1], 10);
+      const name = match[2].trim();
+      out.set(name, (out.get(name) ?? 0) + qty);
+    }
+  }
+  return out;
+}
+
+/** Merge multiple item maps into one. */
+function mergeItemMaps(maps: Map<string, number>[]): Map<string, number> {
+  const result = new Map<string, number>();
+  for (const m of maps) {
+    for (const [k, v] of m) result.set(k, (result.get(k) ?? 0) + v);
+  }
+  return result;
+}
+
+/** Format a sorted item map as a display string, capped at `limit` entries. */
+function formatItemMap(items: Map<string, number>, limit = 8): string {
+  const sorted = [...items.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
+  return sorted.map(([name, count]) => `${name} — ${count}`).join("\n");
+}
+
+/**
+ * Try to get a filing's submission timestamp as a Date.
+ * Uses the bot-recorded `timestamp` (ISO string) which is always reliable.
+ * Falls back to parsing `dateOfIncident` as a last resort.
+ */
+function filingDate(f: FilingRecord): Date | null {
+  if (f.timestamp) {
+    const d = new Date(f.timestamp);
+    if (!isNaN(d.getTime())) return d;
+  }
+  if (f.dateOfIncident) {
+    const d = new Date(f.dateOfIncident);
+    if (!isNaN(d.getTime())) return d;
+  }
+  return null;
+}
+
+// ─── Command handler ──────────────────────────────────────────────────────────
 
 export async function handleStatisticsCommand(
   interaction: ChatInputCommandInteraction,
@@ -25,62 +76,79 @@ export async function handleStatisticsCommand(
     const [filings, sheetUrl] = await Promise.all([getFilings(), getSheetUrl()]);
 
     if (filings.length === 0) {
-      const embed = new EmbedBuilder()
-        .setColor(0x5865f2)
-        .setTitle("Filing Statistics")
-        .setDescription("No filings have been submitted yet.\nUse `/filing` to add the first one.")
-        .setTimestamp();
-
-      await interaction.editReply({ embeds: [embed] });
+      await interaction.editReply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(0x5865f2)
+            .setTitle("Filing Statistics")
+            .setDescription("No filings have been submitted yet.\nUse `/filing` to add the first one.")
+            .setTimestamp(),
+        ],
+      });
       return;
     }
 
-    // Count seized vs not seized
-    const seizedCount = filings.filter((f) => f.seized && f.seized.trim().length > 0).length;
+    // ── All-time seized aggregation ──────────────────────────────────────────
+    const allItemMaps = filings.map((f) => parseSeized(f.seized ?? ""));
+    const allTimeTotals = mergeItemMaps(allItemMaps);
+    const totalSeizedFilings = filings.filter((f) => f.seized?.trim()).length;
 
-    // Aggregate seized item counts — format: "2x Illegal Firearm(s), 1x Cocaine"
-    const itemTotals = new Map<string, number>();
-    for (const filing of filings) {
-      const raw = filing.seized?.trim();
-      if (!raw || raw.toLowerCase() === "none") continue;
-      for (const part of raw.split(",")) {
-        const match = part.trim().match(/^(\d+)x\s+(.+)$/i);
-        if (match) {
-          const qty = parseInt(match[1], 10);
-          const name = match[2].trim();
-          itemTotals.set(name, (itemTotals.get(name) ?? 0) + qty);
-        }
-      }
-    }
+    // ── Last-7-days window ───────────────────────────────────────────────────
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recentFilings = filings.filter((f) => {
+      const d = filingDate(f);
+      return d !== null && d >= cutoff;
+    });
 
-    const topItems = [...itemTotals.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .map(([name, count]) => `${name} — ${count}`)
-      .join("\n");
+    const recentItemMaps = recentFilings.map((f) => parseSeized(f.seized ?? ""));
+    const recentTotals = mergeItemMaps(recentItemMaps);
 
-    // Last 5 filings (most recent first)
-    const recent = filings
+    // ── Recent filings list (last 5, newest first) ───────────────────────────
+    const recentList = filings
       .slice(-5)
       .reverse()
-      .map((f) => {
-        const date = f.dateOfIncident || "?";
-        return `**${f.username}** | ${date}`;
-      })
+      .map((f) => `**${f.username || "?"}** | ${f.dateOfIncident || "?"}`)
       .join("\n");
 
+    // ── Build embed ──────────────────────────────────────────────────────────
     const embed = new EmbedBuilder()
       .setColor(0x5865f2)
       .setTitle("Filing Statistics")
       .setURL(sheetUrl)
       .addFields(
+        // Row 1 — headline numbers
         { name: "Total Filings", value: `${filings.length}`, inline: true },
-        { name: "With Seized Items", value: `${seizedCount}`, inline: true },
-        { name: "\u200B", value: "\u200B", inline: true },
-        ...(topItems
-          ? [{ name: "Top Seized Items", value: topItems }]
-          : []),
-        { name: "Recent Filings", value: recent },
-      )
+        { name: "With Seized Items", value: `${totalSeizedFilings}`, inline: true },
+        { name: "Last 7 Days", value: `${recentFilings.length} filing${recentFilings.length !== 1 ? "s" : ""}`, inline: true },
+      );
+
+    // All-time seized breakdown
+    if (allTimeTotals.size > 0) {
+      embed.addFields({
+        name: "Top Seized Items (All Time)",
+        value: formatItemMap(allTimeTotals),
+      });
+    }
+
+    // Last-7-days seized breakdown — only show if there's data
+    if (recentTotals.size > 0) {
+      embed.addFields({
+        name: "Seized Items — Last 7 Days",
+        value: formatItemMap(recentTotals),
+      });
+    } else {
+      embed.addFields({
+        name: "Seized Items — Last 7 Days",
+        value: recentFilings.length > 0
+          ? "No seized items recorded this week."
+          : "No filings in the last 7 days.",
+      });
+    }
+
+    // Recent filings list
+    embed.addFields({ name: "Recent Filings", value: recentList });
+
+    embed
       .setFooter({ text: "Click the title to open the full spreadsheet" })
       .setTimestamp();
 

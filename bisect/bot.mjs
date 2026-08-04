@@ -76059,7 +76059,42 @@ async function handleFilingModal(interaction) {
 
 // src/bot/commands/statistics.ts
 var import_discord3 = __toESM(require_src(), 1);
-var statisticsCommand = new import_discord3.SlashCommandBuilder().setName("statistics").setDescription("Show filing statistics \u2014 total count, top charges, and recent entries");
+var statisticsCommand = new import_discord3.SlashCommandBuilder().setName("statistics").setDescription("Show filing statistics \u2014 totals, recent trends, and seized item breakdown");
+function parseSeized(raw) {
+  const out = /* @__PURE__ */ new Map();
+  if (!raw?.trim() || raw.trim().toLowerCase() === "none") return out;
+  for (const part of raw.split(",")) {
+    const match = part.trim().match(/^(\d+)x\s+(.+)$/i);
+    if (match) {
+      const qty = parseInt(match[1], 10);
+      const name = match[2].trim();
+      out.set(name, (out.get(name) ?? 0) + qty);
+    }
+  }
+  return out;
+}
+function mergeItemMaps(maps) {
+  const result = /* @__PURE__ */ new Map();
+  for (const m of maps) {
+    for (const [k, v] of m) result.set(k, (result.get(k) ?? 0) + v);
+  }
+  return result;
+}
+function formatItemMap(items, limit = 8) {
+  const sorted = [...items.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
+  return sorted.map(([name, count]) => `${name} \u2014 ${count}`).join("\n");
+}
+function filingDate(f) {
+  if (f.timestamp) {
+    const d = new Date(f.timestamp);
+    if (!isNaN(d.getTime())) return d;
+  }
+  if (f.dateOfIncident) {
+    const d = new Date(f.dateOfIncident);
+    if (!isNaN(d.getTime())) return d;
+  }
+  return null;
+}
 async function handleStatisticsCommand(interaction) {
   const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
@@ -76073,36 +76108,49 @@ async function handleStatisticsCommand(interaction) {
   try {
     const [filings, sheetUrl] = await Promise.all([getFilings(), getSheetUrl()]);
     if (filings.length === 0) {
-      const embed2 = new import_discord3.EmbedBuilder().setColor(5793266).setTitle("Filing Statistics").setDescription("No filings have been submitted yet.\nUse `/filing` to add the first one.").setTimestamp();
-      await interaction.editReply({ embeds: [embed2] });
+      await interaction.editReply({
+        embeds: [
+          new import_discord3.EmbedBuilder().setColor(5793266).setTitle("Filing Statistics").setDescription("No filings have been submitted yet.\nUse `/filing` to add the first one.").setTimestamp()
+        ]
+      });
       return;
     }
-    const seizedCount = filings.filter((f) => f.seized && f.seized.trim().length > 0).length;
-    const itemTotals = /* @__PURE__ */ new Map();
-    for (const filing of filings) {
-      const raw = filing.seized?.trim();
-      if (!raw || raw.toLowerCase() === "none") continue;
-      for (const part of raw.split(",")) {
-        const match = part.trim().match(/^(\d+)x\s+(.+)$/i);
-        if (match) {
-          const qty = parseInt(match[1], 10);
-          const name = match[2].trim();
-          itemTotals.set(name, (itemTotals.get(name) ?? 0) + qty);
-        }
-      }
-    }
-    const topItems = [...itemTotals.entries()].sort((a, b) => b[1] - a[1]).map(([name, count]) => `${name} \u2014 ${count}`).join("\n");
-    const recent = filings.slice(-5).reverse().map((f) => {
-      const date = f.dateOfIncident || "?";
-      return `**${f.username}** | ${date}`;
-    }).join("\n");
+    const allItemMaps = filings.map((f) => parseSeized(f.seized ?? ""));
+    const allTimeTotals = mergeItemMaps(allItemMaps);
+    const totalSeizedFilings = filings.filter((f) => f.seized?.trim()).length;
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1e3);
+    const recentFilings = filings.filter((f) => {
+      const d = filingDate(f);
+      return d !== null && d >= cutoff;
+    });
+    const recentItemMaps = recentFilings.map((f) => parseSeized(f.seized ?? ""));
+    const recentTotals = mergeItemMaps(recentItemMaps);
+    const recentList = filings.slice(-5).reverse().map((f) => `**${f.username || "?"}** | ${f.dateOfIncident || "?"}`).join("\n");
     const embed = new import_discord3.EmbedBuilder().setColor(5793266).setTitle("Filing Statistics").setURL(sheetUrl).addFields(
+      // Row 1 — headline numbers
       { name: "Total Filings", value: `${filings.length}`, inline: true },
-      { name: "With Seized Items", value: `${seizedCount}`, inline: true },
-      { name: "\u200B", value: "\u200B", inline: true },
-      ...topItems ? [{ name: "Top Seized Items", value: topItems }] : [],
-      { name: "Recent Filings", value: recent }
-    ).setFooter({ text: "Click the title to open the full spreadsheet" }).setTimestamp();
+      { name: "With Seized Items", value: `${totalSeizedFilings}`, inline: true },
+      { name: "Last 7 Days", value: `${recentFilings.length} filing${recentFilings.length !== 1 ? "s" : ""}`, inline: true }
+    );
+    if (allTimeTotals.size > 0) {
+      embed.addFields({
+        name: "Top Seized Items (All Time)",
+        value: formatItemMap(allTimeTotals)
+      });
+    }
+    if (recentTotals.size > 0) {
+      embed.addFields({
+        name: "Seized Items \u2014 Last 7 Days",
+        value: formatItemMap(recentTotals)
+      });
+    } else {
+      embed.addFields({
+        name: "Seized Items \u2014 Last 7 Days",
+        value: recentFilings.length > 0 ? "No seized items recorded this week." : "No filings in the last 7 days."
+      });
+    }
+    embed.addFields({ name: "Recent Filings", value: recentList });
+    embed.setFooter({ text: "Click the title to open the full spreadsheet" }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
   } catch (err) {
     logger.error({ err }, "Failed to load statistics");
