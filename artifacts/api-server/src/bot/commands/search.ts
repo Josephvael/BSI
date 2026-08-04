@@ -1,6 +1,8 @@
-import { SlashCommandBuilder, EmbedBuilder, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder, EmbedBuilder, MessageFlags, ChatInputCommandInteraction } from "discord.js";
 import { getUserByUsername, getAvatarUrl, checkGroupMembership, profileUrl } from "../roblox";
 import { getGroups } from "../groupRegistry";
+import { getFilings, getSheetUrl } from "../sheets";
+import { getAllowedRoles, checkAccess } from "../access";
 import { logger } from "../../lib/logger";
 
 export const searchCommand = new SlashCommandBuilder()
@@ -13,15 +15,26 @@ export const searchCommand = new SlashCommandBuilder()
 export async function handleSearchCommand(
   interaction: ChatInputCommandInteraction,
 ): Promise<void> {
+  const allowed = await getAllowedRoles();
+  if (!checkAccess(interaction, allowed)) {
+    await interaction.reply({
+      content: "You do not have access to this command.",
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
   await interaction.deferReply();
 
   const username = interaction.options.getString("username", true);
 
   try {
-    // Fetch user and registered groups in parallel
-    const [user, groups] = await Promise.all([
+    // Fetch user, registered groups, and filing history in parallel
+    const [user, groups, allFilings, sheetUrl] = await Promise.all([
       getUserByUsername(username),
       getGroups(),
+      getFilings(),
+      getSheetUrl(),
     ]);
 
     if (!user) {
@@ -85,6 +98,32 @@ export async function handleSearchCommand(
       embed.addFields({
         name: `Group Memberships (${memberLines.length}/${groups.length} matched)`,
         value: allLines.join("\n"),
+        inline: false,
+      });
+    }
+
+    // Filing history section — case-insensitive match on Offender's Username
+    const usernameLower = username.toLowerCase();
+    const userFilings = allFilings.filter(
+      (f) => f.username.toLowerCase() === usernameLower,
+    );
+
+    if (userFilings.length === 0) {
+      embed.addFields({
+        name: "Filing History",
+        value: "No filings on record.",
+        inline: false,
+      });
+    } else {
+      // Most recent first (last rows in sheet = most recent)
+      const recent = userFilings.slice(-5).reverse();
+      const lines = recent.map((f) => `• **${f.dateOfIncident}** — ${f.seized}`);
+      if (userFilings.length > 5) {
+        lines.push(`[View all ${userFilings.length} filings](${sheetUrl})`);
+      }
+      embed.addFields({
+        name: `Filing History (${userFilings.length} total)`,
+        value: lines.join("\n"),
         inline: false,
       });
     }
