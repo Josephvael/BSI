@@ -37,6 +37,17 @@ interface ServiceAccount {
 let cachedToken: { token: string; expiresAt: number } | null = null;
 let cachedSheetId: string | null = null;
 
+/** TTL in milliseconds for the filings cache (default 60 s, override with FILINGS_CACHE_TTL_MS). */
+const FILINGS_CACHE_TTL_MS = Number(process.env.FILINGS_CACHE_TTL_MS ?? 60_000);
+
+interface FilingsCache {
+  records: FilingRecord[];
+  /** Unix timestamp (ms) when the data was fetched from Sheets. */
+  fetchedAt: number;
+}
+
+let filingsCache: FilingsCache | null = null;
+
 /**
  * Normalises a private key that may have been pasted with literal \n instead
  * of real newlines (common when copying from a JSON file into an env var field).
@@ -237,9 +248,25 @@ export async function appendFiling(record: FilingRecord): Promise<void> {
     const err = await res.text();
     throw new Error(`Sheets append failed (${res.status}): ${err}`);
   }
+
+  // Invalidate the filings cache so the next /search reflects the new entry
+  filingsCache = null;
 }
 
-export async function getFilings(): Promise<FilingRecord[]> {
+export interface FilingsResult {
+  records: FilingRecord[];
+  /** Unix timestamp (ms) when these records were fetched from Google Sheets. */
+  fetchedAt: number;
+}
+
+export async function getFilings(): Promise<FilingsResult> {
+  const now = Date.now();
+
+  // Return cached data if it's still fresh
+  if (filingsCache && now - filingsCache.fetchedAt < FILINGS_CACHE_TTL_MS) {
+    return { records: filingsCache.records, fetchedAt: filingsCache.fetchedAt };
+  }
+
   let sheetId = await getSheetId();
   const range = encodeURIComponent("Sheet1!A:E");
 
@@ -272,13 +299,17 @@ export async function getFilings(): Promise<FilingRecord[]> {
 
   // Skip header row — columns:
   // A: Username, B: Date of Incident, C: Seized, D: Discord User + ID, E: Timestamp
-  return rows.slice(1).map((row) => ({
+  const records: FilingRecord[] = rows.slice(1).map((row) => ({
     username: row[0] ?? "",
     dateOfIncident: row[1] ?? "",
     seized: row[2] ?? "",
     discordUserAndId: row[3] ?? "",
     timestamp: row[4] ?? "",
   }));
+
+  const fetchedAt = Date.now();
+  filingsCache = { records, fetchedAt };
+  return { records, fetchedAt };
 }
 
 export async function getSheetUrl(): Promise<string> {

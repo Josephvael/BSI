@@ -105,7 +105,8 @@ export async function handleStatisticsCommand(
     const windowOpt = (interaction.options.getString("window") ?? "7d") as "7d" | "30d";
     const days = windowOpt === "30d" ? 30 : 7;
 
-    const [filings, sheetUrl] = await Promise.all([getFilings(), getSheetUrl()]);
+    const [filingsResult, sheetUrl] = await Promise.all([getFilings(), getSheetUrl()]);
+    const filings = filingsResult.records;
 
     if (filings.length === 0) {
       await interaction.editReply({

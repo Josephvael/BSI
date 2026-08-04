@@ -29,16 +29,17 @@ export async function handleSearchCommand(
   const username = interaction.options.getString("username", true);
 
   try {
-    // Record fetch time before hitting the sheet so we can show freshness
-    const fetchedAt = Math.floor(Date.now() / 1000);
-
     // Fetch user, registered groups, and filing history in parallel
-    const [user, groups, allFilings, sheetUrl] = await Promise.all([
+    const [user, groups, filingsResult, sheetUrl] = await Promise.all([
       getUserByUsername(username),
       getGroups(),
       getFilings(),
       getSheetUrl(),
     ]);
+
+    const allFilings = filingsResult.records;
+    // Use the actual cache timestamp so "Last updated" reflects when Sheets was last queried
+    const fetchedAt = Math.floor(filingsResult.fetchedAt / 1000);
 
     if (!user) {
       await interaction.editReply({
