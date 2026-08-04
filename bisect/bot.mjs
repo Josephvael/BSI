@@ -75967,12 +75967,18 @@ async function handleFilingModal(interaction) {
 
 // src/bot/commands/statistics.ts
 var import_discord3 = __toESM(require_src(), 1);
-var statisticsCommand = new import_discord3.SlashCommandBuilder().setName("statistics").setDescription("Show filing statistics \u2014 totals, daily trend, and seized item breakdown");
+var statisticsCommand = new import_discord3.SlashCommandBuilder().setName("statistics").setDescription("Show filing statistics \u2014 totals, trend breakdown, and seized item summary").addStringOption(
+  (opt) => opt.setName("window").setDescription("Time window for the trend breakdown (default: 7d)").setRequired(false).addChoices(
+    { name: "Last 7 Days", value: "7d" },
+    { name: "Last 30 Days", value: "30d" }
+  )
+);
 function parseSeized(raw) {
   const out = /* @__PURE__ */ new Map();
   if (!raw?.trim() || raw.trim().toLowerCase() === "none") return out;
-  for (const part of raw.split(",")) {
-    const match = part.trim().match(/^(\d+)x\s+(.+)$/i);
+  const parts = raw.split(/[,\n]+/);
+  for (const part of parts) {
+    const match = part.trim().match(/^(\d+)\s*x\s+(.+)$/i);
     if (match) {
       const qty = parseInt(match[1], 10);
       const name = match[2].trim();
@@ -76009,6 +76015,13 @@ function filingDate(f) {
   }
   return null;
 }
+function trendLine(label, count, seized) {
+  const countStr = count === 0 ? "\u2014" : `${count} filing${count !== 1 ? "s" : ""}`;
+  if (seized.size === 0) return `\`${label}\`  ${countStr}`;
+  const [topItem, topQty] = [...seized.entries()].sort((a, b) => b[1] - a[1])[0];
+  const hint = seized.size > 1 ? `${topQty}\xD7 ${topItem} (+${seized.size - 1} more)` : `${topQty}\xD7 ${topItem}`;
+  return `\`${label}\`  ${countStr} \xB7 ${hint}`;
+}
 async function handleStatisticsCommand(interaction) {
   const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
@@ -76020,6 +76033,8 @@ async function handleStatisticsCommand(interaction) {
   }
   await interaction.deferReply();
   try {
+    const windowOpt = interaction.options.getString("window") ?? "7d";
+    const days = windowOpt === "30d" ? 30 : 7;
     const [filings, sheetUrl] = await Promise.all([getFilings(), getSheetUrl()]);
     if (filings.length === 0) {
       await interaction.editReply({
@@ -76032,62 +76047,70 @@ async function handleStatisticsCommand(interaction) {
     const allTimeTotals = mergeItemMaps(filings.map((f) => parseSeized(f.seized ?? "")));
     const totalSeizedFilings = filings.filter((f) => f.seized?.trim()).length;
     const now = /* @__PURE__ */ new Date();
-    const bucketKeys = [];
-    for (let i = 6; i >= 0; i--) {
+    const dailyKeys = [];
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date(now);
       d.setUTCDate(d.getUTCDate() - i);
-      bucketKeys.push(toDateKey(d));
+      dailyKeys.push(toDateKey(d));
     }
-    const bucketCounts = new Map(bucketKeys.map((k) => [k, 0]));
-    const bucketSeized = new Map(
-      bucketKeys.map((k) => [k, /* @__PURE__ */ new Map()])
-    );
+    const dailyCounts = new Map(dailyKeys.map((k) => [k, 0]));
+    const dailySeized = new Map(dailyKeys.map((k) => [k, /* @__PURE__ */ new Map()]));
     for (const filing of filings) {
       const d = filingDate(filing);
       if (!d) continue;
       const key = toDateKey(d);
-      if (!bucketCounts.has(key)) continue;
-      bucketCounts.set(key, (bucketCounts.get(key) ?? 0) + 1);
-      const merged = mergeItemMaps([
-        bucketSeized.get(key),
-        parseSeized(filing.seized ?? "")
-      ]);
-      bucketSeized.set(key, merged);
+      if (!dailyCounts.has(key)) continue;
+      dailyCounts.set(key, (dailyCounts.get(key) ?? 0) + 1);
+      dailySeized.set(key, mergeItemMaps([dailySeized.get(key), parseSeized(filing.seized ?? "")]));
     }
-    const trendLines = bucketKeys.map((key) => {
-      const count = bucketCounts.get(key) ?? 0;
-      const items = bucketSeized.get(key);
-      const label = formatDateKey(key);
-      const countStr = count === 0 ? "\u2014" : `${count} filing${count !== 1 ? "s" : ""}`;
-      if (items.size === 0) return `\`${label}\`  ${countStr}`;
-      const [topItem, topQty] = [...items.entries()].sort((a, b) => b[1] - a[1])[0];
-      const spikeHint = items.size > 1 ? `${topQty}\xD7 ${topItem} (+${items.size - 1} more)` : `${topQty}\xD7 ${topItem}`;
-      return `\`${label}\`  ${countStr} \xB7 ${spikeHint}`;
-    });
-    const weekTotal = [...bucketCounts.values()].reduce((a, b) => a + b, 0);
+    const windowTotal = [...dailyCounts.values()].reduce((a, b) => a + b, 0);
+    let trendLines;
+    let trendTitle;
+    if (windowOpt === "7d") {
+      trendLines = dailyKeys.map(
+        (key) => trendLine(formatDateKey(key), dailyCounts.get(key) ?? 0, dailySeized.get(key))
+      );
+      trendTitle = "Daily Breakdown \u2014 Last 7 Days";
+    } else {
+      const weekBuckets = [];
+      for (let w = 0; w < 5; w++) {
+        const weekDays = dailyKeys.slice(w * 6, w * 6 + 6);
+        if (weekDays.length === 0) continue;
+        const weekStart = weekDays[0];
+        const weekEnd = weekDays[weekDays.length - 1];
+        const startLabel = (/* @__PURE__ */ new Date(`${weekStart}T12:00:00Z`)).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          timeZone: "UTC"
+        });
+        const endLabel = (/* @__PURE__ */ new Date(`${weekEnd}T12:00:00Z`)).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          timeZone: "UTC"
+        });
+        const count = weekDays.reduce((s, k) => s + (dailyCounts.get(k) ?? 0), 0);
+        const seized = mergeItemMaps(weekDays.map((k) => dailySeized.get(k)));
+        weekBuckets.push({ label: `${startLabel}\u2013${endLabel}`, count, seized });
+      }
+      trendLines = weekBuckets.map((b) => trendLine(b.label, b.count, b.seized));
+      trendTitle = "Weekly Breakdown \u2014 Last 30 Days";
+    }
     const recentList = filings.slice(-5).reverse().map((f) => `**${f.username || "?"}** | ${f.dateOfIncident || "?"}`).join("\n");
+    const windowLabel = windowOpt === "7d" ? "Last 7 Days" : "Last 30 Days";
     const embed = new import_discord3.EmbedBuilder().setColor(5793266).setTitle("Filing Statistics").setURL(sheetUrl).addFields(
       { name: "Total Filings", value: `${filings.length}`, inline: true },
       { name: "With Seized Items", value: `${totalSeizedFilings}`, inline: true },
-      { name: "Last 7 Days", value: `${weekTotal} filing${weekTotal !== 1 ? "s" : ""}`, inline: true },
-      {
-        name: "Daily Breakdown \u2014 Last 7 Days",
-        value: trendLines.join("\n")
-      }
+      { name: windowLabel, value: `${windowTotal} filing${windowTotal !== 1 ? "s" : ""}`, inline: true },
+      { name: trendTitle, value: trendLines.join("\n") }
     );
     if (allTimeTotals.size > 0) {
-      embed.addFields({
-        name: "Top Seized Items (All Time)",
-        value: formatItemMap(allTimeTotals)
-      });
+      embed.addFields({ name: "Top Seized Items (All Time)", value: formatItemMap(allTimeTotals) });
     }
     embed.addFields({ name: "Recent Filings", value: recentList }).setFooter({ text: "Click the title to open the full spreadsheet" }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
   } catch (err) {
     logger.error({ err }, "Failed to load statistics");
-    await interaction.editReply({
-      content: "Could not load statistics. Please try again."
-    });
+    await interaction.editReply({ content: "Could not load statistics. Please try again." });
   }
 }
 

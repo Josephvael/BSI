@@ -5,16 +5,28 @@ import { logger } from "../../lib/logger";
 
 export const statisticsCommand = new SlashCommandBuilder()
   .setName("statistics")
-  .setDescription("Show filing statistics — totals, daily trend, and seized item breakdown");
+  .setDescription("Show filing statistics — totals, trend breakdown, and seized item summary")
+  .addStringOption((opt) =>
+    opt
+      .setName("window")
+      .setDescription("Time window for the trend breakdown (default: 7d)")
+      .setRequired(false)
+      .addChoices(
+        { name: "Last 7 Days", value: "7d" },
+        { name: "Last 30 Days", value: "30d" },
+      ),
+  );
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Parse "2x Hawthorne M80, 1x Jarniwus" → Map<item, total qty> */
+/** Parse "2x Hawthorne M80\n1x Jarniwus" or "2x Hawthorne M80, 1x Jarniwus" → Map */
 function parseSeized(raw: string): Map<string, number> {
   const out = new Map<string, number>();
   if (!raw?.trim() || raw.trim().toLowerCase() === "none") return out;
-  for (const part of raw.split(",")) {
-    const match = part.trim().match(/^(\d+)x\s+(.+)$/i);
+  // Support both comma-separated and newline-separated formats
+  const parts = raw.split(/[,\n]+/);
+  for (const part of parts) {
+    const match = part.trim().match(/^(\d+)\s*x\s+(.+)$/i);
     if (match) {
       const qty = parseInt(match[1], 10);
       const name = match[2].trim();
@@ -30,7 +42,6 @@ function mergeItemMaps(maps: Map<string, number>[]): Map<string, number> {
   return result;
 }
 
-/** Format top-N items from a map as "Item — count\n..." */
 function formatItemMap(items: Map<string, number>, limit = 8): string {
   return [...items.entries()]
     .sort((a, b) => b[1] - a[1])
@@ -39,26 +50,17 @@ function formatItemMap(items: Map<string, number>, limit = 8): string {
     .join("\n");
 }
 
-/** UTC date string "YYYY-MM-DD" for a given Date, used as bucket key. */
 function toDateKey(d: Date): string {
-  return d.toISOString().slice(0, 10);
+  return d.toISOString().slice(0, 10); // "YYYY-MM-DD"
 }
 
-/** Short display label for a date key, e.g. "Aug 04 (Sun)". */
 function formatDateKey(key: string): string {
-  const d = new Date(`${key}T12:00:00Z`); // noon UTC avoids DST edge cases
+  const d = new Date(`${key}T12:00:00Z`);
   return d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-    weekday: "short",
-    timeZone: "UTC",
+    month: "short", day: "2-digit", weekday: "short", timeZone: "UTC",
   });
 }
 
-/**
- * Return the bot-recorded submission timestamp as a Date.
- * Falls back to dateOfIncident if timestamp is absent/unparseable.
- */
 function filingDate(f: FilingRecord): Date | null {
   for (const raw of [f.timestamp, f.dateOfIncident]) {
     if (!raw) continue;
@@ -66,6 +68,15 @@ function filingDate(f: FilingRecord): Date | null {
     if (!isNaN(d.getTime())) return d;
   }
   return null;
+}
+
+/** Format one trend row — daily or weekly. */
+function trendLine(label: string, count: number, seized: Map<string, number>): string {
+  const countStr = count === 0 ? "—" : `${count} filing${count !== 1 ? "s" : ""}`;
+  if (seized.size === 0) return `\`${label}\`  ${countStr}`;
+  const [topItem, topQty] = [...seized.entries()].sort((a, b) => b[1] - a[1])[0];
+  const hint = seized.size > 1 ? `${topQty}× ${topItem} (+${seized.size - 1} more)` : `${topQty}× ${topItem}`;
+  return `\`${label}\`  ${countStr} · ${hint}`;
 }
 
 // ─── Command handler ──────────────────────────────────────────────────────────
@@ -85,6 +96,9 @@ export async function handleStatisticsCommand(
   await interaction.deferReply();
 
   try {
+    const windowOpt = (interaction.options.getString("window") ?? "7d") as "7d" | "30d";
+    const days = windowOpt === "30d" ? 30 : 7;
+
     const [filings, sheetUrl] = await Promise.all([getFilings(), getSheetUrl()]);
 
     if (filings.length === 0) {
@@ -104,52 +118,61 @@ export async function handleStatisticsCommand(
     const allTimeTotals = mergeItemMaps(filings.map((f) => parseSeized(f.seized ?? "")));
     const totalSeizedFilings = filings.filter((f) => f.seized?.trim()).length;
 
-    // ── Build 7-day buckets (today back through 6 days ago, UTC) ─────────────
+    // ── Build daily buckets for the chosen window ─────────────────────────────
     const now = new Date();
-    const bucketKeys: string[] = [];
-    for (let i = 6; i >= 0; i--) {
+    const dailyKeys: string[] = [];
+    for (let i = days - 1; i >= 0; i--) {
       const d = new Date(now);
       d.setUTCDate(d.getUTCDate() - i);
-      bucketKeys.push(toDateKey(d));
+      dailyKeys.push(toDateKey(d));
     }
 
-    // Map each bucket key → { count, seized items }
-    const bucketCounts = new Map<string, number>(bucketKeys.map((k) => [k, 0]));
-    const bucketSeized = new Map<string, Map<string, number>>(
-      bucketKeys.map((k) => [k, new Map()]),
-    );
+    const dailyCounts = new Map<string, number>(dailyKeys.map((k) => [k, 0]));
+    const dailySeized = new Map<string, Map<string, number>>(dailyKeys.map((k) => [k, new Map()]));
 
     for (const filing of filings) {
       const d = filingDate(filing);
       if (!d) continue;
       const key = toDateKey(d);
-      if (!bucketCounts.has(key)) continue; // outside our 7-day window
-      bucketCounts.set(key, (bucketCounts.get(key) ?? 0) + 1);
-      const merged = mergeItemMaps([
-        bucketSeized.get(key)!,
-        parseSeized(filing.seized ?? ""),
-      ]);
-      bucketSeized.set(key, merged);
+      if (!dailyCounts.has(key)) continue;
+      dailyCounts.set(key, (dailyCounts.get(key) ?? 0) + 1);
+      dailySeized.set(key, mergeItemMaps([dailySeized.get(key)!, parseSeized(filing.seized ?? "")]));
     }
 
-    // ── Format daily trend ───────────────────────────────────────────────────
-    const trendLines = bucketKeys.map((key) => {
-      const count = bucketCounts.get(key) ?? 0;
-      const items = bucketSeized.get(key)!;
-      const label = formatDateKey(key);
-      const countStr = count === 0 ? "—" : `${count} filing${count !== 1 ? "s" : ""}`;
+    const windowTotal = [...dailyCounts.values()].reduce((a, b) => a + b, 0);
 
-      if (items.size === 0) return `\`${label}\`  ${countStr}`;
+    // ── Format trend lines ────────────────────────────────────────────────────
+    let trendLines: string[];
+    let trendTitle: string;
 
-      // Show the single top seized item inline for quick spike reading
-      const [topItem, topQty] = [...items.entries()].sort((a, b) => b[1] - a[1])[0];
-      const spikeHint = items.size > 1
-        ? `${topQty}× ${topItem} (+${items.size - 1} more)`
-        : `${topQty}× ${topItem}`;
-      return `\`${label}\`  ${countStr} · ${spikeHint}`;
-    });
-
-    const weekTotal = [...bucketCounts.values()].reduce((a, b) => a + b, 0);
+    if (windowOpt === "7d") {
+      // Daily rows for 7-day view
+      trendLines = dailyKeys.map((key) =>
+        trendLine(formatDateKey(key), dailyCounts.get(key) ?? 0, dailySeized.get(key)!),
+      );
+      trendTitle = "Daily Breakdown — Last 7 Days";
+    } else {
+      // Weekly summary rows for 30-day view (5 buckets: weeks 1-5)
+      // Each bucket covers Mon–Sun; we group the 30 days into ~5 week buckets
+      const weekBuckets: { label: string; count: number; seized: Map<string, number> }[] = [];
+      for (let w = 0; w < 5; w++) {
+        const weekDays = dailyKeys.slice(w * 6, w * 6 + 6); // ~6 days per bucket across 5 buckets
+        if (weekDays.length === 0) continue;
+        const weekStart = weekDays[0];
+        const weekEnd = weekDays[weekDays.length - 1];
+        const startLabel = new Date(`${weekStart}T12:00:00Z`).toLocaleDateString("en-US", {
+          month: "short", day: "numeric", timeZone: "UTC",
+        });
+        const endLabel = new Date(`${weekEnd}T12:00:00Z`).toLocaleDateString("en-US", {
+          month: "short", day: "numeric", timeZone: "UTC",
+        });
+        const count = weekDays.reduce((s, k) => s + (dailyCounts.get(k) ?? 0), 0);
+        const seized = mergeItemMaps(weekDays.map((k) => dailySeized.get(k)!));
+        weekBuckets.push({ label: `${startLabel}–${endLabel}`, count, seized });
+      }
+      trendLines = weekBuckets.map((b) => trendLine(b.label, b.count, b.seized));
+      trendTitle = "Weekly Breakdown — Last 30 Days";
+    }
 
     // ── Recent filings list (last 5, newest first) ────────────────────────────
     const recentList = filings
@@ -159,6 +182,8 @@ export async function handleStatisticsCommand(
       .join("\n");
 
     // ── Build embed ──────────────────────────────────────────────────────────
+    const windowLabel = windowOpt === "7d" ? "Last 7 Days" : "Last 30 Days";
+
     const embed = new EmbedBuilder()
       .setColor(0x5865f2)
       .setTitle("Filing Statistics")
@@ -166,18 +191,12 @@ export async function handleStatisticsCommand(
       .addFields(
         { name: "Total Filings", value: `${filings.length}`, inline: true },
         { name: "With Seized Items", value: `${totalSeizedFilings}`, inline: true },
-        { name: "Last 7 Days", value: `${weekTotal} filing${weekTotal !== 1 ? "s" : ""}`, inline: true },
-        {
-          name: "Daily Breakdown — Last 7 Days",
-          value: trendLines.join("\n"),
-        },
+        { name: windowLabel, value: `${windowTotal} filing${windowTotal !== 1 ? "s" : ""}`, inline: true },
+        { name: trendTitle, value: trendLines.join("\n") },
       );
 
     if (allTimeTotals.size > 0) {
-      embed.addFields({
-        name: "Top Seized Items (All Time)",
-        value: formatItemMap(allTimeTotals),
-      });
+      embed.addFields({ name: "Top Seized Items (All Time)", value: formatItemMap(allTimeTotals) });
     }
 
     embed
@@ -188,8 +207,6 @@ export async function handleStatisticsCommand(
     await interaction.editReply({ embeds: [embed] });
   } catch (err) {
     logger.error({ err }, "Failed to load statistics");
-    await interaction.editReply({
-      content: "Could not load statistics. Please try again.",
-    });
+    await interaction.editReply({ content: "Could not load statistics. Please try again." });
   }
 }
