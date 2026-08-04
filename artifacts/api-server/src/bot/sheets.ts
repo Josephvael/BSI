@@ -243,13 +243,12 @@ async function migrateSheetHeader(sheetId: string): Promise<void> {
       break;
 
     case "unknown-header":
-      logger.warn(
-        { existingHeader: result.existingHeader },
-        "Sheet header migration: unrecognised header — leaving unchanged; " +
-        "Sheets formulas may not work correctly on existing rows",
+      // Cannot safely migrate or verify — abort so misaligned rows are never written.
+      // The session flag is intentionally NOT set so the next filing retries.
+      throw new Error(
+        `Sheet header migration: unrecognised header [${result.existingHeader.join(" | ")}] — ` +
+        "filing aborted to prevent data misalignment. Fix the sheet header manually and restart the bot.",
       );
-      headerMigrated = true; // don't retry on unrecognised layouts
-      break;
 
     case "get-failed":
       // Cannot verify current schema — abort so we don't write misaligned rows

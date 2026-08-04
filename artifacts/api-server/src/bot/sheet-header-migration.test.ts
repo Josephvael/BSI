@@ -82,4 +82,27 @@ describe("runHeaderMigration", () => {
     expect(putCalled).toBe(false);
     expect((result as { existingHeader: string[] }).existingHeader).toEqual(["Custom", "Column", "Names"]);
   });
+
+  it("returns 'unknown-header' (not 'up-to-date') when only the first column matches NEW_HEADER", async () => {
+    // Simulates a partially migrated or corrupted sheet where Filing ID is in col A
+    // but the rest of the columns are wrong — must NOT be accepted as up-to-date.
+    const partialHeader = ["Filing ID", "Wrong Col B", "Wrong Col C"];
+    const req = async () => makeResp(true, 200, { values: [partialHeader] });
+    const result = await runHeaderMigration("sheet-1", req);
+    expect(result.outcome).toBe("unknown-header");
+  });
+
+  it("returns 'unknown-header' when new header has correct columns but one is corrupted", async () => {
+    const corruptHeader = [...NEW_HEADER] as string[];
+    corruptHeader[3] = "CORRUPTED";  // "Item Seized" replaced
+    const req = async () => makeResp(true, 200, { values: [corruptHeader] });
+    const result = await runHeaderMigration("sheet-1", req);
+    expect(result.outcome).toBe("unknown-header");
+  });
+
+  it("returns 'up-to-date' only when every column of NEW_HEADER matches exactly", async () => {
+    const req = async () => makeResp(true, 200, { values: [[...NEW_HEADER]] });
+    const result = await runHeaderMigration("sheet-1", req);
+    expect(result.outcome).toBe("up-to-date");
+  });
 });

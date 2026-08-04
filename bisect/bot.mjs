@@ -75527,7 +75527,7 @@ async function runHeaderMigration(sheetId, request) {
   }
   const data = await getRes.json();
   const existingHeader = data.values?.[0] ?? [];
-  if (existingHeader[0] === NEW_HEADER[0]) {
+  if (NEW_HEADER.every((col, i) => existingHeader[i] === col)) {
     return { outcome: "up-to-date" };
   }
   const isOldSchema = existingHeader.length === 0 || existingHeader[0] === OLD_HEADER[0] && existingHeader.length <= OLD_HEADER.length;
@@ -75691,12 +75691,9 @@ async function migrateSheetHeader(sheetId) {
       headerMigrated = true;
       break;
     case "unknown-header":
-      logger.warn(
-        { existingHeader: result.existingHeader },
-        "Sheet header migration: unrecognised header \u2014 leaving unchanged; Sheets formulas may not work correctly on existing rows"
+      throw new Error(
+        `Sheet header migration: unrecognised header [${result.existingHeader.join(" | ")}] \u2014 filing aborted to prevent data misalignment. Fix the sheet header manually and restart the bot.`
       );
-      headerMigrated = true;
-      break;
     case "get-failed":
       throw new Error(
         `Sheet header migration: failed to read header row (HTTP ${result.status}) \u2014 filing aborted`

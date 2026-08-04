@@ -55,8 +55,8 @@ export async function runHeaderMigration(
   const data = (await getRes.json()) as { values?: string[][] };
   const existingHeader = data.values?.[0] ?? [];
 
-  // ── 2. Already on new schema ───────────────────────────────────────────────
-  if (existingHeader[0] === NEW_HEADER[0]) {
+  // ── 2. Already on new schema — every column must match exactly ────────────
+  if (NEW_HEADER.every((col, i) => existingHeader[i] === col)) {
     return { outcome: "up-to-date" };
   }
 
