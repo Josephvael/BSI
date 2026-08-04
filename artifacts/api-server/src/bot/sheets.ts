@@ -48,6 +48,12 @@ interface FilingsCache {
 
 let filingsCache: FilingsCache | null = null;
 
+/** Tracks whether the header migration has already run this session. */
+let headerMigrated = false;
+
+const OLD_HEADER = ["Offender's Username", "Date of Incident", "Seized", "Discord User + ID", "Timestamp"];
+const NEW_HEADER = ["Filing ID", "Offender's Username", "Date of Incident", "Item Seized", "Quantity", "Discord User + ID", "Timestamp"];
+
 /**
  * Normalises a private key that may have been pasted with literal \n instead
  * of real newlines (common when copying from a JSON file into an env var field).
@@ -214,6 +220,56 @@ async function createSpreadsheet(): Promise<string> {
 }
 
 /**
+ * Checks row 1 of the existing Sheet1 and upgrades it from the old 5-column
+ * header to the new 7-column header if needed.  Runs at most once per session.
+ */
+async function migrateSheetHeader(sheetId: string): Promise<void> {
+  if (headerMigrated) return;
+  headerMigrated = true; // set early so a concurrent call doesn't double-run
+
+  const range = encodeURIComponent("Sheet1!A1:G1");
+  const res = await sheetsRequest(`/v4/spreadsheets/${sheetId}/values/${range}`, { method: "GET" });
+  if (!res.ok) {
+    logger.warn({ status: res.status }, "Sheet header migration: could not read row 1 — skipping");
+    return;
+  }
+
+  const data = (await res.json()) as { values?: string[][] };
+  const existingHeader = data.values?.[0] ?? [];
+
+  // Already on new schema — nothing to do
+  if (existingHeader[0] === NEW_HEADER[0]) {
+    logger.info("Sheet header migration: already up to date (7-column)");
+    return;
+  }
+
+  // Old 5-column schema detected — or empty sheet — upgrade the header
+  const isOldSchema =
+    existingHeader.length === 0 ||
+    (existingHeader[0] === OLD_HEADER[0] && existingHeader.length <= OLD_HEADER.length);
+
+  if (!isOldSchema) {
+    logger.warn(
+      { existingHeader },
+      "Sheet header migration: unrecognised header — skipping to avoid data loss",
+    );
+    return;
+  }
+
+  const putRes = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
+    { method: "PUT", body: JSON.stringify({ values: [NEW_HEADER] }) },
+  );
+
+  if (putRes.ok) {
+    logger.info("Sheet header migration: upgraded from 5-column to 7-column header");
+  } else {
+    const err = await putRes.text();
+    logger.warn({ status: putRes.status, err }, "Sheet header migration: PUT failed");
+  }
+}
+
+/**
  * Parse a seized string ("2x Hawthorn M80A1, 1x Delino R20") into individual
  * item records so each can occupy its own sheet row with a numeric Quantity.
  */
@@ -233,6 +289,9 @@ function parseSeizedItems(seized: string): { name: string; qty: number }[] {
 
 export async function appendFiling(record: FilingRecord): Promise<void> {
   let sheetId = await getSheetId();
+
+  // Migrate the header row once if the sheet was created before the 7-column schema
+  await migrateSheetHeader(sheetId);
 
   // Generate a stable Filing ID so multi-item filings can be grouped in Sheets
   const filingId = `FID-${Date.now().toString(36)}`;

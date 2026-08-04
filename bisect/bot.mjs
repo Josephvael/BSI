@@ -75506,6 +75506,9 @@ var cachedToken = null;
 var cachedSheetId = null;
 var FILINGS_CACHE_TTL_MS = Number(process.env.FILINGS_CACHE_TTL_MS ?? 6e4);
 var filingsCache = null;
+var headerMigrated = false;
+var OLD_HEADER = ["Offender's Username", "Date of Incident", "Seized", "Discord User + ID", "Timestamp"];
+var NEW_HEADER = ["Filing ID", "Offender's Username", "Date of Incident", "Item Seized", "Quantity", "Discord User + ID", "Timestamp"];
 function fixPrivateKey(key) {
   let fixed = key.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n").trim();
   const header = "-----BEGIN PRIVATE KEY-----";
@@ -75629,6 +75632,40 @@ async function createSpreadsheet() {
   );
   return sheetId;
 }
+async function migrateSheetHeader(sheetId) {
+  if (headerMigrated) return;
+  headerMigrated = true;
+  const range = encodeURIComponent("Sheet1!A1:G1");
+  const res = await sheetsRequest(`/v4/spreadsheets/${sheetId}/values/${range}`, { method: "GET" });
+  if (!res.ok) {
+    logger.warn({ status: res.status }, "Sheet header migration: could not read row 1 \u2014 skipping");
+    return;
+  }
+  const data = await res.json();
+  const existingHeader = data.values?.[0] ?? [];
+  if (existingHeader[0] === NEW_HEADER[0]) {
+    logger.info("Sheet header migration: already up to date (7-column)");
+    return;
+  }
+  const isOldSchema = existingHeader.length === 0 || existingHeader[0] === OLD_HEADER[0] && existingHeader.length <= OLD_HEADER.length;
+  if (!isOldSchema) {
+    logger.warn(
+      { existingHeader },
+      "Sheet header migration: unrecognised header \u2014 skipping to avoid data loss"
+    );
+    return;
+  }
+  const putRes = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
+    { method: "PUT", body: JSON.stringify({ values: [NEW_HEADER] }) }
+  );
+  if (putRes.ok) {
+    logger.info("Sheet header migration: upgraded from 5-column to 7-column header");
+  } else {
+    const err = await putRes.text();
+    logger.warn({ status: putRes.status, err }, "Sheet header migration: PUT failed");
+  }
+}
 function parseSeizedItems(seized) {
   if (!seized?.trim()) return [];
   const items = [];
@@ -75644,6 +75681,7 @@ function parseSeizedItems(seized) {
 }
 async function appendFiling(record) {
   let sheetId = await getSheetId();
+  await migrateSheetHeader(sheetId);
   const filingId = `FID-${Date.now().toString(36)}`;
   const items = parseSeizedItems(record.seized);
   const rows = items.length > 0 ? items.map(({ name, qty }) => [
@@ -76623,9 +76661,11 @@ async function handleRobloxCommand(interaction) {
     else if (sub === "whois") await handleWhois(interaction);
   } catch (err) {
     logger.error({ err }, "Error handling /roblox command");
-    const reply = { content: "Something went wrong. Please try again.", flags: import_discord5.MessageFlags.Ephemeral };
-    if (interaction.deferred || interaction.replied) await interaction.editReply(reply);
-    else await interaction.reply(reply);
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply({ content: "Something went wrong. Please try again." });
+    } else {
+      await interaction.reply({ content: "Something went wrong. Please try again.", flags: import_discord5.MessageFlags.Ephemeral });
+    }
   }
 }
 async function handleLookup(interaction) {
@@ -76862,9 +76902,11 @@ async function handleGroupsCommand(interaction) {
     }
   } catch (err) {
     logger.error({ err }, "Error handling /groups command");
-    const reply = { content: "Something went wrong. Please try again.", flags: import_discord6.MessageFlags.Ephemeral };
-    if (interaction.replied || interaction.deferred) await interaction.editReply(reply);
-    else await interaction.reply(reply);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.editReply({ content: "Something went wrong. Please try again." });
+    } else {
+      await interaction.reply({ content: "Something went wrong. Please try again.", flags: import_discord6.MessageFlags.Ephemeral });
+    }
   }
 }
 
@@ -77065,6 +77107,9 @@ async function handlePanelCommand(interaction) {
     return;
   }
   await interaction.reply({ flags: import_discord8.MessageFlags.Ephemeral, content: "Panel posted!" });
+  if (!("send" in interaction.channel)) {
+    return;
+  }
   await interaction.channel.send({ embeds: [embed], components: [row] });
 }
 async function handlePanelButton(interaction) {
