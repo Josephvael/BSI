@@ -76374,6 +76374,19 @@ async function handleSearchCommand(interaction) {
 var import_discord8 = __toESM(require_src(), 1);
 var PANEL_BUTTON_ID = "panel_file_report";
 var panelCommand = new import_discord8.SlashCommandBuilder().setName("panel").setDescription("Post the DSI Filing Center panel in this channel").setDefaultMemberPermissions(import_discord8.PermissionFlagsBits.Administrator);
+async function handlePanelCommand(interaction) {
+  const embed = new import_discord8.EmbedBuilder().setColor(6139362).setTitle("Clark County's DSI Filing Center").setDescription(
+    "Use the button below to submit a report of an arrest relating to:\n\n\u2022 Illegal Firearms\n\u2022 Illegal Firearm Distribution\n\u2022 Illegal Possession of Narcotics\n\u2022 Possession of drug paraphernalia\n\nPlease note, that additional information that relates to the arrest is required (Additional Charges, etc)."
+  ).setTimestamp();
+  const button = new import_discord8.ButtonBuilder().setCustomId(PANEL_BUTTON_ID).setLabel("File a Report").setStyle(import_discord8.ButtonStyle.Primary);
+  const row = new import_discord8.ActionRowBuilder().addComponents(button);
+  if (!interaction.channel) {
+    await interaction.reply({ flags: import_discord8.MessageFlags.Ephemeral, content: "Cannot post panel: channel not accessible." });
+    return;
+  }
+  await interaction.reply({ flags: import_discord8.MessageFlags.Ephemeral, content: "Panel posted!" });
+  await interaction.channel.send({ embeds: [embed], components: [row] });
+}
 async function handlePanelButton(interaction) {
   const allowed = await getAllowedRoles();
   if (!checkAccess(interaction, allowed)) {
@@ -76457,6 +76470,8 @@ async function startBot() {
           await handleGroupsCommand(interaction);
         } else if (interaction.commandName === "search") {
           await handleSearchCommand(interaction);
+        } else if (interaction.commandName === "panel") {
+          await handlePanelCommand(interaction);
         }
       } else if (interaction.isButton()) {
         if (interaction.customId === PANEL_BUTTON_ID) {

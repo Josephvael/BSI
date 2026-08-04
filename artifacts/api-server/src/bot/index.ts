@@ -99,6 +99,8 @@ export async function startBot(): Promise<void> {
           await handleGroupsCommand(interaction);
         } else if (interaction.commandName === "search") {
           await handleSearchCommand(interaction);
+        } else if (interaction.commandName === "panel") {
+          await handlePanelCommand(interaction);
         }
       } else if (interaction.isButton()) {
         if (interaction.customId === PANEL_BUTTON_ID) {
