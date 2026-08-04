@@ -20594,23 +20594,23 @@ var require_message = __commonJS({
       MessageReferenceType2[MessageReferenceType2["Default"] = 0] = "Default";
       MessageReferenceType2[MessageReferenceType2["Forward"] = 1] = "Forward";
     })(MessageReferenceType || (exports2.MessageReferenceType = MessageReferenceType = {}));
-    var MessageFlags7;
-    (function(MessageFlags8) {
-      MessageFlags8[MessageFlags8["Crossposted"] = 1] = "Crossposted";
-      MessageFlags8[MessageFlags8["IsCrosspost"] = 2] = "IsCrosspost";
-      MessageFlags8[MessageFlags8["SuppressEmbeds"] = 4] = "SuppressEmbeds";
-      MessageFlags8[MessageFlags8["SourceMessageDeleted"] = 8] = "SourceMessageDeleted";
-      MessageFlags8[MessageFlags8["Urgent"] = 16] = "Urgent";
-      MessageFlags8[MessageFlags8["HasThread"] = 32] = "HasThread";
-      MessageFlags8[MessageFlags8["Ephemeral"] = 64] = "Ephemeral";
-      MessageFlags8[MessageFlags8["Loading"] = 128] = "Loading";
-      MessageFlags8[MessageFlags8["FailedToMentionSomeRolesInThread"] = 256] = "FailedToMentionSomeRolesInThread";
-      MessageFlags8[MessageFlags8["ShouldShowLinkNotDiscordWarning"] = 1024] = "ShouldShowLinkNotDiscordWarning";
-      MessageFlags8[MessageFlags8["SuppressNotifications"] = 4096] = "SuppressNotifications";
-      MessageFlags8[MessageFlags8["IsVoiceMessage"] = 8192] = "IsVoiceMessage";
-      MessageFlags8[MessageFlags8["HasSnapshot"] = 16384] = "HasSnapshot";
-      MessageFlags8[MessageFlags8["IsComponentsV2"] = 32768] = "IsComponentsV2";
-    })(MessageFlags7 || (exports2.MessageFlags = MessageFlags7 = {}));
+    var MessageFlags8;
+    (function(MessageFlags9) {
+      MessageFlags9[MessageFlags9["Crossposted"] = 1] = "Crossposted";
+      MessageFlags9[MessageFlags9["IsCrosspost"] = 2] = "IsCrosspost";
+      MessageFlags9[MessageFlags9["SuppressEmbeds"] = 4] = "SuppressEmbeds";
+      MessageFlags9[MessageFlags9["SourceMessageDeleted"] = 8] = "SourceMessageDeleted";
+      MessageFlags9[MessageFlags9["Urgent"] = 16] = "Urgent";
+      MessageFlags9[MessageFlags9["HasThread"] = 32] = "HasThread";
+      MessageFlags9[MessageFlags9["Ephemeral"] = 64] = "Ephemeral";
+      MessageFlags9[MessageFlags9["Loading"] = 128] = "Loading";
+      MessageFlags9[MessageFlags9["FailedToMentionSomeRolesInThread"] = 256] = "FailedToMentionSomeRolesInThread";
+      MessageFlags9[MessageFlags9["ShouldShowLinkNotDiscordWarning"] = 1024] = "ShouldShowLinkNotDiscordWarning";
+      MessageFlags9[MessageFlags9["SuppressNotifications"] = 4096] = "SuppressNotifications";
+      MessageFlags9[MessageFlags9["IsVoiceMessage"] = 8192] = "IsVoiceMessage";
+      MessageFlags9[MessageFlags9["HasSnapshot"] = 16384] = "HasSnapshot";
+      MessageFlags9[MessageFlags9["IsComponentsV2"] = 32768] = "IsComponentsV2";
+    })(MessageFlags8 || (exports2.MessageFlags = MessageFlags8 = {}));
     var BaseThemeType;
     (function(BaseThemeType2) {
       BaseThemeType2[BaseThemeType2["Unset"] = 0] = "Unset";
@@ -35856,7 +35856,7 @@ var require_DataResolver = __commonJS({
 var require_MessageFlagsBitField = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/util/MessageFlagsBitField.js"(exports2, module2) {
     "use strict";
-    var { MessageFlags: MessageFlags7 } = require_v106();
+    var { MessageFlags: MessageFlags8 } = require_v106();
     var BitField = require_BitField();
     var MessageFlagsBitField = class extends BitField {
       /**
@@ -35864,7 +35864,7 @@ var require_MessageFlagsBitField = __commonJS({
        * @type {MessageFlags}
        * @memberof MessageFlagsBitField
        */
-      static Flags = MessageFlags7;
+      static Flags = MessageFlags8;
     };
     module2.exports = MessageFlagsBitField;
   }
@@ -49692,7 +49692,7 @@ var require_Message = __commonJS({
       InteractionType,
       ChannelType,
       MessageType,
-      MessageFlags: MessageFlags7,
+      MessageFlags: MessageFlags8,
       PermissionFlagsBits: PermissionFlagsBits5,
       MessageReferenceType
     } = require_v106();
@@ -50009,7 +50009,7 @@ var require_Message = __commonJS({
        * @readonly
        */
       get hasThread() {
-        return this.flags.has(MessageFlags7.HasThread);
+        return this.flags.has(MessageFlags8.HasThread);
       }
       /**
        * The thread started by this message
@@ -50219,7 +50219,7 @@ var require_Message = __commonJS({
         const bitfield = PermissionFlagsBits5.SendMessages | (this.author.id === this.client.user.id ? PermissionsBitField2.DefaultBit : PermissionFlagsBits5.ManageMessages);
         const { channel } = this;
         return Boolean(
-          channel?.type === ChannelType.GuildAnnouncement && !this.flags.has(MessageFlags7.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
+          channel?.type === ChannelType.GuildAnnouncement && !this.flags.has(MessageFlags8.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
         );
       }
       /**
@@ -50420,9 +50420,9 @@ var require_Message = __commonJS({
       suppressEmbeds(suppress = true) {
         const flags = new MessageFlagsBitField(this.flags.bitfield);
         if (suppress) {
-          flags.add(MessageFlags7.SuppressEmbeds);
+          flags.add(MessageFlags8.SuppressEmbeds);
         } else {
-          flags.remove(MessageFlags7.SuppressEmbeds);
+          flags.remove(MessageFlags8.SuppressEmbeds);
         }
         return this.edit({ flags });
       }
@@ -52220,7 +52220,7 @@ var require_MessagePayload = __commonJS({
     var { Buffer: Buffer2 } = __require("node:buffer");
     var { lazy, isJSONEncodable } = require_dist();
     var { DiscordSnowflake } = require_cjs();
-    var { MessageFlags: MessageFlags7, MessageReferenceType } = require_v106();
+    var { MessageFlags: MessageFlags8, MessageReferenceType } = require_v106();
     var { DiscordjsError: DiscordjsError2, DiscordjsRangeError: DiscordjsRangeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var { resolveFile } = require_DataResolver();
     var MessageFlagsBitField = require_MessageFlagsBitField();
@@ -52346,7 +52346,7 @@ var require_MessagePayload = __commonJS({
           flags = new MessageFlagsBitField(this.options.flags).bitfield;
         }
         if (isInteraction && this.options.ephemeral) {
-          flags |= MessageFlags7.Ephemeral;
+          flags |= MessageFlags8.Ephemeral;
         }
         let allowedMentions = this.options.allowedMentions === void 0 ? this.target.client.options.allowedMentions : this.options.allowedMentions;
         if (allowedMentions?.repliedUser !== void 0) {
@@ -58115,7 +58115,7 @@ var require_InteractionResponses = __commonJS({
     var { deprecate } = __require("node:util");
     var { makeURLSearchParams: makeURLSearchParams2 } = require_dist5();
     var { isJSONEncodable } = require_dist();
-    var { InteractionResponseType, MessageFlags: MessageFlags7, Routes: Routes3, InteractionType } = require_v106();
+    var { InteractionResponseType, MessageFlags: MessageFlags8, Routes: Routes3, InteractionType } = require_v106();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var MessageFlagsBitField = require_MessageFlagsBitField();
     var InteractionCallbackResponse = require_InteractionCallbackResponse();
@@ -58209,7 +58209,7 @@ var require_InteractionResponses = __commonJS({
         }
         const flags = new MessageFlagsBitField(options.flags);
         if (options.ephemeral) {
-          flags.add(MessageFlags7.Ephemeral);
+          flags.add(MessageFlags8.Ephemeral);
         }
         const response = await this.client.rest.post(Routes3.interactionCallback(this.id, this.token), {
           body: {
@@ -58222,7 +58222,7 @@ var require_InteractionResponses = __commonJS({
           query: makeURLSearchParams2({ with_response: options.withResponse ?? false })
         });
         this.deferred = true;
-        this.ephemeral = flags.has(MessageFlags7.Ephemeral);
+        this.ephemeral = flags.has(MessageFlags8.Ephemeral);
         return options.withResponse ? new InteractionCallbackResponse(this.client, response) : options.fetchReply ? this.fetchReply() : new InteractionResponse(this);
       }
       /**
@@ -58277,7 +58277,7 @@ var require_InteractionResponses = __commonJS({
           auth: false,
           query: makeURLSearchParams2({ with_response: options.withResponse ?? false })
         });
-        this.ephemeral = Boolean(data.flags & MessageFlags7.Ephemeral);
+        this.ephemeral = Boolean(data.flags & MessageFlags8.Ephemeral);
         this.replied = true;
         return options.withResponse ? new InteractionCallbackResponse(this.client, response) : options.fetchReply ? this.fetchReply() : new InteractionResponse(this);
       }
@@ -75772,7 +75772,7 @@ var FILING_CAT_SELECT_ID = "filing_cat_select";
 var FILING_ITEM_SELECT_PREFIX = "filing_item_select";
 var CATEGORIES = {
   weapons_1: {
-    label: "\u{1F52B}  Weapons (1 / 2)",
+    label: "Weapons (1 / 2)",
     prefix: "w1",
     items: [
       "Albert & Heinrich SM9",
@@ -75798,7 +75798,7 @@ var CATEGORIES = {
     ]
   },
   weapons_2: {
-    label: "\u{1F52B}  Weapons (2 / 2)",
+    label: "Weapons (2 / 2)",
     prefix: "w2",
     items: [
       "Hawthorne M80",
@@ -75823,7 +75823,7 @@ var CATEGORIES = {
     ]
   },
   ammo_1: {
-    label: "\u{1F527}  Ammunition (1 / 2)",
+    label: "Ammunition (1 / 2)",
     prefix: "a1",
     items: [
       "5.45x39mm Kilkov Magazine",
@@ -75849,7 +75849,7 @@ var CATEGORIES = {
     ]
   },
   ammo_2: {
-    label: "\u{1F527}  Ammunition (2 / 2)",
+    label: "Ammunition (2 / 2)",
     prefix: "a2",
     items: [
       "7.62x51mm Albert & Heinrich",
@@ -75864,7 +75864,7 @@ var CATEGORIES = {
     ]
   },
   kits: {
-    label: "\u{1F392}  Weapon Kits",
+    label: "Weapon Kits",
     prefix: "k",
     items: [
       "Assault Rifle Kit",
@@ -75882,7 +75882,7 @@ var CATEGORIES = {
     ]
   },
   stolen: {
-    label: "\u{1F4B0}  Stolen Goods",
+    label: "Stolen Goods",
     prefix: "s",
     items: [
       "Bag of Dirty Money",
@@ -75891,7 +75891,7 @@ var CATEGORIES = {
     ]
   },
   narcotics: {
-    label: "\u{1F48A}  Narcotics",
+    label: "Narcotics",
     prefix: "n",
     items: [
       "Bag of Nopyfruit",
@@ -75904,7 +75904,7 @@ var CATEGORIES = {
     ]
   },
   cargo: {
-    label: "\u{1F4E6}  Illicit Cargo",
+    label: "Illicit Cargo",
     prefix: "c",
     items: [
       "Crate of Illegal Firearm Parts",
@@ -75913,7 +75913,7 @@ var CATEGORIES = {
     ]
   },
   devices: {
-    label: "\u{1F4A3}  Destructive Devices",
+    label: "Destructive Devices",
     prefix: "d",
     items: [
       "Barrel of Thermite",
@@ -75925,7 +75925,7 @@ var CATEGORIES = {
     ]
   },
   misc: {
-    label: "\u{1F50D}  Misc. Items",
+    label: "Misc. Items",
     prefix: "m",
     items: [
       "Cones",
@@ -75964,7 +75964,7 @@ async function showCategorySelectMenu(interaction) {
       label: cat.label,
       value: key
     })),
-    { label: "\u2705  None / N/A", value: "none" }
+    { label: "None / N/A", value: "none" }
   ];
   const select = new import_discord2.StringSelectMenuBuilder().setCustomId(FILING_CAT_SELECT_ID).setPlaceholder("Select a seized item category\u2026").addOptions(options);
   const row = new import_discord2.ActionRowBuilder().addComponents(select);
@@ -75989,7 +75989,7 @@ async function handleCatSelect(interaction) {
     label: item,
     value: `${cat.prefix}_${idx}`
   }));
-  const select = new import_discord2.StringSelectMenuBuilder().setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${categoryKey}`).setPlaceholder(`Select item(s) from ${cat.label.replace(/^.+?\s{2}/, "")}\u2026`).setMinValues(1).setMaxValues(Math.min(3, itemOptions.length)).addOptions(itemOptions);
+  const select = new import_discord2.StringSelectMenuBuilder().setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${categoryKey}`).setPlaceholder(`Select item(s) from ${cat.label}\u2026`).setMinValues(1).setMaxValues(Math.min(3, itemOptions.length)).addOptions(itemOptions);
   const row = new import_discord2.ActionRowBuilder().addComponents(select);
   await interaction.update({
     content: `**Step 2 of 3** \u2014 Select up to **3** items from ${cat.label}:`,
@@ -76078,6 +76078,20 @@ async function handleStatisticsCommand(interaction) {
       return;
     }
     const seizedCount = filings.filter((f) => f.seized && f.seized.trim().length > 0).length;
+    const itemTotals = /* @__PURE__ */ new Map();
+    for (const filing of filings) {
+      const raw = filing.seized?.trim();
+      if (!raw || raw.toLowerCase() === "none") continue;
+      for (const part of raw.split(",")) {
+        const match = part.trim().match(/^(\d+)x\s+(.+)$/i);
+        if (match) {
+          const qty = parseInt(match[1], 10);
+          const name = match[2].trim();
+          itemTotals.set(name, (itemTotals.get(name) ?? 0) + qty);
+        }
+      }
+    }
+    const topItems = [...itemTotals.entries()].sort((a, b) => b[1] - a[1]).map(([name, count]) => `${name} \u2014 ${count}`).join("\n");
     const recent = filings.slice(-5).reverse().map((f) => {
       const date = f.dateOfIncident || "?";
       return `**${f.username}** | ${date}`;
@@ -76086,6 +76100,7 @@ async function handleStatisticsCommand(interaction) {
       { name: "Total Filings", value: `${filings.length}`, inline: true },
       { name: "With Seized Items", value: `${seizedCount}`, inline: true },
       { name: "\u200B", value: "\u200B", inline: true },
+      ...topItems ? [{ name: "Top Seized Items", value: topItems }] : [],
       { name: "Recent Filings", value: recent }
     ).setFooter({ text: "Click the title to open the full spreadsheet" }).setTimestamp();
     await interaction.editReply({ embeds: [embed] });
@@ -76544,12 +76559,22 @@ var searchCommand = new import_discord7.SlashCommandBuilder().setName("search").
   (opt) => opt.setName("username").setDescription("Roblox username to search").setRequired(true)
 );
 async function handleSearchCommand(interaction) {
+  const allowed = await getAllowedRoles();
+  if (!checkAccess(interaction, allowed)) {
+    await interaction.reply({
+      content: "You do not have access to this command.",
+      flags: import_discord7.MessageFlags.Ephemeral
+    });
+    return;
+  }
   await interaction.deferReply();
   const username = interaction.options.getString("username", true);
   try {
-    const [user, groups] = await Promise.all([
+    const [user, groups, allFilings, sheetUrl] = await Promise.all([
       getUserByUsername(username),
-      getGroups()
+      getGroups(),
+      getFilings(),
+      getSheetUrl()
     ]);
     if (!user) {
       await interaction.editReply({
@@ -76594,6 +76619,28 @@ async function handleSearchCommand(interaction) {
       embed.addFields({
         name: `Group Memberships (${memberLines.length}/${groups.length} matched)`,
         value: allLines.join("\n"),
+        inline: false
+      });
+    }
+    const usernameLower = username.toLowerCase();
+    const userFilings = allFilings.filter(
+      (f) => f.username.toLowerCase() === usernameLower
+    );
+    if (userFilings.length === 0) {
+      embed.addFields({
+        name: "Filing History",
+        value: "No filings on record.",
+        inline: false
+      });
+    } else {
+      const recent = userFilings.slice(-5).reverse();
+      const lines = recent.map((f) => `\u2022 **${f.dateOfIncident}** \u2014 ${f.seized}`);
+      if (userFilings.length > 5) {
+        lines.push(`[View all ${userFilings.length} filings](${sheetUrl})`);
+      }
+      embed.addFields({
+        name: `Filing History (${userFilings.length} total)`,
+        value: lines.join("\n"),
         inline: false
       });
     }

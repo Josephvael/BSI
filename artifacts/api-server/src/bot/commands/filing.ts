@@ -32,7 +32,7 @@ interface Category {
 
 const CATEGORIES: Record<string, Category> = {
   weapons_1: {
-    label: "🔫  Weapons (1 / 2)",
+    label: "Weapons (1 / 2)",
     prefix: "w1",
     items: [
       "Albert & Heinrich SM9", "Albert & Heinrich LM2", "Albert & Heinrich HR4",
@@ -43,7 +43,7 @@ const CATEGORIES: Record<string, Category> = {
     ],
   },
   weapons_2: {
-    label: "🔫  Weapons (2 / 2)",
+    label: "Weapons (2 / 2)",
     prefix: "w2",
     items: [
       "Hawthorne M80", "Hawthorne M80A1", "Hawthorne M80A2", "Hawthorne M80T",
@@ -55,7 +55,7 @@ const CATEGORIES: Record<string, Category> = {
     ],
   },
   ammo_1: {
-    label: "🔧  Ammunition (1 / 2)",
+    label: "Ammunition (1 / 2)",
     prefix: "a1",
     items: [
       "5.45x39mm Kilkov Magazine", "5.45x39mm Kilikov Extended",
@@ -70,7 +70,7 @@ const CATEGORIES: Record<string, Category> = {
     ],
   },
   ammo_2: {
-    label: "🔧  Ammunition (2 / 2)",
+    label: "Ammunition (2 / 2)",
     prefix: "a2",
     items: [
       "7.62x51mm Albert & Heinrich", "7.62x54mmR Krovin", "7.62x54mm Rimmed",
@@ -79,7 +79,7 @@ const CATEGORIES: Record<string, Category> = {
     ],
   },
   kits: {
-    label: "🎒  Weapon Kits",
+    label: "Weapon Kits",
     prefix: "k",
     items: [
       "Assault Rifle Kit", "Assault Carbine Kit", "Battle Rifle Kit",
@@ -89,7 +89,7 @@ const CATEGORIES: Record<string, Category> = {
     ],
   },
   stolen: {
-    label: "💰  Stolen Goods",
+    label: "Stolen Goods",
     prefix: "s",
     items: [
       "Bag of Dirty Money", "Folder of Military Intelligence",
@@ -97,7 +97,7 @@ const CATEGORIES: Record<string, Category> = {
     ],
   },
   narcotics: {
-    label: "💊  Narcotics",
+    label: "Narcotics",
     prefix: "n",
     items: [
       "Bag of Nopyfruit", "Barrel of Nopyfruit Concentrate", "Bag of Gushie",
@@ -105,7 +105,7 @@ const CATEGORIES: Record<string, Category> = {
     ],
   },
   cargo: {
-    label: "📦  Illicit Cargo",
+    label: "Illicit Cargo",
     prefix: "c",
     items: [
       "Crate of Illegal Firearm Parts", "Crate of Illegal Ammunition",
@@ -113,7 +113,7 @@ const CATEGORIES: Record<string, Category> = {
     ],
   },
   devices: {
-    label: "💣  Destructive Devices",
+    label: "Destructive Devices",
     prefix: "d",
     items: [
       "Barrel of Thermite", "Detonator", "Encrypted Phone",
@@ -121,7 +121,7 @@ const CATEGORIES: Record<string, Category> = {
     ],
   },
   misc: {
-    label: "🔍  Misc. Items",
+    label: "Misc. Items",
     prefix: "m",
     items: [
       "Cones", "Handcuffs", "Highland NR28",
@@ -173,7 +173,7 @@ export async function showCategorySelectMenu(
       label: cat.label,
       value: key,
     })),
-    { label: "✅  None / N/A", value: "none" },
+    { label: "None / N/A", value: "none" },
   ];
 
   const select = new StringSelectMenuBuilder()
@@ -215,7 +215,7 @@ export async function handleCatSelect(
 
   const select = new StringSelectMenuBuilder()
     .setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${categoryKey}`)
-    .setPlaceholder(`Select item(s) from ${cat.label.replace(/^.+?\s{2}/, "")}…`)
+    .setPlaceholder(`Select item(s) from ${cat.label}…`)
     .setMinValues(1)
     .setMaxValues(Math.min(3, itemOptions.length))
     .addOptions(itemOptions);
