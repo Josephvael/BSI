@@ -105,29 +105,62 @@ export async function handleSearchCommand(
       });
     }
 
-    // Filing history section — case-insensitive match on Offender's Username
+    // Filing history section — exact match first, then partial/contains near-matches
     const usernameLower = username.toLowerCase();
-    const userFilings = allFilings.filter(
+    const exactFilings = allFilings.filter(
       (f) => f.username.toLowerCase() === usernameLower,
     );
+    const nearFilings = allFilings.filter(
+      (f) =>
+        f.username.toLowerCase() !== usernameLower &&
+        f.username.toLowerCase().includes(usernameLower),
+    );
 
-    if (userFilings.length === 0) {
+    if (exactFilings.length === 0 && nearFilings.length === 0) {
       embed.addFields({
         name: "Filing History",
         value: `No filings on record.\n-# Last updated: <t:${fetchedAt}:R>`,
         inline: false,
       });
     } else {
-      // Most recent first (last rows in sheet = most recent)
-      const recent = userFilings.slice(-5).reverse();
-      const lines = recent.map((f) => `• **${f.dateOfIncident}** — ${f.seized}`);
-      if (userFilings.length > 5) {
-        lines.push(`[View all ${userFilings.length} filings](${sheetUrl})`);
+      const filingLines: string[] = [];
+
+      if (exactFilings.length > 0) {
+        // Most recent first (last rows in sheet = most recent)
+        const recent = exactFilings.slice(-5).reverse();
+        const lines = recent.map((f) => `• **${f.dateOfIncident}** — ${f.seized}`);
+        if (exactFilings.length > 5) {
+          lines.push(`[View all ${exactFilings.length} filings](${sheetUrl})`);
+        }
+        filingLines.push(...lines);
+      } else {
+        filingLines.push("No exact matches on record.");
       }
-      lines.push(`-# Last updated: <t:${fetchedAt}:R>`);
+
+      if (nearFilings.length > 0) {
+        filingLines.push("\n**Possible matches**");
+        const recentNear = nearFilings.slice(-5).reverse();
+        const nearLines = recentNear.map(
+          (f) => `• **${f.dateOfIncident}** — ${f.seized} *(stored as: ${f.username})*`,
+        );
+        if (nearFilings.length > 5) {
+          nearLines.push(`[View all ${nearFilings.length} near-matches](${sheetUrl})`);
+        }
+        filingLines.push(...nearLines);
+      }
+
+      filingLines.push(`-# Last updated: <t:${fetchedAt}:R>`);
+
+      const totalExact = exactFilings.length;
+      const totalNear = nearFilings.length;
+      const headerLabel =
+        totalNear > 0
+          ? `Filing History (${totalExact} exact, ${totalNear} possible)`
+          : `Filing History (${totalExact} total)`;
+
       embed.addFields({
-        name: `Filing History (${userFilings.length} total)`,
-        value: lines.join("\n"),
+        name: headerLabel,
+        value: filingLines.join("\n"),
         inline: false,
       });
     }
