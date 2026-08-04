@@ -75611,13 +75611,13 @@ async function createSpreadsheet() {
   });
   const data = await res.json();
   const sheetId = data.spreadsheetId;
-  const range = encodeURIComponent("Sheet1!A1:E1");
+  const range = encodeURIComponent("Sheet1!A1:G1");
   await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
     {
       method: "PUT",
       body: JSON.stringify({
-        values: [["Offender's Username", "Date of Incident", "Seized", "Discord User + ID", "Timestamp"]]
+        values: [["Filing ID", "Offender's Username", "Date of Incident", "Item Seized", "Quantity", "Discord User + ID", "Timestamp"]]
       })
     }
   );
@@ -75629,18 +75629,34 @@ async function createSpreadsheet() {
   );
   return sheetId;
 }
+function parseSeizedItems(seized) {
+  if (!seized?.trim()) return [];
+  const items = [];
+  for (const part of seized.split(",")) {
+    const m = part.trim().match(/^(\d+)\s*x\s+(.+)$/i);
+    if (m) {
+      items.push({ name: m[2].trim(), qty: parseInt(m[1], 10) });
+    } else if (part.trim()) {
+      items.push({ name: part.trim(), qty: 1 });
+    }
+  }
+  return items;
+}
 async function appendFiling(record) {
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:E");
-  const body = JSON.stringify({
-    values: [[
-      record.username,
-      record.dateOfIncident,
-      record.seized,
-      record.discordUserAndId,
-      record.timestamp
-    ]]
-  });
+  const filingId = `FID-${Date.now().toString(36)}`;
+  const items = parseSeizedItems(record.seized);
+  const rows = items.length > 0 ? items.map(({ name, qty }) => [
+    filingId,
+    record.username,
+    record.dateOfIncident,
+    name,
+    String(qty),
+    record.discordUserAndId,
+    record.timestamp
+  ]) : [[filingId, record.username, record.dateOfIncident, "", "", record.discordUserAndId, record.timestamp]];
+  const range = encodeURIComponent("Sheet1!A:G");
+  const body = JSON.stringify({ values: rows });
   let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
     { method: "POST", body }
@@ -75652,7 +75668,7 @@ async function appendFiling(record) {
     );
     sheetId = await createSpreadsheet();
     res = await sheetsRequest(
-      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:E")}:append?valueInputOption=USER_ENTERED`,
+      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:G")}:append?valueInputOption=USER_ENTERED`,
       { method: "POST", body }
     );
   }
@@ -75668,7 +75684,7 @@ async function getFilings() {
     return { records: filingsCache.records, fetchedAt: filingsCache.fetchedAt };
   }
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:E");
+  const range = encodeURIComponent("Sheet1!A:G");
   let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}`,
     { method: "GET" }
@@ -75690,13 +75706,38 @@ async function getFilings() {
   }
   const data = await res.json();
   const rows = data.values ?? [];
-  const records = rows.slice(1).map((row) => ({
-    username: row[0] ?? "",
-    dateOfIncident: row[1] ?? "",
-    seized: row[2] ?? "",
-    discordUserAndId: row[3] ?? "",
-    timestamp: row[4] ?? ""
-  }));
+  const records = [];
+  const newFilings = /* @__PURE__ */ new Map();
+  for (const row of rows.slice(1)) {
+    if (!row[0]) continue;
+    if (row[0].startsWith("FID-")) {
+      const [filingId, username, date, item, qty, discord, timestamp] = row;
+      if (!newFilings.has(filingId)) {
+        newFilings.set(filingId, {
+          username: username ?? "",
+          dateOfIncident: date ?? "",
+          seized: "",
+          discordUserAndId: discord ?? "",
+          timestamp: timestamp ?? ""
+        });
+      }
+      if (item?.trim()) {
+        const qtyNum = Math.max(1, parseInt(qty ?? "1", 10) || 1);
+        const entry = `${qtyNum}x ${item.trim()}`;
+        const rec = newFilings.get(filingId);
+        rec.seized = rec.seized ? `${rec.seized}, ${entry}` : entry;
+      }
+    } else {
+      records.push({
+        username: row[0] ?? "",
+        dateOfIncident: row[1] ?? "",
+        seized: row[2] ?? "",
+        discordUserAndId: row[3] ?? "",
+        timestamp: row[4] ?? ""
+      });
+    }
+  }
+  for (const rec of newFilings.values()) records.push(rec);
   const fetchedAt = Date.now();
   filingsCache = { records, fetchedAt };
   return { records, fetchedAt };

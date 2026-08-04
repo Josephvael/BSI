@@ -190,14 +190,14 @@ async function createSpreadsheet(): Promise<string> {
   const data = (await res.json()) as { spreadsheetId: string };
   const sheetId = data.spreadsheetId;
 
-  // Write header row matching current FilingRecord column order
-  const range = encodeURIComponent("Sheet1!A1:E1");
+  // Write header row — 7 columns (one row per seized item)
+  const range = encodeURIComponent("Sheet1!A1:G1");
   await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
     {
       method: "PUT",
       body: JSON.stringify({
-        values: [["Offender's Username", "Date of Incident", "Seized", "Discord User + ID", "Timestamp"]],
+        values: [["Filing ID", "Offender's Username", "Date of Incident", "Item Seized", "Quantity", "Discord User + ID", "Timestamp"]],
       }),
     },
   );
@@ -213,18 +213,47 @@ async function createSpreadsheet(): Promise<string> {
   return sheetId;
 }
 
+/**
+ * Parse a seized string ("2x Hawthorn M80A1, 1x Delino R20") into individual
+ * item records so each can occupy its own sheet row with a numeric Quantity.
+ */
+function parseSeizedItems(seized: string): { name: string; qty: number }[] {
+  if (!seized?.trim()) return [];
+  const items: { name: string; qty: number }[] = [];
+  for (const part of seized.split(",")) {
+    const m = part.trim().match(/^(\d+)\s*x\s+(.+)$/i);
+    if (m) {
+      items.push({ name: m[2].trim(), qty: parseInt(m[1], 10) });
+    } else if (part.trim()) {
+      items.push({ name: part.trim(), qty: 1 });
+    }
+  }
+  return items;
+}
+
 export async function appendFiling(record: FilingRecord): Promise<void> {
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:E");
-  const body = JSON.stringify({
-    values: [[
-      record.username,
-      record.dateOfIncident,
-      record.seized,
-      record.discordUserAndId,
-      record.timestamp,
-    ]],
-  });
+
+  // Generate a stable Filing ID so multi-item filings can be grouped in Sheets
+  const filingId = `FID-${Date.now().toString(36)}`;
+  const items = parseSeizedItems(record.seized);
+
+  // One row per item; if nothing was seized, write a single row with empty item/qty
+  const rows: string[][] =
+    items.length > 0
+      ? items.map(({ name, qty }) => [
+          filingId,
+          record.username,
+          record.dateOfIncident,
+          name,
+          String(qty),
+          record.discordUserAndId,
+          record.timestamp,
+        ])
+      : [[filingId, record.username, record.dateOfIncident, "", "", record.discordUserAndId, record.timestamp]];
+
+  const range = encodeURIComponent("Sheet1!A:G");
+  const body = JSON.stringify({ values: rows });
 
   let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED`,
@@ -239,7 +268,7 @@ export async function appendFiling(record: FilingRecord): Promise<void> {
     );
     sheetId = await createSpreadsheet();
     res = await sheetsRequest(
-      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:E")}:append?valueInputOption=USER_ENTERED`,
+      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Sheet1!A:G")}:append?valueInputOption=USER_ENTERED`,
       { method: "POST", body },
     );
   }
@@ -268,7 +297,7 @@ export async function getFilings(): Promise<FilingsResult> {
   }
 
   let sheetId = await getSheetId();
-  const range = encodeURIComponent("Sheet1!A:E");
+  const range = encodeURIComponent("Sheet1!A:G");
 
   let res = await sheetsRequest(
     `/v4/spreadsheets/${sheetId}/values/${range}`,
@@ -297,15 +326,53 @@ export async function getFilings(): Promise<FilingsResult> {
   const data = (await res.json()) as { values?: string[][] };
   const rows = data.values ?? [];
 
-  // Skip header row — columns:
-  // A: Username, B: Date of Incident, C: Seized, D: Discord User + ID, E: Timestamp
-  const records: FilingRecord[] = rows.slice(1).map((row) => ({
-    username: row[0] ?? "",
-    dateOfIncident: row[1] ?? "",
-    seized: row[2] ?? "",
-    discordUserAndId: row[3] ?? "",
-    timestamp: row[4] ?? "",
-  }));
+  // Support two layouts:
+  //
+  // OLD (5 cols, A–E): Username | Date | Seized (text blob) | Discord | Timestamp
+  // NEW (7 cols, A–G): Filing ID | Username | Date | Item | Qty | Discord | Timestamp
+  //
+  // New rows are detected by column A starting with "FID-".
+  // New rows are grouped by Filing ID so each filing returns as one FilingRecord.
+
+  const records: FilingRecord[] = [];
+  // Preserve insertion order for new-format filings (Map maintains order)
+  const newFilings = new Map<string, FilingRecord>();
+
+  for (const row of rows.slice(1)) {
+    if (!row[0]) continue; // blank row
+
+    if (row[0].startsWith("FID-")) {
+      // ── New 7-column format ──────────────────────────────────────────
+      const [filingId, username, date, item, qty, discord, timestamp] = row;
+      if (!newFilings.has(filingId)) {
+        newFilings.set(filingId, {
+          username: username ?? "",
+          dateOfIncident: date ?? "",
+          seized: "",
+          discordUserAndId: discord ?? "",
+          timestamp: timestamp ?? "",
+        });
+      }
+      if (item?.trim()) {
+        const qtyNum = Math.max(1, parseInt(qty ?? "1", 10) || 1);
+        const entry = `${qtyNum}x ${item.trim()}`;
+        const rec = newFilings.get(filingId)!;
+        rec.seized = rec.seized ? `${rec.seized}, ${entry}` : entry;
+      }
+    } else {
+      // ── Old 5-column format (backward compat) ────────────────────────
+      records.push({
+        username: row[0] ?? "",
+        dateOfIncident: row[1] ?? "",
+        seized: row[2] ?? "",
+        discordUserAndId: row[3] ?? "",
+        timestamp: row[4] ?? "",
+      });
+    }
+  }
+
+  // Append new-format filings after old-format ones (old rows sit at top of sheet)
+  for (const rec of newFilings.values()) records.push(rec);
 
   const fetchedAt = Date.now();
   filingsCache = { records, fetchedAt };
