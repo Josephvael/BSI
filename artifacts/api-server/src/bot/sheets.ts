@@ -308,7 +308,13 @@ export async function syncGroupsSheet(groups: GroupRecord[]): Promise<void> {
     }),
   });
 
-  // Clear + rewrite the whole tab
+  // Explicitly clear the tab first so removed rows don't linger
+  await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Groups!A1:D")}:clear`,
+    { method: "POST" },
+  );
+
+  // Rewrite the whole tab using RAW so numeric-looking IDs aren't mangled
   const range = encodeURIComponent("Groups!A1:D");
   const values: string[][] = [
     ["Group ID", "Label", "Added By", "Added At"],
@@ -316,7 +322,7 @@ export async function syncGroupsSheet(groups: GroupRecord[]): Promise<void> {
   ];
 
   const res = await sheetsRequest(
-    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=RAW`,
     { method: "PUT", body: JSON.stringify({ values }) },
   );
 
@@ -324,4 +330,188 @@ export async function syncGroupsSheet(groups: GroupRecord[]): Promise<void> {
     const err = await res.text();
     throw new Error(`Groups sheet sync failed (${res.status}): ${err}`);
   }
+}
+
+/**
+ * Reads the "Groups" tab and returns the registered groups.
+ * Returns an empty array only when the tab genuinely doesn't exist yet.
+ * Throws on any other non-OK response so callers can distinguish a real API
+ * failure from a legitimately empty tab.
+ */
+export async function getGroupsFromSheet(): Promise<GroupRecord[]> {
+  const sheetId = await getSheetId();
+  const range = encodeURIComponent("Groups!A1:D");
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}`,
+    { method: "GET" },
+  );
+  if (!res.ok) {
+    const body = await res.text();
+    // 400 "Unable to parse range" means the tab hasn't been created yet — safe to treat as empty.
+    if (res.status === 400 && body.includes("Unable to parse range")) return [];
+    throw new Error(`Sheets read failed for Groups (${res.status}): ${body}`);
+  }
+  const data = (await res.json()) as { values?: string[][] };
+  const rows = (data.values ?? []).slice(1); // skip header
+  return rows
+    .filter((row) => row[0])
+    .map((row) => ({
+      id: Number(row[0]),
+      label: row[1] ?? "",
+      addedBy: row[2] ?? "",
+      addedAt: row[3] ?? "",
+    }));
+}
+
+/**
+ * Writes all allowed role IDs to an "Access Roles" tab in the same spreadsheet.
+ * Creates the tab if it doesn't exist yet.
+ */
+export async function syncAccessSheet(roles: string[]): Promise<void> {
+  const sheetId = await getSheetId();
+
+  // Try to create the tab — ignore error if it already exists
+  await sheetsRequest(`/v4/spreadsheets/${sheetId}:batchUpdate`, {
+    method: "POST",
+    body: JSON.stringify({
+      requests: [{ addSheet: { properties: { title: "Access Roles" } } }],
+    }),
+  });
+
+  // Explicitly clear the tab first so revoked roles don't linger
+  await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Access Roles!A1:A")}:clear`,
+    { method: "POST" },
+  );
+
+  // Rewrite using RAW so Discord snowflake IDs (17–19 digits) are stored as
+  // plain strings and not mangled by Sheets' numeric precision limit.
+  const range = encodeURIComponent("Access Roles!A1:A");
+  const values: string[][] = [
+    ["Role ID"],
+    ...roles.map((id) => [id]),
+  ];
+
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=RAW`,
+    { method: "PUT", body: JSON.stringify({ values }) },
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Access Roles sheet sync failed (${res.status}): ${err}`);
+  }
+}
+
+/**
+ * Reads the "Access Roles" tab and returns the role IDs.
+ * Returns an empty array only when the tab genuinely doesn't exist yet.
+ * Throws on any other non-OK response so callers can distinguish a real API
+ * failure from a legitimately empty tab.
+ */
+export async function getAccessFromSheet(): Promise<string[]> {
+  const sheetId = await getSheetId();
+  const range = encodeURIComponent("Access Roles!A1:A");
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}`,
+    { method: "GET" },
+  );
+  if (!res.ok) {
+    const body = await res.text();
+    // 400 "Unable to parse range" means the tab hasn't been created yet — safe to treat as empty.
+    if (res.status === 400 && body.includes("Unable to parse range")) return [];
+    throw new Error(`Sheets read failed for Access Roles (${res.status}): ${body}`);
+  }
+  const data = (await res.json()) as { values?: string[][] };
+  const rows = (data.values ?? []).slice(1); // skip header
+  return rows.filter((row) => row[0]).map((row) => row[0]);
+}
+
+export interface VerificationEntry {
+  robloxId: number;
+  robloxUsername: string;
+  verifiedAt: string;
+  verifiedBy: string;
+}
+
+/**
+ * Writes all Discord↔Roblox verifications to a "Verifications" tab.
+ * Creates the tab if it doesn't exist yet.
+ */
+export async function syncVerificationsSheet(
+  store: Record<string, VerificationEntry>,
+): Promise<void> {
+  const sheetId = await getSheetId();
+
+  // Try to create the tab — ignore error if it already exists
+  await sheetsRequest(`/v4/spreadsheets/${sheetId}:batchUpdate`, {
+    method: "POST",
+    body: JSON.stringify({
+      requests: [{ addSheet: { properties: { title: "Verifications" } } }],
+    }),
+  });
+
+  // Explicitly clear the tab first so removed verifications don't linger
+  await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Verifications!A1:E")}:clear`,
+    { method: "POST" },
+  );
+
+  // Rewrite using RAW so Discord snowflake IDs (17–19 digits) are stored as
+  // plain strings and not mangled by Sheets' numeric precision limit.
+  const range = encodeURIComponent("Verifications!A1:E");
+  const values: string[][] = [
+    ["Discord User ID", "Roblox ID", "Roblox Username", "Verified At", "Verified By"],
+    ...Object.entries(store).map(([discordId, v]) => [
+      discordId,
+      String(v.robloxId),
+      v.robloxUsername,
+      v.verifiedAt,
+      v.verifiedBy,
+    ]),
+  ];
+
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=RAW`,
+    { method: "PUT", body: JSON.stringify({ values }) },
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Verifications sheet sync failed (${res.status}): ${err}`);
+  }
+}
+
+/**
+ * Reads the "Verifications" tab and returns the verification store.
+ * Returns an empty object only when the tab genuinely doesn't exist yet.
+ * Throws on any other non-OK response so callers can distinguish a real API
+ * failure from a legitimately empty tab.
+ */
+export async function getVerificationsFromSheet(): Promise<Record<string, VerificationEntry>> {
+  const sheetId = await getSheetId();
+  const range = encodeURIComponent("Verifications!A1:E");
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}`,
+    { method: "GET" },
+  );
+  if (!res.ok) {
+    const body = await res.text();
+    // 400 "Unable to parse range" means the tab hasn't been created yet — safe to treat as empty.
+    if (res.status === 400 && body.includes("Unable to parse range")) return {};
+    throw new Error(`Sheets read failed for Verifications (${res.status}): ${body}`);
+  }
+  const data = (await res.json()) as { values?: string[][] };
+  const rows = (data.values ?? []).slice(1); // skip header
+  const store: Record<string, VerificationEntry> = {};
+  for (const row of rows) {
+    if (!row[0]) continue;
+    store[row[0]] = {
+      robloxId: Number(row[1]),
+      robloxUsername: row[2] ?? "",
+      verifiedAt: row[3] ?? "",
+      verifiedBy: row[4] ?? "",
+    };
+  }
+  return store;
 }

@@ -75703,19 +75703,144 @@ async function syncGroupsSheet(groups) {
       requests: [{ addSheet: { properties: { title: "Groups" } } }]
     })
   });
+  await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Groups!A1:D")}:clear`,
+    { method: "POST" }
+  );
   const range = encodeURIComponent("Groups!A1:D");
   const values = [
     ["Group ID", "Label", "Added By", "Added At"],
     ...groups.map((g) => [String(g.id), g.label, g.addedBy, g.addedAt])
   ];
   const res = await sheetsRequest(
-    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=USER_ENTERED`,
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=RAW`,
     { method: "PUT", body: JSON.stringify({ values }) }
   );
   if (!res.ok) {
     const err = await res.text();
     throw new Error(`Groups sheet sync failed (${res.status}): ${err}`);
   }
+}
+async function getGroupsFromSheet() {
+  const sheetId = await getSheetId();
+  const range = encodeURIComponent("Groups!A1:D");
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}`,
+    { method: "GET" }
+  );
+  if (!res.ok) {
+    const body = await res.text();
+    if (res.status === 400 && body.includes("Unable to parse range")) return [];
+    throw new Error(`Sheets read failed for Groups (${res.status}): ${body}`);
+  }
+  const data = await res.json();
+  const rows = (data.values ?? []).slice(1);
+  return rows.filter((row) => row[0]).map((row) => ({
+    id: Number(row[0]),
+    label: row[1] ?? "",
+    addedBy: row[2] ?? "",
+    addedAt: row[3] ?? ""
+  }));
+}
+async function syncAccessSheet(roles) {
+  const sheetId = await getSheetId();
+  await sheetsRequest(`/v4/spreadsheets/${sheetId}:batchUpdate`, {
+    method: "POST",
+    body: JSON.stringify({
+      requests: [{ addSheet: { properties: { title: "Access Roles" } } }]
+    })
+  });
+  await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Access Roles!A1:A")}:clear`,
+    { method: "POST" }
+  );
+  const range = encodeURIComponent("Access Roles!A1:A");
+  const values = [
+    ["Role ID"],
+    ...roles.map((id) => [id])
+  ];
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=RAW`,
+    { method: "PUT", body: JSON.stringify({ values }) }
+  );
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Access Roles sheet sync failed (${res.status}): ${err}`);
+  }
+}
+async function getAccessFromSheet() {
+  const sheetId = await getSheetId();
+  const range = encodeURIComponent("Access Roles!A1:A");
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}`,
+    { method: "GET" }
+  );
+  if (!res.ok) {
+    const body = await res.text();
+    if (res.status === 400 && body.includes("Unable to parse range")) return [];
+    throw new Error(`Sheets read failed for Access Roles (${res.status}): ${body}`);
+  }
+  const data = await res.json();
+  const rows = (data.values ?? []).slice(1);
+  return rows.filter((row) => row[0]).map((row) => row[0]);
+}
+async function syncVerificationsSheet(store) {
+  const sheetId = await getSheetId();
+  await sheetsRequest(`/v4/spreadsheets/${sheetId}:batchUpdate`, {
+    method: "POST",
+    body: JSON.stringify({
+      requests: [{ addSheet: { properties: { title: "Verifications" } } }]
+    })
+  });
+  await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Verifications!A1:E")}:clear`,
+    { method: "POST" }
+  );
+  const range = encodeURIComponent("Verifications!A1:E");
+  const values = [
+    ["Discord User ID", "Roblox ID", "Roblox Username", "Verified At", "Verified By"],
+    ...Object.entries(store).map(([discordId, v]) => [
+      discordId,
+      String(v.robloxId),
+      v.robloxUsername,
+      v.verifiedAt,
+      v.verifiedBy
+    ])
+  ];
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}?valueInputOption=RAW`,
+    { method: "PUT", body: JSON.stringify({ values }) }
+  );
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Verifications sheet sync failed (${res.status}): ${err}`);
+  }
+}
+async function getVerificationsFromSheet() {
+  const sheetId = await getSheetId();
+  const range = encodeURIComponent("Verifications!A1:E");
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${range}`,
+    { method: "GET" }
+  );
+  if (!res.ok) {
+    const body = await res.text();
+    if (res.status === 400 && body.includes("Unable to parse range")) return {};
+    throw new Error(`Sheets read failed for Verifications (${res.status}): ${body}`);
+  }
+  const data = await res.json();
+  const rows = (data.values ?? []).slice(1);
+  const store = {};
+  for (const row of rows) {
+    if (!row[0]) continue;
+    store[row[0]] = {
+      robloxId: Number(row[1]),
+      robloxUsername: row[2] ?? "",
+      verifiedAt: row[3] ?? "",
+      verifiedBy: row[4] ?? ""
+    };
+  }
+  return store;
 }
 
 // src/bot/access.ts
@@ -75727,7 +75852,16 @@ var rolesCache = null;
 async function loadRoles() {
   if (rolesCache) return rolesCache;
   if (!existsSync2(ACCESS_FILE)) {
-    rolesCache = /* @__PURE__ */ new Set();
+    const roles = await getAccessFromSheet();
+    if (roles.length > 0) {
+      logger.info(
+        { count: roles.length },
+        "Restored access roles from Google Sheet (local file was missing)"
+      );
+    }
+    rolesCache = new Set(roles);
+    await mkdir2("./.bot-data", { recursive: true });
+    await writeFile2(ACCESS_FILE, JSON.stringify({ roles }, null, 2));
     return rolesCache;
   }
   try {
@@ -75743,6 +75877,7 @@ async function saveRoles(roles) {
   await mkdir2("./.bot-data", { recursive: true });
   await writeFile2(ACCESS_FILE, JSON.stringify({ roles: [...roles] }, null, 2));
   rolesCache = roles;
+  await syncAccessSheet([...roles]);
 }
 async function grantRoleAccess(roleId) {
   const roles = await loadRoles();
@@ -75756,6 +75891,11 @@ async function revokeRoleAccess(roleId) {
 }
 async function getAllowedRoles() {
   return loadRoles();
+}
+async function syncAccessToSheetsIfExists() {
+  if (!existsSync2(ACCESS_FILE)) return;
+  const roles = await loadRoles();
+  await syncAccessSheet([...roles]);
 }
 function checkAccess(interaction, allowedRoles) {
   if (interaction.memberPermissions?.has(import_discord.PermissionFlagsBits.Administrator)) return true;
@@ -76072,7 +76212,16 @@ var cache = null;
 async function load() {
   if (cache) return cache;
   if (!existsSync3(FILE)) {
-    cache = {};
+    const restored = await getVerificationsFromSheet();
+    if (Object.keys(restored).length > 0) {
+      logger.info(
+        { count: Object.keys(restored).length },
+        "Restored verifications from Google Sheet (local file was missing)"
+      );
+    }
+    cache = restored;
+    await mkdir3("./.bot-data", { recursive: true });
+    await writeFile3(FILE, JSON.stringify(cache, null, 2));
     return cache;
   }
   try {
@@ -76087,6 +76236,7 @@ async function save(store) {
   await mkdir3("./.bot-data", { recursive: true });
   await writeFile3(FILE, JSON.stringify(store, null, 2));
   cache = store;
+  await syncVerificationsSheet(store);
 }
 async function setVerification(discordUserId, robloxId, robloxUsername, verifiedBy) {
   const store = await load();
@@ -76108,6 +76258,11 @@ async function removeVerification(discordUserId) {
   delete store[discordUserId];
   await save(store);
   return true;
+}
+async function syncVerificationsToSheetsIfExists() {
+  if (!existsSync3(FILE)) return;
+  const store = await load();
+  await syncVerificationsSheet(store);
 }
 
 // src/bot/commands/roblox.ts
@@ -76269,7 +76424,16 @@ var cache2 = null;
 async function load2() {
   if (cache2) return cache2;
   if (!existsSync4(FILE2)) {
-    cache2 = [];
+    const restored = await getGroupsFromSheet();
+    if (restored.length > 0) {
+      logger.info(
+        { count: restored.length },
+        "Restored group registry from Google Sheet (local file was missing)"
+      );
+    }
+    cache2 = restored;
+    await mkdir4("./.bot-data", { recursive: true });
+    await writeFile4(FILE2, JSON.stringify(cache2, null, 2));
     return cache2;
   }
   try {
@@ -76284,6 +76448,7 @@ async function save2(groups) {
   await mkdir4("./.bot-data", { recursive: true });
   await writeFile4(FILE2, JSON.stringify(groups, null, 2));
   cache2 = groups;
+  await syncGroupsSheet(groups);
 }
 async function getGroups() {
   return load2();
@@ -76294,9 +76459,6 @@ async function addGroup(id, label, addedBy) {
   if (existing) return { added: false, existing };
   const updated = [...groups, { id, label, addedBy, addedAt: (/* @__PURE__ */ new Date()).toISOString() }];
   await save2(updated);
-  syncGroupsSheet(updated).catch(
-    (err) => logger.warn({ err }, "Failed to sync groups to Google Sheet")
-  );
   return { added: true };
 }
 async function removeGroup(id) {
@@ -76304,10 +76466,12 @@ async function removeGroup(id) {
   const updated = groups.filter((g) => g.id !== id);
   if (updated.length === groups.length) return false;
   await save2(updated);
-  syncGroupsSheet(updated).catch(
-    (err) => logger.warn({ err }, "Failed to sync groups to Google Sheet")
-  );
   return true;
+}
+async function syncGroupsToSheetsIfExists() {
+  if (!existsSync4(FILE2)) return;
+  const groups = await load2();
+  await syncGroupsSheet(groups);
 }
 
 // src/bot/commands/groups.ts
@@ -76611,7 +76775,25 @@ async function startBot() {
 }
 
 // src/bot-standalone.ts
+if (!process.env.GOOGLE_SHEET_ID) {
+  logger.warn(
+    "GOOGLE_SHEET_ID is not set. On a filesystem wipe (e.g. BisectHosting restart) access roles, verifications, and groups cannot be restored from Google Sheets. Set GOOGLE_SHEET_ID to the spreadsheet ID in your host environment variables."
+  );
+}
 logger.info("Starting standalone Discord bot");
+var backupResults = await Promise.allSettled([
+  syncAccessToSheetsIfExists(),
+  syncVerificationsToSheetsIfExists(),
+  syncGroupsToSheetsIfExists()
+]);
+for (const [i, result] of backupResults.entries()) {
+  const name = ["access roles", "verifications", "groups"][i];
+  if (result.status === "rejected") {
+    logger.warn({ err: result.reason }, `Startup Sheets backup failed for ${name}`);
+  } else {
+    logger.info(`Startup Sheets backup completed for ${name}`);
+  }
+}
 startBot().catch((err) => {
   logger.error({ err }, "Bot failed to start");
   process.exit(1);
