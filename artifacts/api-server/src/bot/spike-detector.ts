@@ -85,6 +85,16 @@ export function seedWindow(entries: { itemName: string; ts: number }[]): void {
 }
 
 /**
+ * Reset all in-memory state. Exported for unit tests only — do not call in
+ * production code.
+ * @internal
+ */
+export function _resetForTest(): void {
+  window.length = 0;
+  cooldowns.clear();
+}
+
+/**
  * Record `items` as freshly filed, then return any items that are spiking.
  * Call this once per completed filing, after the row is safely written to Sheets.
  */
