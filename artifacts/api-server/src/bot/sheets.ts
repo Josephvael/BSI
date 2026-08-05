@@ -666,6 +666,73 @@ export async function syncVerificationsSheet(
  * Throws on any other non-OK response so callers can distinguish a real API
  * failure from a legitimately empty tab.
  */
+export interface SpikeRecord {
+  itemName: string;
+  count: number;
+  windowHours: number;
+  detectedAt: string;
+}
+
+/**
+ * Appends one spike event to the "Spikes" tab, creating the tab and its header
+ * row on first use.  Non-fatal — errors are logged but do not throw so a spike
+ * notification failure never breaks the filing flow.
+ */
+export async function appendSpikeRecord(spike: SpikeRecord): Promise<void> {
+  const sheetId = await getSheetId();
+
+  // Ensure the tab exists (ignore error if it already does)
+  await sheetsRequest(`/v4/spreadsheets/${sheetId}:batchUpdate`, {
+    method: "POST",
+    body: JSON.stringify({
+      requests: [{ addSheet: { properties: { title: "Spikes" } } }],
+    }),
+  });
+
+  // Check whether the header row is present
+  const checkRes = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Spikes!A1:D1")}`,
+    { method: "GET" },
+  );
+  const existing = checkRes.ok
+    ? ((await checkRes.json()) as { values?: string[][] }).values ?? []
+    : [];
+
+  if (existing.length === 0) {
+    // Write header on first use
+    await sheetsRequest(
+      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Spikes!A1:D1")}?valueInputOption=USER_ENTERED`,
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          values: [["Item", "Count in Window", "Window (hours)", "Detected At"]],
+        }),
+      },
+    );
+  }
+
+  // Append the spike row
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Spikes!A:D")}:append?valueInputOption=USER_ENTERED`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        values: [[
+          spike.itemName,
+          String(spike.count),
+          String(spike.windowHours),
+          spike.detectedAt,
+        ]],
+      }),
+    },
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Spike record append failed (${res.status}): ${err}`);
+  }
+}
+
 export async function getVerificationsFromSheet(): Promise<Record<string, VerificationEntry>> {
   const sheetId = await getSheetId();
   const range = encodeURIComponent("Verifications!A1:E");

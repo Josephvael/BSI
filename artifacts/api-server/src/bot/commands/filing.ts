@@ -9,14 +9,20 @@ import {
   ButtonStyle,
   EmbedBuilder,
   MessageFlags,
+  TextChannel,
   ChatInputCommandInteraction,
   ButtonInteraction,
   StringSelectMenuInteraction,
   ModalSubmitInteraction,
 } from "discord.js";
-import { appendFiling } from "../sheets";
+import { appendFiling, appendSpikeRecord } from "../sheets";
 import { getAllowedRoles, checkAccess } from "../access";
+import { recordAndDetect } from "../spike-detector";
+import { getDiscordClient } from "../discord-client";
 import { logger } from "../../lib/logger";
+
+/** Channel ID where spike alerts are posted. Set SPIKE_ALERT_CHANNEL_ID in env. */
+const SPIKE_CHANNEL_ID = process.env.SPIKE_ALERT_CHANNEL_ID ?? "";
 
 export const filingCommand = new SlashCommandBuilder()
   .setName("filing")
@@ -432,13 +438,60 @@ export async function handleFilingModal(
   const seized = state.accumulated.map((i) => `${i.qty}x ${i.name}`).join(", ");
 
   try {
+    const timestamp = new Date().toISOString();
     await appendFiling({
       username,
       dateOfIncident,
       seized,
       discordUserAndId: `${interaction.user.tag} | ${interaction.user.id}`,
-      timestamp: new Date().toISOString(),
+      timestamp,
     });
+
+    // ── Spike detection ───────────────────────────────────────────────────────
+    if (state.accumulated.length > 0) {
+      const spikes = recordAndDetect(state.accumulated);
+      for (const spike of spikes) {
+        // Record to Sheets (non-fatal)
+        appendSpikeRecord({
+          itemName:    spike.itemName,
+          count:       spike.count,
+          windowHours: spike.windowHours,
+          detectedAt:  timestamp,
+        }).catch((err) => logger.warn({ err, item: spike.itemName }, "Failed to write spike to Sheets"));
+
+        // Send Discord alert (non-fatal)
+        if (SPIKE_CHANNEL_ID) {
+          const client = getDiscordClient();
+          if (client) {
+            client.channels.fetch(SPIKE_CHANNEL_ID)
+              .then((ch) => {
+                if (!ch?.isTextBased()) return;
+                const alertEmbed = new EmbedBuilder()
+                  .setColor(0xed4245) // Discord red
+                  .setTitle("⚠️ Filing Spike Detected")
+                  .setDescription(
+                    `**${spike.itemName}** has been filed **${spike.count} times** ` +
+                    `in the last ${spike.windowHours} hour${spike.windowHours !== 1 ? "s" : ""}.`,
+                  )
+                  .addFields(
+                    { name: "Item",          value: spike.itemName,                inline: true },
+                    { name: "Filing Count",  value: String(spike.count),           inline: true },
+                    { name: "Window",        value: `${spike.windowHours}h`,       inline: true },
+                    { name: "Triggered by",  value: `${interaction.user.tag}`,     inline: true },
+                  )
+                  .setFooter({ text: "Spike logged to the Spikes sheet" })
+                  .setTimestamp();
+                return (ch as TextChannel).send({ embeds: [alertEmbed] });
+              })
+              .catch((err) => logger.warn({ err, channelId: SPIKE_CHANNEL_ID }, "Failed to send spike alert"));
+          } else {
+            logger.warn("Spike detected but Discord client not available for alert");
+          }
+        } else {
+          logger.warn({ item: spike.itemName, count: spike.count }, "Spike detected — set SPIKE_ALERT_CHANNEL_ID to enable Discord alerts");
+        }
+      }
+    }
 
     const embed = new EmbedBuilder()
       .setColor(0x57f287)

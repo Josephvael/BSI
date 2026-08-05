@@ -13206,15 +13206,15 @@ var require_request2 = __commonJS({
           signal = input[kSignal];
         }
         const origin = environmentSettingsObject.settingsObject.origin;
-        let window = "client";
+        let window2 = "client";
         if (request.window?.constructor?.name === "EnvironmentSettingsObject" && sameOrigin(request.window, origin)) {
-          window = request.window;
+          window2 = request.window;
         }
         if (init.window != null) {
-          throw new TypeError(`'window' option '${window}' must be null`);
+          throw new TypeError(`'window' option '${window2}' must be null`);
         }
         if ("window" in init) {
-          window = "no-window";
+          window2 = "no-window";
         }
         request = makeRequest({
           // URL request’s URL.
@@ -13229,7 +13229,7 @@ var require_request2 = __commonJS({
           // client This’s relevant settings object.
           client: environmentSettingsObject.settingsObject,
           // window window.
-          window,
+          window: window2,
           // priority request’s priority.
           priority: request.priority,
           // origin request’s origin. The propagation of the origin is only significant for navigation requests
@@ -55675,7 +55675,7 @@ var require_TextChannel = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/TextChannel.js"(exports2, module2) {
     "use strict";
     var BaseGuildTextChannel = require_BaseGuildTextChannel();
-    var TextChannel = class extends BaseGuildTextChannel {
+    var TextChannel2 = class extends BaseGuildTextChannel {
       _patch(data) {
         super._patch(data);
         if ("rate_limit_per_user" in data) {
@@ -55692,7 +55692,7 @@ var require_TextChannel = __commonJS({
         return this.edit({ rateLimitPerUser, reason });
       }
     };
-    module2.exports = TextChannel;
+    module2.exports = TextChannel2;
   }
 });
 
@@ -75494,6 +75494,15 @@ var logger = {
   child: (_bindings) => logger
 };
 
+// src/bot/discord-client.ts
+var _client = null;
+function setDiscordClient(client) {
+  _client = client;
+}
+function getDiscordClient() {
+  return _client;
+}
+
 // src/bot/commands/filing.ts
 var import_discord2 = __toESM(require_src(), 1);
 
@@ -75997,6 +76006,49 @@ async function syncVerificationsSheet(store) {
     throw new Error(`Verifications sheet sync failed (${res.status}): ${err}`);
   }
 }
+async function appendSpikeRecord(spike) {
+  const sheetId = await getSheetId();
+  await sheetsRequest(`/v4/spreadsheets/${sheetId}:batchUpdate`, {
+    method: "POST",
+    body: JSON.stringify({
+      requests: [{ addSheet: { properties: { title: "Spikes" } } }]
+    })
+  });
+  const checkRes = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Spikes!A1:D1")}`,
+    { method: "GET" }
+  );
+  const existing = checkRes.ok ? (await checkRes.json()).values ?? [] : [];
+  if (existing.length === 0) {
+    await sheetsRequest(
+      `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Spikes!A1:D1")}?valueInputOption=USER_ENTERED`,
+      {
+        method: "PUT",
+        body: JSON.stringify({
+          values: [["Item", "Count in Window", "Window (hours)", "Detected At"]]
+        })
+      }
+    );
+  }
+  const res = await sheetsRequest(
+    `/v4/spreadsheets/${sheetId}/values/${encodeURIComponent("Spikes!A:D")}:append?valueInputOption=USER_ENTERED`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        values: [[
+          spike.itemName,
+          String(spike.count),
+          String(spike.windowHours),
+          spike.detectedAt
+        ]]
+      })
+    }
+  );
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Spike record append failed (${res.status}): ${err}`);
+  }
+}
 async function getVerificationsFromSheet() {
   const sheetId = await getSheetId();
   const range = encodeURIComponent("Verifications!A1:E");
@@ -76088,7 +76140,40 @@ function checkAccess(interaction, allowedRoles) {
   return [...allowedRoles].some((id) => memberRoles.cache.has(id));
 }
 
+// src/bot/spike-detector.ts
+var SPIKE_THRESHOLD = Number(process.env.SPIKE_THRESHOLD ?? 3);
+var SPIKE_WINDOW_MS = Number(process.env.SPIKE_WINDOW_HOURS ?? 1) * 36e5;
+var SPIKE_COOLDOWN_MS = Number(process.env.SPIKE_COOLDOWN_HOURS ?? 2) * 36e5;
+var window = [];
+var cooldowns = /* @__PURE__ */ new Map();
+function prune(now) {
+  const cutoff = now - SPIKE_WINDOW_MS;
+  while (window.length > 0 && window[0].ts < cutoff) window.shift();
+}
+function recordAndDetect(items) {
+  const now = Date.now();
+  for (const { name } of items) {
+    window.push({ itemName: name, ts: now });
+  }
+  prune(now);
+  const spikes = [];
+  const checked = /* @__PURE__ */ new Set();
+  for (const { name } of items) {
+    if (checked.has(name)) continue;
+    checked.add(name);
+    const cooldownExpiry = cooldowns.get(name);
+    if (cooldownExpiry !== void 0 && now < cooldownExpiry) continue;
+    const count = window.filter((e) => e.itemName === name).length;
+    if (count >= SPIKE_THRESHOLD) {
+      spikes.push({ itemName: name, count, windowHours: SPIKE_WINDOW_MS / 36e5 });
+      cooldowns.set(name, now + SPIKE_COOLDOWN_MS);
+    }
+  }
+  return spikes;
+}
+
 // src/bot/commands/filing.ts
+var SPIKE_CHANNEL_ID = process.env.SPIKE_ALERT_CHANNEL_ID ?? "";
 var filingCommand = new import_discord2.SlashCommandBuilder().setName("filing").setDescription("File a new record");
 var CATEGORIES = {
   // Delino has 28 items — split into two groups to stay under Discord's 25-option limit
@@ -76450,13 +76535,46 @@ async function handleFilingModal(interaction) {
   pendingState.delete(interaction.user.id);
   const seized = state.accumulated.map((i) => `${i.qty}x ${i.name}`).join(", ");
   try {
+    const timestamp = (/* @__PURE__ */ new Date()).toISOString();
     await appendFiling({
       username,
       dateOfIncident,
       seized,
       discordUserAndId: `${interaction.user.tag} | ${interaction.user.id}`,
-      timestamp: (/* @__PURE__ */ new Date()).toISOString()
+      timestamp
     });
+    if (state.accumulated.length > 0) {
+      const spikes = recordAndDetect(state.accumulated);
+      for (const spike of spikes) {
+        appendSpikeRecord({
+          itemName: spike.itemName,
+          count: spike.count,
+          windowHours: spike.windowHours,
+          detectedAt: timestamp
+        }).catch((err) => logger.warn({ err, item: spike.itemName }, "Failed to write spike to Sheets"));
+        if (SPIKE_CHANNEL_ID) {
+          const client = getDiscordClient();
+          if (client) {
+            client.channels.fetch(SPIKE_CHANNEL_ID).then((ch) => {
+              if (!ch?.isTextBased()) return;
+              const alertEmbed = new import_discord2.EmbedBuilder().setColor(15548997).setTitle("\u26A0\uFE0F Filing Spike Detected").setDescription(
+                `**${spike.itemName}** has been filed **${spike.count} times** in the last ${spike.windowHours} hour${spike.windowHours !== 1 ? "s" : ""}.`
+              ).addFields(
+                { name: "Item", value: spike.itemName, inline: true },
+                { name: "Filing Count", value: String(spike.count), inline: true },
+                { name: "Window", value: `${spike.windowHours}h`, inline: true },
+                { name: "Triggered by", value: `${interaction.user.tag}`, inline: true }
+              ).setFooter({ text: "Spike logged to the Spikes sheet" }).setTimestamp();
+              return ch.send({ embeds: [alertEmbed] });
+            }).catch((err) => logger.warn({ err, channelId: SPIKE_CHANNEL_ID }, "Failed to send spike alert"));
+          } else {
+            logger.warn("Spike detected but Discord client not available for alert");
+          }
+        } else {
+          logger.warn({ item: spike.itemName, count: spike.count }, "Spike detected \u2014 set SPIKE_ALERT_CHANNEL_ID to enable Discord alerts");
+        }
+      }
+    }
     const embed = new import_discord2.EmbedBuilder().setColor(5763719).setTitle("Filing Submitted").addFields(
       { name: "Offender's Username", value: username, inline: true },
       { name: "Date of Incident", value: dateOfIncident, inline: true },
@@ -77349,6 +77467,7 @@ async function startBot() {
   const client = new import_discord9.Client({ intents: [import_discord9.GatewayIntentBits.Guilds] });
   client.once(import_discord9.Events.ClientReady, async (readyClient) => {
     logger.info({ tag: readyClient.user.tag }, "Discord bot is online");
+    setDiscordClient(client);
     await registerCommands(token, clientId, guildId);
   });
   client.on(import_discord9.Events.GuildCreate, async (guild) => {

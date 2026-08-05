@@ -8,6 +8,7 @@ import {
   PermissionFlagsBits,
 } from "discord.js";
 import { logger } from "../lib/logger";
+import { setDiscordClient } from "./discord-client";
 import {
   filingCommand, handleFilingCommand, handleFilingModal,
   handleCatSelect, handleItemSelect, handleQtyModal,
@@ -80,6 +81,7 @@ export async function startBot(): Promise<void> {
 
   client.once(Events.ClientReady, async (readyClient) => {
     logger.info({ tag: readyClient.user.tag }, "Discord bot is online");
+    setDiscordClient(client);
     await registerCommands(token, clientId, guildId);
   });
 
