@@ -22,6 +22,8 @@ import { robloxCommand, handleRobloxCommand } from "./commands/roblox";
 import { groupsCommand, handleGroupsCommand } from "./commands/groups";
 import { searchCommand, handleSearchCommand } from "./commands/search";
 import { panelCommand, handlePanelCommand, handlePanelButton, PANEL_BUTTON_ID } from "./commands/panel";
+import { getFilings } from "./sheets";
+import { seedWindow } from "./spike-detector";
 
 const commands = [
   filingCommand.toJSON(),
@@ -83,6 +85,29 @@ export async function startBot(): Promise<void> {
     logger.info({ tag: readyClient.user.tag }, "Discord bot is online");
     setDiscordClient(client);
     await registerCommands(token, clientId, guildId);
+
+    // Seed the spike detector window from recent filing history so that an
+    // in-progress spike trend is not lost across bot restarts.  We reuse the
+    // getFilings() call (which also populates the search cache) so no extra
+    // Sheets API requests are made on every filing.
+    try {
+      const { records } = await getFilings();
+      const entries: { itemName: string; ts: number }[] = [];
+      for (const rec of records) {
+        const ts = rec.timestamp ? new Date(rec.timestamp).getTime() : NaN;
+        if (!ts || isNaN(ts)) continue;
+        // Parse "2x ItemName, 1x ItemName2" (new format) or bare names (old format)
+        for (const part of rec.seized.split(",")) {
+          const m = part.trim().match(/^(\d+)\s*x\s+(.+)$/i);
+          const itemName = m ? m[2].trim() : part.trim();
+          if (itemName) entries.push({ itemName, ts });
+        }
+      }
+      seedWindow(entries);
+    } catch (err) {
+      // Non-fatal: the window starts empty if Sheets is unavailable at boot
+      logger.warn({ err }, "Could not seed spike detector from filing history — window starts empty");
+    }
   });
 
   client.on(Events.GuildCreate, async (guild) => {

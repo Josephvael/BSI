@@ -5,11 +5,15 @@
  * It returns any items that have crossed the spike threshold within the rolling
  * window and haven't already triggered an alert within the cooldown period.
  *
+ * Call `seedWindow()` once at startup (from bot ready handler) to replay recent
+ * filing history into the window so spikes survive bot restarts.
+ *
  * Configurable via environment variables:
  *   SPIKE_THRESHOLD     — filings of the same item before it's a spike (default: 3)
  *   SPIKE_WINDOW_HOURS  — rolling window size in hours (default: 1)
  *   SPIKE_COOLDOWN_HOURS — minimum hours between alerts for the same item (default: 2)
  */
+import { logger } from "../lib/logger";
 
 export interface SpikeResult {
   itemName: string;
@@ -36,6 +40,48 @@ const cooldowns = new Map<string, number>();
 function prune(now: number): void {
   const cutoff = now - SPIKE_WINDOW_MS;
   while (window.length > 0 && window[0].ts < cutoff) window.shift();
+}
+
+/**
+ * Seed the rolling window from historical filing data on bot startup.
+ *
+ * Pass entries derived from `getFilings()` so the window survives restarts
+ * without making any additional Sheets API calls.  Only entries that fall
+ * within the current window are inserted; entries already present (matched
+ * by ts + itemName) are skipped so calling this more than once is safe.
+ *
+ * Cooldowns are intentionally NOT restored — if the bot restarted mid-spike
+ * we want the next filing to be able to fire an alert immediately.
+ */
+export function seedWindow(entries: { itemName: string; ts: number }[]): void {
+  const now = Date.now();
+  const cutoff = now - SPIKE_WINDOW_MS;
+
+  const fresh = entries.filter((e) => e.ts >= cutoff);
+  if (fresh.length === 0) {
+    logger.debug("Spike detector seed: no recent entries within window — nothing to replay");
+    return;
+  }
+
+  // Build a set of already-present keys to avoid duplicates
+  const existing = new Set(window.map((e) => `${e.ts}|${e.itemName}`));
+  let added = 0;
+  for (const entry of fresh) {
+    const key = `${entry.ts}|${entry.itemName}`;
+    if (!existing.has(key)) {
+      window.push(entry);
+      existing.add(key);
+      added++;
+    }
+  }
+
+  // Keep the array sorted oldest-first so prune() works correctly
+  window.sort((a, b) => a.ts - b.ts);
+
+  logger.info(
+    { seededCount: added, windowHours: SPIKE_WINDOW_MS / 3_600_000 },
+    "Spike detector window seeded from filing history",
+  );
 }
 
 /**
