@@ -77455,9 +77455,7 @@ var SETTINGS_FILE = "./.bot-data/flock-settings.json";
 var DEFAULT_SETTINGS = {
   sort: "popular",
   all: 0,
-  shirts: 500,
-  pants: 500,
-  tshirts: 300,
+  clothing: 1e3,
   accessories: 1e3,
   bundles: 200,
   gear: 200
@@ -77487,9 +77485,8 @@ var SORT_TYPES = {
 };
 var CATEGORY_PARAMS = {
   all: { category: "All" },
-  shirts: { category: "Clothing", subcategory: "ClassicShirts" },
-  pants: { category: "Clothing", subcategory: "ClassicPants" },
-  tshirts: { category: "Clothing", subcategory: "ClassicTShirts" },
+  clothing: { category: "Clothing" },
+  // shirts + pants + t-shirts combined
   accessories: { category: "Accessories" },
   bundles: { category: "Bundles" },
   gear: { category: "Gear" }
@@ -77517,7 +77514,10 @@ async function fetchCatalogPage(params, sortType, cursor, limit) {
       await sleep(wait);
       continue;
     }
-    if (!res.ok) throw new Error(`Roblox API ${res.status} ${res.statusText}`);
+    if (!res.ok) {
+      const body = await res.text().catch(() => "(unreadable)");
+      throw new Error(`Roblox API ${res.status} ${res.statusText} \u2014 ${body}`);
+    }
     const data = await res.json();
     return {
       items: (data.data ?? []).map((i) => ({ id: i.id, name: i.name ?? "" })),
@@ -77555,7 +77555,7 @@ async function collectCategory(catKey, limit, sortType) {
 var flockCommand = new import_discord9.SlashCommandBuilder().setName("flock").setDescription("Project FlockLLM \u2014 collect Roblox marketplace data").addSubcommand(
   (sub) => sub.setName("collect").setDescription("Run data collection using current settings and receive a JSONL file")
 ).addSubcommand(
-  (sub) => sub.setName("set").setDescription("Update per-category item limits and sort order").addIntegerOption((o) => o.setName("all").setDescription("Items from the general catalog (0 = skip)").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("shirts").setDescription("Shirt items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("pants").setDescription("Pant items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("tshirts").setDescription("T-Shirt items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("accessories").setDescription("Accessory items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("bundles").setDescription("Bundle items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("gear").setDescription("Gear items to collect").setMinValue(0).setMaxValue(1e4)).addStringOption(
+  (sub) => sub.setName("set").setDescription("Update per-category item limits and sort order").addIntegerOption((o) => o.setName("all").setDescription("Items from the general All-categories catalog (0 = skip)").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("clothing").setDescription("Clothing items \u2014 shirts, pants & t-shirts combined").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("accessories").setDescription("Accessory items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("bundles").setDescription("Bundle items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("gear").setDescription("Gear items to collect").setMinValue(0).setMaxValue(1e4)).addStringOption(
     (o) => o.setName("sort").setDescription("Sort order for all categories").addChoices(
       { name: "Popular (most favorited)", value: "popular" },
       { name: "Best Selling", value: "bestselling" },
@@ -77640,9 +77640,7 @@ async function handleSet(interaction) {
   const settings = await loadSettings();
   const fields = [
     "all",
-    "shirts",
-    "pants",
-    "tshirts",
+    "clothing",
     "accessories",
     "bundles",
     "gear"

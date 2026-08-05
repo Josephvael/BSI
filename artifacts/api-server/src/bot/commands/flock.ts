@@ -39,9 +39,7 @@ const SETTINGS_FILE = "./.bot-data/flock-settings.json";
 export interface FlockSettings {
   sort:        string; // "popular" | "bestselling" | "recent" | "new" | "relevant"
   all:         number; // items from the general "All" catalog (0 = skip)
-  shirts:      number;
-  pants:       number;
-  tshirts:     number;
+  clothing:    number; // shirts + pants + t-shirts combined (category=Clothing)
   accessories: number;
   bundles:     number;
   gear:        number;
@@ -50,9 +48,7 @@ export interface FlockSettings {
 const DEFAULT_SETTINGS: FlockSettings = {
   sort:        "popular",
   all:         0,
-  shirts:      500,
-  pants:       500,
-  tshirts:     300,
+  clothing:    1000,
   accessories: 1000,
   bundles:     200,
   gear:        200,
@@ -83,14 +79,15 @@ const SORT_TYPES: Record<string, string> = {
   new:         "4", // recently created
 };
 
+// Only top-level category strings are accepted by the Roblox catalog API.
+// Subcategory filtering (e.g. just shirts vs pants) requires numeric enum IDs
+// that are undocumented and change — use the "clothing" bucket for all apparel.
 const CATEGORY_PARAMS: Record<keyof Omit<FlockSettings, "sort">, Record<string, string>> = {
-  all:         { category: "All" },
-  shirts:      { category: "Clothing", subcategory: "ClassicShirts" },
-  pants:       { category: "Clothing", subcategory: "ClassicPants" },
-  tshirts:     { category: "Clothing", subcategory: "ClassicTShirts" },
-  accessories: { category: "Accessories" },
-  bundles:     { category: "Bundles" },
-  gear:        { category: "Gear" },
+  all:         { category: "All"        },
+  clothing:    { category: "Clothing"   }, // shirts + pants + t-shirts combined
+  accessories: { category: "Accessories"},
+  bundles:     { category: "Bundles"    },
+  gear:        { category: "Gear"       },
 };
 
 const VALID_PAGE_SIZES = [10, 28, 30, 60, 120];
@@ -127,7 +124,10 @@ async function fetchCatalogPage(
       await sleep(wait);
       continue;
     }
-    if (!res.ok) throw new Error(`Roblox API ${res.status} ${res.statusText}`);
+    if (!res.ok) {
+      const body = await res.text().catch(() => "(unreadable)");
+      throw new Error(`Roblox API ${res.status} ${res.statusText} — ${body}`);
+    }
 
     const data = (await res.json()) as {
       data?: { id: number; name?: string }[];
@@ -192,10 +192,8 @@ export const flockCommand = new SlashCommandBuilder()
     sub
       .setName("set")
       .setDescription("Update per-category item limits and sort order")
-      .addIntegerOption((o) => o.setName("all").setDescription("Items from the general catalog (0 = skip)").setMinValue(0).setMaxValue(10000))
-      .addIntegerOption((o) => o.setName("shirts").setDescription("Shirt items to collect").setMinValue(0).setMaxValue(10000))
-      .addIntegerOption((o) => o.setName("pants").setDescription("Pant items to collect").setMinValue(0).setMaxValue(10000))
-      .addIntegerOption((o) => o.setName("tshirts").setDescription("T-Shirt items to collect").setMinValue(0).setMaxValue(10000))
+      .addIntegerOption((o) => o.setName("all").setDescription("Items from the general All-categories catalog (0 = skip)").setMinValue(0).setMaxValue(10000))
+      .addIntegerOption((o) => o.setName("clothing").setDescription("Clothing items — shirts, pants & t-shirts combined").setMinValue(0).setMaxValue(10000))
       .addIntegerOption((o) => o.setName("accessories").setDescription("Accessory items to collect").setMinValue(0).setMaxValue(10000))
       .addIntegerOption((o) => o.setName("bundles").setDescription("Bundle items to collect").setMinValue(0).setMaxValue(10000))
       .addIntegerOption((o) => o.setName("gear").setDescription("Gear items to collect").setMinValue(0).setMaxValue(10000))
@@ -321,7 +319,7 @@ async function handleSet(interaction: ChatInputCommandInteraction): Promise<void
   const settings = await loadSettings();
 
   const fields: (keyof Omit<FlockSettings, "sort">)[] = [
-    "all", "shirts", "pants", "tshirts", "accessories", "bundles", "gear",
+    "all", "clothing", "accessories", "bundles", "gear",
   ];
 
   for (const field of fields) {
