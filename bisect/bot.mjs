@@ -76296,6 +76296,7 @@ var FILING_ITEM_SELECT_PREFIX = "filing_item_select";
 var FILING_QTY_MODAL_ID = "filing_qty_modal";
 var FILING_ADD_MORE_BUTTON_ID = "filing_add_more";
 var FILING_CONTINUE_BUTTON_ID = "filing_continue";
+var FILING_BACK_BUTTON_ID = "filing_back";
 var pendingState = /* @__PURE__ */ new Map();
 function buildCategoryRow() {
   return new import_discord2.ActionRowBuilder().addComponents(
@@ -76385,8 +76386,21 @@ async function handleCatSelect(interaction) {
     components: [
       new import_discord2.ActionRowBuilder().addComponents(
         new import_discord2.StringSelectMenuBuilder().setCustomId(`${FILING_ITEM_SELECT_PREFIX}:${catKey}`).setPlaceholder("Pick items (hold Ctrl/Cmd to select multiple)").setMinValues(1).setMaxValues(Math.min(options.length, 5)).addOptions(options)
+      ),
+      new import_discord2.ActionRowBuilder().addComponents(
+        new import_discord2.ButtonBuilder().setCustomId(FILING_BACK_BUTTON_ID).setLabel("\u2190 Back to categories").setStyle(import_discord2.ButtonStyle.Secondary)
       )
     ]
+  });
+}
+async function handleBackButton(interaction) {
+  const state = pendingState.get(interaction.user.id);
+  const accLine = state && state.accumulated.length > 0 ? `
+
+**Already added:** ${state.accumulated.map((i) => `${i.qty}\xD7 ${i.name}`).join(", ")}` : "";
+  await interaction.update({
+    content: `**Select a category of seized items** (pick None if nothing was seized):${accLine}`,
+    components: [buildCategoryRow()]
   });
 }
 async function handleItemSelect(interaction) {
@@ -77368,6 +77382,8 @@ async function startBot() {
           await handleAddMoreButton(interaction);
         } else if (interaction.customId === FILING_CONTINUE_BUTTON_ID) {
           await handleContinueButton(interaction);
+        } else if (interaction.customId === FILING_BACK_BUTTON_ID) {
+          await handleBackButton(interaction);
         }
       } else if (interaction.isStringSelectMenu()) {
         if (interaction.customId === FILING_CAT_SELECT_ID) {

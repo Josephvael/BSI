@@ -11,9 +11,9 @@ import { logger } from "../lib/logger";
 import {
   filingCommand, handleFilingCommand, handleFilingModal,
   handleCatSelect, handleItemSelect, handleQtyModal,
-  handleAddMoreButton, handleContinueButton,
+  handleAddMoreButton, handleContinueButton, handleBackButton,
   FILING_CAT_SELECT_ID, FILING_ITEM_SELECT_PREFIX,
-  FILING_QTY_MODAL_ID, FILING_ADD_MORE_BUTTON_ID, FILING_CONTINUE_BUTTON_ID,
+  FILING_QTY_MODAL_ID, FILING_ADD_MORE_BUTTON_ID, FILING_CONTINUE_BUTTON_ID, FILING_BACK_BUTTON_ID,
 } from "./commands/filing";
 import { statisticsCommand, handleStatisticsCommand } from "./commands/statistics";
 import { accessCommand, handleAccessCommand } from "./commands/access";
@@ -115,6 +115,8 @@ export async function startBot(): Promise<void> {
           await handleAddMoreButton(interaction);
         } else if (interaction.customId === FILING_CONTINUE_BUTTON_ID) {
           await handleContinueButton(interaction);
+        } else if (interaction.customId === FILING_BACK_BUTTON_ID) {
+          await handleBackButton(interaction);
         }
       } else if (interaction.isStringSelectMenu()) {
         if (interaction.customId === FILING_CAT_SELECT_ID) {

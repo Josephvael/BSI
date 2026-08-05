@@ -159,6 +159,7 @@ export const FILING_ITEM_SELECT_PREFIX = "filing_item_select";
 export const FILING_QTY_MODAL_ID = "filing_qty_modal";
 export const FILING_ADD_MORE_BUTTON_ID = "filing_add_more";
 export const FILING_CONTINUE_BUTTON_ID = "filing_continue";
+export const FILING_BACK_BUTTON_ID = "filing_back";
 
 // ─── Per-user session state ───────────────────────────────────────────────────
 
@@ -327,7 +328,29 @@ export async function handleCatSelect(
           .setMaxValues(Math.min(options.length, 5))
           .addOptions(options),
       ),
+      new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId(FILING_BACK_BUTTON_ID)
+          .setLabel("← Back to categories")
+          .setStyle(ButtonStyle.Secondary),
+      ),
     ],
+  });
+}
+
+/** Back button — returns to the category picker without clearing confirmed items. */
+export async function handleBackButton(
+  interaction: ButtonInteraction,
+): Promise<void> {
+  const state = pendingState.get(interaction.user.id);
+  const accLine =
+    state && state.accumulated.length > 0
+      ? `\n\n**Already added:** ${state.accumulated.map((i) => `${i.qty}× ${i.name}`).join(", ")}`
+      : "";
+
+  await interaction.update({
+    content: `**Select a category of seized items** (pick None if nothing was seized):${accLine}`,
+    components: [buildCategoryRow()],
   });
 }
 
