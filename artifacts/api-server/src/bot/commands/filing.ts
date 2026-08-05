@@ -25,8 +25,9 @@ export const filingCommand = new SlashCommandBuilder()
 // ─── Seized item catalogue ────────────────────────────────────────────────────
 
 const CATEGORIES: Record<string, { label: string; items: string[] }> = {
-  delino: {
-    label: "Delino Firearms",
+  // Delino has 28 items — split into two groups to stay under Discord's 25-option limit
+  delino_rifles: {
+    label: "Delino — R-Series Rifles",
     items: [
       "Delino R20", "Upgraded Delino R20",
       "Delino R21", "Delino R21 'Canner'", "Upgrade Delino R21",
@@ -35,10 +36,17 @@ const CATEGORIES: Record<string, { label: string; items: string[] }> = {
       "Delino R21B", "Upgraded Delino R21B",
       "Delino XR21", "Upgraded Delino XR21",
       "Delino R20P", "Delino R21P",
-      "Ceremonial Delino R-1", "Delino P45",
+      "Ceremonial Delino R-1",
+    ],
+  },
+  delino_pistols: {
+    label: "Delino — Pistols & Ammo",
+    items: [
+      "Delino P45", "Upgraded Delino P45",
       "Delino Defender", "Upgraded Delino Defender",
       "Delino Special", "Upgraded Delino Special",
       "Delino Police",
+      "Mustang M45", "Mustang M45 Surplus",
       ".45 Automatic Delino Magazine", ".44 Delino",
     ],
   },
@@ -59,47 +67,87 @@ const CATEGORIES: Record<string, { label: string; items: string[] }> = {
       "Bennetti 17", "Upgraded Bennetti 17",
       "Pietro 86P", "Upgraded Pietro 86P",
       "Pietro 92P", "Upgraded Pietro 92P",
-      "Mustang M45", "Mustang M45 Surplus",
       "Mich & Kosi 4605", "Upgraded Mich & Kosi 4605",
       "Neuhausen P9A", "Updated Neuhausen P9A",
       "Millsburg 780A1", "Upgraded Millsburg 780A1",
-      "9x19mm Bennetti Magazine", ".40 Automatic Pierto",
-      ".45 Mitch & Kosi Magazine", "9x19mm Straight Magazine",
-      "9x19mm Curved Magazine", "9x19mm 33rd Magazine", "12 Gauge",
+      "9x19mm Bennetti Magazine", "9x19mm Straight Magazine",
+      "9x19mm Curved Magazine", "9x19mm 33rd Magazine",
+      ".40 Automatic Pierto", ".45 Mitch & Kosi Magazine", "12 Gauge",
     ],
   },
-  albert: {
-    label: "Albert & Heinrich Arms",
+  albert_etc: {
+    label: "Albert, Protec & Cobray",
     items: [
       "Albert & Heinrich SM9", "Upgraded Albert & Heinrich SM9",
       "Albert & Heinrich LM2", "Albert & Heinrich HR4",
       "7.62x51mm Albert & Heinrich",
+      "Protec DC9",
+      "Cobray MP18", "Upgraded Cobray MP18",
     ],
   },
-  russian_firearms: {
-    label: "Russian Firearms",
+  kilikov: {
+    label: "Kilikov",
+    items: [
+      "Imported Kilikov 54U", "Kilikov 54U", "Upgraded Kilikov 54U",
+      "Kilikov Machinu 1962", "Upgraded Kilikov Machinu 1962",
+      "Kilikov Pulemyot 1971", "Upgraded Kilikov Pulemyot 1971",
+      "5.45x39mm Kilikov Magazine", "5.45x39mm Kilikov Extended",
+      "7.62x39mm Kilikov", "7.62x39mm Kilikov Extended", "7.62x39mm Kilikov Drum",
+    ],
+  },
+  other_russian: {
+    label: "Other Russian Firearms & Ammo",
     items: [
       "Krovin Vintovka 1891", "Upgraded Krovin Vintovka 1891",
-      "Fedotovo Karabin 1949", "Upgraded Fedotovo Karabin 1949",
       "Krovin Strelok 1891", "Upgraded Krovin Strelok 1891",
+      "Fedotovo Karabin 1949", "Upgraded Fedotovo Karabin 1949",
       "Klimovsk Drobovik Spetsialniy 23K", "Afanasev Pistolet 1951",
-      "Kilikov Machinu 1962", "Upgraded Kilikov Machinu 1962",
-      "Imported Kilikov 54U", "Kilikov 54U", "Upgraded Kilikov 54U",
       "Kovrovsky Avtomat 1941",
-      "Kilikov Pulemyot 1971", "Upgraded Kilikov Pulemyot 1971",
-      "Protec DC9", "Cobray MP18", "Upgraded Cobray MP18",
+      "30rd 5.56x45mm STANORD", "20rd 5.56x45mm STANORD",
+      "5.56 Box Magazine", "5.56 Box Magazine (Tracer)",
+      "9x18mm Afanasev", "7.62x25mm Tula Kovrovksy", "7.62x25mm 71rd Drum",
+      "7.62x39 Clip",
+      "7.62x54mmR Krovin", "7.62x54mm Rimmed", "23x75mm Rimmed",
     ],
   },
-  russian_ammo: {
-    label: "Russian Ammunition & Other",
+  weapon_kits: {
+    label: "Weapon Kits",
     items: [
-      "5.45x39mm Kilkov Magazine", "5.45x39mm Kilikov Extended",
-      "5.56x45mm STANORD (20rd & 30rd)", "5.56 Box Magazine", "5.56 Box Magazine (Tracer)",
-      "9x18mm Afanasev", "7.62x25mm Tula Kovrovksy", "7.62x25mm 71rd Drum",
-      "7.62x39mm Klikov", "7.62x39mm Klikov Extended",
-      "7.62x39mm Klikov Drum", "7.62x39 Clip",
-      "7.62x54mmR Krovin", "7.62x54mm Rimmed", "23x75mm Rimmed",
-      "Taser Cartridge",
+      "Assault Rifle Kit", "Assault Carbine Kit", "Battle Rifle Kit",
+      "Carbine Kit", "Light Machine Gun Kit", "Machine Pistol Kit",
+      "Pistol Kit", "Revolver Kit", "Rifle Kit",
+      "Shotgun Kit", "Sniper Rifle Kit", "Submachine Gun Kit",
+    ],
+  },
+  stolen_illicit: {
+    label: "Stolen Goods & Illicit Cargo",
+    items: [
+      "Bag of Dirty Money", "Folder of Military Intelligence", "Military Encryption Card",
+      "Crate of Illegal Firearm Parts", "Crate of Illegal Ammunition",
+      "Coin-o-Matic Business Conveyer",
+    ],
+  },
+  narcotics: {
+    label: "Narcotics",
+    items: [
+      "Bag of Nopyfruit", "Barrel of Nopyfruit Concentrate",
+      "Bag of Gushie", "Barrel of Solution", "Box of Plastic Bags",
+      "Jarniwus", "Jarniwus Seeds",
+    ],
+  },
+  destructive: {
+    label: "Destructive Devices",
+    items: [
+      "Barrel of Thermite", "Detonator", "Encrypted Phone",
+      "Jerrybomb", "Molotov", "Tear Gas",
+    ],
+  },
+  misc: {
+    label: "Misc",
+    items: [
+      "Xion TI26", "Highland NR28",
+      "Cones", "Handcuffs", "Lockpicks", "Spike Strips",
+      "Taser Cartridge", "The Underground Business Card",
     ],
   },
 };
