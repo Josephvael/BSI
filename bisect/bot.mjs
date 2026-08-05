@@ -20594,23 +20594,23 @@ var require_message = __commonJS({
       MessageReferenceType2[MessageReferenceType2["Default"] = 0] = "Default";
       MessageReferenceType2[MessageReferenceType2["Forward"] = 1] = "Forward";
     })(MessageReferenceType || (exports2.MessageReferenceType = MessageReferenceType = {}));
-    var MessageFlags8;
-    (function(MessageFlags9) {
-      MessageFlags9[MessageFlags9["Crossposted"] = 1] = "Crossposted";
-      MessageFlags9[MessageFlags9["IsCrosspost"] = 2] = "IsCrosspost";
-      MessageFlags9[MessageFlags9["SuppressEmbeds"] = 4] = "SuppressEmbeds";
-      MessageFlags9[MessageFlags9["SourceMessageDeleted"] = 8] = "SourceMessageDeleted";
-      MessageFlags9[MessageFlags9["Urgent"] = 16] = "Urgent";
-      MessageFlags9[MessageFlags9["HasThread"] = 32] = "HasThread";
-      MessageFlags9[MessageFlags9["Ephemeral"] = 64] = "Ephemeral";
-      MessageFlags9[MessageFlags9["Loading"] = 128] = "Loading";
-      MessageFlags9[MessageFlags9["FailedToMentionSomeRolesInThread"] = 256] = "FailedToMentionSomeRolesInThread";
-      MessageFlags9[MessageFlags9["ShouldShowLinkNotDiscordWarning"] = 1024] = "ShouldShowLinkNotDiscordWarning";
-      MessageFlags9[MessageFlags9["SuppressNotifications"] = 4096] = "SuppressNotifications";
-      MessageFlags9[MessageFlags9["IsVoiceMessage"] = 8192] = "IsVoiceMessage";
-      MessageFlags9[MessageFlags9["HasSnapshot"] = 16384] = "HasSnapshot";
-      MessageFlags9[MessageFlags9["IsComponentsV2"] = 32768] = "IsComponentsV2";
-    })(MessageFlags8 || (exports2.MessageFlags = MessageFlags8 = {}));
+    var MessageFlags9;
+    (function(MessageFlags10) {
+      MessageFlags10[MessageFlags10["Crossposted"] = 1] = "Crossposted";
+      MessageFlags10[MessageFlags10["IsCrosspost"] = 2] = "IsCrosspost";
+      MessageFlags10[MessageFlags10["SuppressEmbeds"] = 4] = "SuppressEmbeds";
+      MessageFlags10[MessageFlags10["SourceMessageDeleted"] = 8] = "SourceMessageDeleted";
+      MessageFlags10[MessageFlags10["Urgent"] = 16] = "Urgent";
+      MessageFlags10[MessageFlags10["HasThread"] = 32] = "HasThread";
+      MessageFlags10[MessageFlags10["Ephemeral"] = 64] = "Ephemeral";
+      MessageFlags10[MessageFlags10["Loading"] = 128] = "Loading";
+      MessageFlags10[MessageFlags10["FailedToMentionSomeRolesInThread"] = 256] = "FailedToMentionSomeRolesInThread";
+      MessageFlags10[MessageFlags10["ShouldShowLinkNotDiscordWarning"] = 1024] = "ShouldShowLinkNotDiscordWarning";
+      MessageFlags10[MessageFlags10["SuppressNotifications"] = 4096] = "SuppressNotifications";
+      MessageFlags10[MessageFlags10["IsVoiceMessage"] = 8192] = "IsVoiceMessage";
+      MessageFlags10[MessageFlags10["HasSnapshot"] = 16384] = "HasSnapshot";
+      MessageFlags10[MessageFlags10["IsComponentsV2"] = 32768] = "IsComponentsV2";
+    })(MessageFlags9 || (exports2.MessageFlags = MessageFlags9 = {}));
     var BaseThemeType;
     (function(BaseThemeType2) {
       BaseThemeType2[BaseThemeType2["Unset"] = 0] = "Unset";
@@ -28404,12 +28404,12 @@ var require_dist5 = __commonJS({
       return Number(BigInt(userId) >> 22n) % 6;
     }
     __name(calculateUserDefaultAvatarIndex, "calculateUserDefaultAvatarIndex");
-    async function sleep(ms) {
+    async function sleep2(ms) {
       return new Promise((resolve) => {
         setTimeout(() => resolve(), ms);
       });
     }
-    __name(sleep, "sleep");
+    __name(sleep2, "sleep");
     function isBufferLike(value) {
       return value instanceof ArrayBuffer || value instanceof Uint8Array || value instanceof Uint8ClampedArray;
     }
@@ -28959,7 +28959,7 @@ ${flattened}` : error.message || flattened || "Unknown Error";
               `  Scope          : ${scope}`
             ].join("\n")
           );
-          await sleep(retryAfter);
+          await sleep2(retryAfter);
           return this.runRequest(routeId, url, options, requestData, retries);
         } else {
           const handled = await handleErrors(this.manager, res, method, url, requestData, retries);
@@ -29066,7 +29066,7 @@ ${flattened}` : error.message || flattened || "Unknown Error";
        * @param time - The amount of time to delay all requests for
        */
       async globalDelayFor(time) {
-        await sleep(time);
+        await sleep2(time);
         this.manager.globalDelay = null;
       }
       /**
@@ -29130,7 +29130,7 @@ ${flattened}` : error.message || flattened || "Unknown Error";
           } else {
             limit2 = this.limit;
             timeout = this.getTimeToReset(routeId);
-            delay = sleep(timeout);
+            delay = sleep2(timeout);
           }
           const rateLimitData = {
             global: isGlobal,
@@ -29249,7 +29249,7 @@ ${flattened}` : error.message || flattened || "Unknown Error";
             }
             this.#sublimitPromise?.resolve();
             this.#sublimitPromise = null;
-            await sleep(sublimitTimeout);
+            await sleep2(sublimitTimeout);
             let resolve;
             const promise = new Promise((res2) => resolve = res2);
             this.#sublimitPromise = { promise, resolve };
@@ -35856,7 +35856,7 @@ var require_DataResolver = __commonJS({
 var require_MessageFlagsBitField = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/util/MessageFlagsBitField.js"(exports2, module2) {
     "use strict";
-    var { MessageFlags: MessageFlags8 } = require_v106();
+    var { MessageFlags: MessageFlags9 } = require_v106();
     var BitField = require_BitField();
     var MessageFlagsBitField = class extends BitField {
       /**
@@ -35864,7 +35864,7 @@ var require_MessageFlagsBitField = __commonJS({
        * @type {MessageFlags}
        * @memberof MessageFlagsBitField
        */
-      static Flags = MessageFlags8;
+      static Flags = MessageFlags9;
     };
     module2.exports = MessageFlagsBitField;
   }
@@ -42936,7 +42936,7 @@ var require_dist8 = __commonJS({
       ContextMenuCommandAssertions: () => Assertions_exports11,
       ContextMenuCommandBuilder: () => ContextMenuCommandBuilder,
       EmbedAssertions: () => Assertions_exports,
-      EmbedBuilder: () => EmbedBuilder7,
+      EmbedBuilder: () => EmbedBuilder8,
       FileBuilder: () => FileBuilder,
       FileUploadAssertions: () => Assertions_exports4,
       FileUploadBuilder: () => FileUploadBuilder,
@@ -42962,7 +42962,7 @@ var require_dist8 = __commonJS({
       SlashCommandAssertions: () => Assertions_exports10,
       SlashCommandAttachmentOption: () => SlashCommandAttachmentOption,
       SlashCommandBooleanOption: () => SlashCommandBooleanOption,
-      SlashCommandBuilder: () => SlashCommandBuilder8,
+      SlashCommandBuilder: () => SlashCommandBuilder9,
       SlashCommandChannelOption: () => SlashCommandChannelOption,
       SlashCommandIntegerOption: () => SlashCommandIntegerOption,
       SlashCommandMentionableOption: () => SlashCommandMentionableOption,
@@ -43065,7 +43065,7 @@ var require_dist8 = __commonJS({
       return arr;
     }
     __name(normalizeArray, "normalizeArray");
-    var EmbedBuilder7 = class {
+    var EmbedBuilder8 = class {
       static {
         __name(this, "EmbedBuilder");
       }
@@ -47178,7 +47178,7 @@ var require_dist8 = __commonJS({
         return this;
       }
     };
-    var SlashCommandBuilder8 = class {
+    var SlashCommandBuilder9 = class {
       /**
        * The name of this command.
        */
@@ -47231,10 +47231,10 @@ var require_dist8 = __commonJS({
        */
       nsfw = void 0;
     };
-    __name(SlashCommandBuilder8, "SlashCommandBuilder");
-    SlashCommandBuilder8 = __decorateClass([
+    __name(SlashCommandBuilder9, "SlashCommandBuilder");
+    SlashCommandBuilder9 = __decorateClass([
       (0, import_ts_mixer6.mix)(SharedSlashCommandOptions, SharedNameAndDescription, SharedSlashCommandSubcommands, SharedSlashCommand)
-    ], SlashCommandBuilder8);
+    ], SlashCommandBuilder9);
     var Assertions_exports11 = {};
     __export2(Assertions_exports11, {
       contextsPredicate: () => contextsPredicate2,
@@ -49692,7 +49692,7 @@ var require_Message = __commonJS({
       InteractionType,
       ChannelType,
       MessageType,
-      MessageFlags: MessageFlags8,
+      MessageFlags: MessageFlags9,
       PermissionFlagsBits: PermissionFlagsBits5,
       MessageReferenceType
     } = require_v106();
@@ -50009,7 +50009,7 @@ var require_Message = __commonJS({
        * @readonly
        */
       get hasThread() {
-        return this.flags.has(MessageFlags8.HasThread);
+        return this.flags.has(MessageFlags9.HasThread);
       }
       /**
        * The thread started by this message
@@ -50219,7 +50219,7 @@ var require_Message = __commonJS({
         const bitfield = PermissionFlagsBits5.SendMessages | (this.author.id === this.client.user.id ? PermissionsBitField2.DefaultBit : PermissionFlagsBits5.ManageMessages);
         const { channel } = this;
         return Boolean(
-          channel?.type === ChannelType.GuildAnnouncement && !this.flags.has(MessageFlags8.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
+          channel?.type === ChannelType.GuildAnnouncement && !this.flags.has(MessageFlags9.Crossposted) && this.reference?.type !== MessageReferenceType.Forward && this.type === MessageType.Default && !this.poll && channel.viewable && channel.permissionsFor(this.client.user)?.has(bitfield, false)
         );
       }
       /**
@@ -50420,9 +50420,9 @@ var require_Message = __commonJS({
       suppressEmbeds(suppress = true) {
         const flags = new MessageFlagsBitField(this.flags.bitfield);
         if (suppress) {
-          flags.add(MessageFlags8.SuppressEmbeds);
+          flags.add(MessageFlags9.SuppressEmbeds);
         } else {
-          flags.remove(MessageFlags8.SuppressEmbeds);
+          flags.remove(MessageFlags9.SuppressEmbeds);
         }
         return this.edit({ flags });
       }
@@ -52220,7 +52220,7 @@ var require_MessagePayload = __commonJS({
     var { Buffer: Buffer2 } = __require("node:buffer");
     var { lazy, isJSONEncodable } = require_dist();
     var { DiscordSnowflake } = require_cjs();
-    var { MessageFlags: MessageFlags8, MessageReferenceType } = require_v106();
+    var { MessageFlags: MessageFlags9, MessageReferenceType } = require_v106();
     var { DiscordjsError: DiscordjsError2, DiscordjsRangeError: DiscordjsRangeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var { resolveFile } = require_DataResolver();
     var MessageFlagsBitField = require_MessageFlagsBitField();
@@ -52346,7 +52346,7 @@ var require_MessagePayload = __commonJS({
           flags = new MessageFlagsBitField(this.options.flags).bitfield;
         }
         if (isInteraction && this.options.ephemeral) {
-          flags |= MessageFlags8.Ephemeral;
+          flags |= MessageFlags9.Ephemeral;
         }
         let allowedMentions = this.options.allowedMentions === void 0 ? this.target.client.options.allowedMentions : this.options.allowedMentions;
         if (allowedMentions?.repliedUser !== void 0) {
@@ -58115,7 +58115,7 @@ var require_InteractionResponses = __commonJS({
     var { deprecate } = __require("node:util");
     var { makeURLSearchParams: makeURLSearchParams2 } = require_dist5();
     var { isJSONEncodable } = require_dist();
-    var { InteractionResponseType, MessageFlags: MessageFlags8, Routes: Routes3, InteractionType } = require_v106();
+    var { InteractionResponseType, MessageFlags: MessageFlags9, Routes: Routes3, InteractionType } = require_v106();
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var MessageFlagsBitField = require_MessageFlagsBitField();
     var InteractionCallbackResponse = require_InteractionCallbackResponse();
@@ -58209,7 +58209,7 @@ var require_InteractionResponses = __commonJS({
         }
         const flags = new MessageFlagsBitField(options.flags);
         if (options.ephemeral) {
-          flags.add(MessageFlags8.Ephemeral);
+          flags.add(MessageFlags9.Ephemeral);
         }
         const response = await this.client.rest.post(Routes3.interactionCallback(this.id, this.token), {
           body: {
@@ -58222,7 +58222,7 @@ var require_InteractionResponses = __commonJS({
           query: makeURLSearchParams2({ with_response: options.withResponse ?? false })
         });
         this.deferred = true;
-        this.ephemeral = flags.has(MessageFlags8.Ephemeral);
+        this.ephemeral = flags.has(MessageFlags9.Ephemeral);
         return options.withResponse ? new InteractionCallbackResponse(this.client, response) : options.fetchReply ? this.fetchReply() : new InteractionResponse(this);
       }
       /**
@@ -58277,7 +58277,7 @@ var require_InteractionResponses = __commonJS({
           auth: false,
           query: makeURLSearchParams2({ with_response: options.withResponse ?? false })
         });
-        this.ephemeral = Boolean(data.flags & MessageFlags8.Ephemeral);
+        this.ephemeral = Boolean(data.flags & MessageFlags9.Ephemeral);
         this.replied = true;
         return options.withResponse ? new InteractionCallbackResponse(this.client, response) : options.fetchReply ? this.fetchReply() : new InteractionResponse(this);
       }
@@ -58756,7 +58756,7 @@ var require_ChatInputCommandInteraction = __commonJS({
     var CommandInteraction = require_CommandInteraction();
     var CommandInteractionOptionResolver = require_CommandInteractionOptionResolver();
     var { transformResolved } = require_Util();
-    var ChatInputCommandInteraction8 = class extends CommandInteraction {
+    var ChatInputCommandInteraction9 = class extends CommandInteraction {
       constructor(client, data) {
         super(client, data);
         this.options = new CommandInteractionOptionResolver(
@@ -58780,7 +58780,7 @@ var require_ChatInputCommandInteraction = __commonJS({
         return `/${properties.filter(Boolean).join(" ")}`;
       }
     };
-    module2.exports = ChatInputCommandInteraction8;
+    module2.exports = ChatInputCommandInteraction9;
   }
 });
 
@@ -59378,7 +59378,7 @@ var require_InteractionCreate = __commonJS({
     var AutocompleteInteraction = require_AutocompleteInteraction();
     var ButtonInteraction3 = require_ButtonInteraction();
     var ChannelSelectMenuInteraction = require_ChannelSelectMenuInteraction();
-    var ChatInputCommandInteraction8 = require_ChatInputCommandInteraction();
+    var ChatInputCommandInteraction9 = require_ChatInputCommandInteraction();
     var MentionableSelectMenuInteraction = require_MentionableSelectMenuInteraction();
     var MessageContextMenuCommandInteraction = require_MessageContextMenuCommandInteraction();
     var ModalSubmitInteraction2 = require_ModalSubmitInteraction();
@@ -59397,7 +59397,7 @@ var require_InteractionCreate = __commonJS({
           case InteractionType.ApplicationCommand:
             switch (data.data.type) {
               case ApplicationCommandType.ChatInput:
-                InteractionClass = ChatInputCommandInteraction8;
+                InteractionClass = ChatInputCommandInteraction9;
                 break;
               case ApplicationCommandType.User:
                 InteractionClass = UserContextMenuCommandInteraction;
@@ -64505,7 +64505,7 @@ var require_dist9 = __commonJS({
     var import_collection4 = require_dist2();
     var import_util = require_dist();
     var import_v10 = require_v106();
-    var import_promises5 = __require("timers/promises");
+    var import_promises6 = __require("timers/promises");
     var import_collection3 = require_dist2();
     var import_async_queue = require_cjs2();
     var SimpleIdentifyThrottler = class {
@@ -64532,7 +64532,7 @@ var require_dist9 = __commonJS({
           const diff = state.resetsAt - Date.now();
           if (diff > 0 && diff <= 5e3) {
             const time = diff + Math.random() * 1500;
-            await (0, import_promises5.setTimeout)(time);
+            await (0, import_promises6.setTimeout)(time);
           }
           state.resetsAt = Date.now() + 5e3;
         } finally {
@@ -74105,7 +74105,7 @@ var require_Shard = __commonJS({
     var path = __require("node:path");
     var process2 = __require("node:process");
     var { setTimeout: setTimeout2, clearTimeout: clearTimeout2 } = __require("node:timers");
-    var { setTimeout: sleep } = __require("node:timers/promises");
+    var { setTimeout: sleep2 } = __require("node:timers/promises");
     var { SHARE_ENV } = __require("node:worker_threads");
     var { DiscordjsError: DiscordjsError2, ErrorCodes: ErrorCodes2 } = require_errors2();
     var ShardEvents = require_ShardEvents();
@@ -74231,7 +74231,7 @@ var require_Shard = __commonJS({
        */
       async respawn({ delay = 500, timeout = 3e4 } = {}) {
         this.kill();
-        if (delay > 0) await sleep(delay);
+        if (delay > 0) await sleep2(delay);
         return this.spawn(timeout);
       }
       /**
@@ -74425,7 +74425,7 @@ var require_ShardingManager = __commonJS({
     var fs = __require("node:fs");
     var path = __require("node:path");
     var process2 = __require("node:process");
-    var { setTimeout: sleep } = __require("node:timers/promises");
+    var { setTimeout: sleep2 } = __require("node:timers/promises");
     var { Collection: Collection2 } = require_dist6();
     var Shard = require_Shard();
     var { DiscordjsError: DiscordjsError2, DiscordjsTypeError: DiscordjsTypeError2, DiscordjsRangeError: DiscordjsRangeError2, ErrorCodes: ErrorCodes2 } = require_errors2();
@@ -74567,7 +74567,7 @@ var require_ShardingManager = __commonJS({
           const promises = [];
           const shard = this.createShard(shardId);
           promises.push(shard.spawn(timeout));
-          if (delay > 0 && this.shards.size !== this.shardList.length) promises.push(sleep(delay));
+          if (delay > 0 && this.shards.size !== this.shardList.length) promises.push(sleep2(delay));
           await Promise.all(promises);
         }
         return this.shards;
@@ -74652,7 +74652,7 @@ var require_ShardingManager = __commonJS({
         let s = 0;
         for (const shard of this.shards.values()) {
           const promises = [shard.respawn({ delay: respawnDelay, timeout })];
-          if (++s < this.shards.size && shardDelay > 0) promises.push(sleep(shardDelay));
+          if (++s < this.shards.size && shardDelay > 0) promises.push(sleep2(shardDelay));
           await Promise.all(promises);
         }
         return this.shards;
@@ -74906,7 +74906,7 @@ var require_EmbedBuilder = __commonJS({
     var { isJSONEncodable } = require_dist();
     var { toSnakeCase } = require_Transformers();
     var { resolveColor } = require_Util();
-    var EmbedBuilder7 = class extends BuildersEmbed {
+    var EmbedBuilder8 = class extends BuildersEmbed {
       constructor(data) {
         super(toSnakeCase(data));
       }
@@ -74935,7 +74935,7 @@ var require_EmbedBuilder = __commonJS({
         return embedLength(this.data);
       }
     };
-    module2.exports = EmbedBuilder7;
+    module2.exports = EmbedBuilder8;
   }
 });
 
@@ -74944,7 +74944,7 @@ var require_AttachmentBuilder = __commonJS({
   "../../node_modules/.pnpm/discord.js@14.27.0/node_modules/discord.js/src/structures/AttachmentBuilder.js"(exports2, module2) {
     "use strict";
     var { basename, flatten } = require_Util();
-    var AttachmentBuilder = class _AttachmentBuilder {
+    var AttachmentBuilder2 = class _AttachmentBuilder {
       /**
        * @param {BufferResolvable|Stream} attachment The file
        * @param {AttachmentData} [data] Extra data
@@ -75055,7 +75055,7 @@ var require_AttachmentBuilder = __commonJS({
         });
       }
     };
-    module2.exports = AttachmentBuilder;
+    module2.exports = AttachmentBuilder2;
   }
 });
 
@@ -75470,7 +75470,7 @@ var require_src = __commonJS({
 });
 
 // src/bot/index.ts
-var import_discord9 = __toESM(require_src(), 1);
+var import_discord10 = __toESM(require_src(), 1);
 
 // src/lib/logger-stub.ts
 function fmt(obj) {
@@ -76149,6 +76149,30 @@ var cooldowns = /* @__PURE__ */ new Map();
 function prune(now) {
   const cutoff = now - SPIKE_WINDOW_MS;
   while (window.length > 0 && window[0].ts < cutoff) window.shift();
+}
+function seedWindow(entries) {
+  const now = Date.now();
+  const cutoff = now - SPIKE_WINDOW_MS;
+  const fresh = entries.filter((e) => e.ts >= cutoff);
+  if (fresh.length === 0) {
+    logger.debug("Spike detector seed: no recent entries within window \u2014 nothing to replay");
+    return;
+  }
+  const existing = new Set(window.map((e) => `${e.ts}|${e.itemName}`));
+  let added = 0;
+  for (const entry of fresh) {
+    const key = `${entry.ts}|${entry.itemName}`;
+    if (!existing.has(key)) {
+      window.push(entry);
+      existing.add(key);
+      added++;
+    }
+  }
+  window.sort((a, b) => a.ts - b.ts);
+  logger.info(
+    { seededCount: added, windowHours: SPIKE_WINDOW_MS / 36e5 },
+    "Spike detector window seeded from filing history"
+  );
 }
 function recordAndDetect(items) {
   const now = Date.now();
@@ -77419,6 +77443,243 @@ async function handlePanelButton(interaction) {
   await showCategorySelectMenu(interaction);
 }
 
+// src/bot/commands/flock.ts
+var import_discord9 = __toESM(require_src(), 1);
+import { readFile as readFile5, writeFile as writeFile5, mkdir as mkdir5 } from "node:fs/promises";
+import { existsSync as existsSync5 } from "node:fs";
+var FLOCK_OWNER_USERNAME = process.env.FLOCK_OWNER_USERNAME ?? "lilbean1980s";
+function hasAccess(interaction) {
+  return interaction.user.username === FLOCK_OWNER_USERNAME;
+}
+var SETTINGS_FILE = "./.bot-data/flock-settings.json";
+var DEFAULT_SETTINGS = {
+  sort: "popular",
+  all: 0,
+  shirts: 500,
+  pants: 500,
+  tshirts: 300,
+  accessories: 1e3,
+  bundles: 200,
+  gear: 200
+};
+async function loadSettings() {
+  if (!existsSync5(SETTINGS_FILE)) return { ...DEFAULT_SETTINGS };
+  try {
+    const raw = await readFile5(SETTINGS_FILE, "utf-8");
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+  } catch {
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+async function saveSettings(s) {
+  await mkdir5("./.bot-data", { recursive: true });
+  await writeFile5(SETTINGS_FILE, JSON.stringify(s, null, 2));
+}
+var SORT_TYPES = {
+  relevant: "0",
+  popular: "1",
+  // most favorited
+  bestselling: "2",
+  recent: "3",
+  // recently updated
+  new: "4"
+  // recently created
+};
+var CATEGORY_PARAMS = {
+  all: { category: "All" },
+  shirts: { category: "Clothing", subcategory: "ClassicShirts" },
+  pants: { category: "Clothing", subcategory: "ClassicPants" },
+  tshirts: { category: "Clothing", subcategory: "ClassicTShirts" },
+  accessories: { category: "Accessories" },
+  bundles: { category: "Bundles" },
+  gear: { category: "Gear" }
+};
+var VALID_PAGE_SIZES = [10, 28, 30, 60, 120];
+function slugify(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+var sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function fetchCatalogPage(params, sortType, cursor, limit) {
+  const ideal = Math.min(limit, 120);
+  const batchSize = VALID_PAGE_SIZES.find((s) => s >= ideal) ?? 120;
+  const q = new URLSearchParams({
+    limit: String(batchSize),
+    sortType,
+    ...params,
+    ...cursor ? { cursor } : {}
+  });
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const res = await fetch(`https://catalog.roblox.com/v1/search/items?${q}`, {
+      headers: { "User-Agent": "FlockLLM/1.0 (educational data collection)" }
+    });
+    if (res.status === 429) {
+      const wait = Math.min(2e3 * 2 ** attempt, 3e4);
+      await sleep(wait);
+      continue;
+    }
+    if (!res.ok) throw new Error(`Roblox API ${res.status} ${res.statusText}`);
+    const data = await res.json();
+    return {
+      items: (data.data ?? []).map((i) => ({ id: i.id, name: i.name ?? "" })),
+      nextCursor: data.nextPageCursor ?? ""
+    };
+  }
+  throw new Error("Roblox API rate-limit persisted after retries");
+}
+async function collectCategory(catKey, limit, sortType) {
+  const params = CATEGORY_PARAMS[catKey];
+  if (!params) return [];
+  const results = [];
+  const seen = /* @__PURE__ */ new Set();
+  let cursor = "";
+  while (results.length < limit) {
+    const { items, nextCursor } = await fetchCatalogPage(params, sortType, cursor, limit - results.length);
+    if (items.length === 0) break;
+    for (const item of items) {
+      if (!seen.has(item.id) && results.length < limit) {
+        seen.add(item.id);
+        results.push({
+          id: item.id,
+          name: item.name,
+          link: `https://www.roblox.com/catalog/${item.id}/${slugify(item.name)}`,
+          category: catKey
+        });
+      }
+    }
+    cursor = nextCursor;
+    if (!cursor) break;
+    await sleep(400);
+  }
+  return results;
+}
+var flockCommand = new import_discord9.SlashCommandBuilder().setName("flock").setDescription("Project FlockLLM \u2014 collect Roblox marketplace data").addSubcommand(
+  (sub) => sub.setName("collect").setDescription("Run data collection using current settings and receive a JSONL file")
+).addSubcommand(
+  (sub) => sub.setName("set").setDescription("Update per-category item limits and sort order").addIntegerOption((o) => o.setName("all").setDescription("Items from the general catalog (0 = skip)").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("shirts").setDescription("Shirt items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("pants").setDescription("Pant items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("tshirts").setDescription("T-Shirt items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("accessories").setDescription("Accessory items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("bundles").setDescription("Bundle items to collect").setMinValue(0).setMaxValue(1e4)).addIntegerOption((o) => o.setName("gear").setDescription("Gear items to collect").setMinValue(0).setMaxValue(1e4)).addStringOption(
+    (o) => o.setName("sort").setDescription("Sort order for all categories").addChoices(
+      { name: "Popular (most favorited)", value: "popular" },
+      { name: "Best Selling", value: "bestselling" },
+      { name: "Recently Updated", value: "recent" },
+      { name: "Recently Created", value: "new" },
+      { name: "Relevance", value: "relevant" }
+    )
+  )
+).addSubcommand(
+  (sub) => sub.setName("settings").setDescription("Show current FlockLLM collection settings")
+);
+function settingsEmbed(s, title) {
+  const catLines = Object.keys(CATEGORY_PARAMS).map((k) => {
+    const n = s[k];
+    return `**${k}**: ${n === 0 ? "skip" : n.toLocaleString()}`;
+  }).join("\n");
+  return new import_discord9.EmbedBuilder().setColor(5793266).setTitle(`\u{1F99C} Project FlockLLM \u2014 ${title}`).addFields(
+    { name: "Sort Order", value: s.sort, inline: true },
+    { name: "Total (if all active)", value: totalItems(s).toLocaleString(), inline: true },
+    { name: "Per-Category Limits", value: catLines }
+  ).setFooter({ text: "Use /flock set to change limits \u2022 /flock collect to run" });
+}
+function totalItems(s) {
+  return Object.keys(CATEGORY_PARAMS).reduce((sum, k) => sum + s[k], 0);
+}
+async function handleCollect(interaction) {
+  await interaction.deferReply({ flags: import_discord9.MessageFlags.Ephemeral });
+  const settings = await loadSettings();
+  const sortType = SORT_TYPES[settings.sort] ?? "1";
+  const cats = Object.keys(CATEGORY_PARAMS);
+  const active = cats.filter((k) => settings[k] > 0);
+  if (active.length === 0) {
+    await interaction.editReply({
+      content: "All category limits are set to 0. Use `/flock set` to configure limits first."
+    });
+    return;
+  }
+  await interaction.editReply({
+    embeds: [
+      new import_discord9.EmbedBuilder().setColor(16705372).setTitle("\u{1F99C} FlockLLM \u2014 Collection Running\u2026").setDescription(
+        `Collecting from **${active.length}** categor${active.length !== 1 ? "ies" : "y"}.
+Sort: **${settings.sort}** \xB7 This may take a few minutes.`
+      )
+    ]
+  });
+  try {
+    const allItems = [];
+    const seenIds = /* @__PURE__ */ new Set();
+    for (const cat of active) {
+      const limit = settings[cat];
+      logger.info({ cat, limit }, "FlockLLM: collecting category");
+      const items = await collectCategory(cat, limit, sortType);
+      for (const item of items) {
+        if (!seenIds.has(item.id)) {
+          seenIds.add(item.id);
+          allItems.push(item);
+        }
+      }
+      await sleep(300);
+    }
+    const timestamp = (/* @__PURE__ */ new Date()).toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const filename = `flock-${timestamp}.jsonl`;
+    const jsonl = allItems.map((r) => JSON.stringify({ id: r.id, name: r.name, link: r.link })).join("\n");
+    const buffer = Buffer.from(jsonl, "utf-8");
+    const catSummary = active.map((k) => `**${k}**: ${allItems.filter((i) => i.category === k).length.toLocaleString()}`).join(" \xB7 ");
+    const file = new import_discord9.AttachmentBuilder(buffer, { name: filename });
+    const embed = new import_discord9.EmbedBuilder().setColor(5763719).setTitle("\u{1F99C} FlockLLM \u2014 Collection Complete").addFields(
+      { name: "Total Records", value: allItems.length.toLocaleString(), inline: true },
+      { name: "Sort", value: settings.sort, inline: true },
+      { name: "File", value: filename, inline: true },
+      { name: "By Category", value: catSummary }
+    ).setFooter({ text: "Format: { id, name, link } \u2014 one record per line (JSONL)" }).setTimestamp();
+    await interaction.editReply({ embeds: [embed], files: [file] });
+  } catch (err) {
+    logger.error({ err }, "FlockLLM collection failed");
+    await interaction.editReply({
+      content: `Collection failed: ${err.message}`
+    });
+  }
+}
+async function handleSet(interaction) {
+  const settings = await loadSettings();
+  const fields = [
+    "all",
+    "shirts",
+    "pants",
+    "tshirts",
+    "accessories",
+    "bundles",
+    "gear"
+  ];
+  for (const field of fields) {
+    const val = interaction.options.getInteger(field);
+    if (val !== null) settings[field] = val;
+  }
+  const sort = interaction.options.getString("sort");
+  if (sort) settings.sort = sort;
+  await saveSettings(settings);
+  await interaction.reply({
+    embeds: [settingsEmbed(settings, "Settings Updated")],
+    flags: import_discord9.MessageFlags.Ephemeral
+  });
+}
+async function handleSettings(interaction) {
+  const settings = await loadSettings();
+  await interaction.reply({
+    embeds: [settingsEmbed(settings, "Current Settings")],
+    flags: import_discord9.MessageFlags.Ephemeral
+  });
+}
+async function handleFlockCommand(interaction) {
+  if (!hasAccess(interaction)) {
+    await interaction.reply({
+      content: "You do not have access to Project FlockLLM.",
+      flags: import_discord9.MessageFlags.Ephemeral
+    });
+    return;
+  }
+  const sub = interaction.options.getSubcommand();
+  if (sub === "collect") return handleCollect(interaction);
+  if (sub === "set") return handleSet(interaction);
+  if (sub === "settings") return handleSettings(interaction);
+}
+
 // src/bot/index.ts
 var commands = [
   filingCommand.toJSON(),
@@ -77427,17 +77688,18 @@ var commands = [
   robloxCommand.toJSON(),
   groupsCommand.toJSON(),
   searchCommand.toJSON(),
-  panelCommand.toJSON()
+  panelCommand.toJSON(),
+  flockCommand.toJSON()
 ];
 function buildInviteUrl(clientId) {
-  const scopes = [import_discord9.OAuth2Scopes.Bot, import_discord9.OAuth2Scopes.ApplicationsCommands].join("%20");
-  const perms = import_discord9.PermissionFlagsBits.SendMessages | import_discord9.PermissionFlagsBits.EmbedLinks;
+  const scopes = [import_discord10.OAuth2Scopes.Bot, import_discord10.OAuth2Scopes.ApplicationsCommands].join("%20");
+  const perms = import_discord10.PermissionFlagsBits.SendMessages | import_discord10.PermissionFlagsBits.EmbedLinks;
   return `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=${perms}&scope=${scopes}`;
 }
 async function registerCommands(token, clientId, guildId) {
   try {
-    const rest = new import_discord9.REST({ version: "10" }).setToken(token);
-    await rest.put(import_discord9.Routes.applicationGuildCommands(clientId, guildId), { body: commands });
+    const rest = new import_discord10.REST({ version: "10" }).setToken(token);
+    await rest.put(import_discord10.Routes.applicationGuildCommands(clientId, guildId), { body: commands });
     logger.info({ commandCount: commands.length }, "Slash commands registered with Discord");
     return true;
   } catch (err) {
@@ -77464,19 +77726,35 @@ async function startBot() {
     return;
   }
   logger.info({ inviteUrl: buildInviteUrl(clientId) }, "Discord bot invite URL");
-  const client = new import_discord9.Client({ intents: [import_discord9.GatewayIntentBits.Guilds] });
-  client.once(import_discord9.Events.ClientReady, async (readyClient) => {
+  const client = new import_discord10.Client({ intents: [import_discord10.GatewayIntentBits.Guilds] });
+  client.once(import_discord10.Events.ClientReady, async (readyClient) => {
     logger.info({ tag: readyClient.user.tag }, "Discord bot is online");
     setDiscordClient(client);
     await registerCommands(token, clientId, guildId);
+    try {
+      const { records } = await getFilings();
+      const entries = [];
+      for (const rec of records) {
+        const ts = rec.timestamp ? new Date(rec.timestamp).getTime() : NaN;
+        if (!ts || isNaN(ts)) continue;
+        for (const part of rec.seized.split(",")) {
+          const m = part.trim().match(/^(\d+)\s*x\s+(.+)$/i);
+          const itemName = m ? m[2].trim() : part.trim();
+          if (itemName) entries.push({ itemName, ts });
+        }
+      }
+      seedWindow(entries);
+    } catch (err) {
+      logger.warn({ err }, "Could not seed spike detector from filing history \u2014 window starts empty");
+    }
   });
-  client.on(import_discord9.Events.GuildCreate, async (guild) => {
+  client.on(import_discord10.Events.GuildCreate, async (guild) => {
     if (guild.id === guildId) {
       logger.info({ guildName: guild.name }, "Bot joined the target guild \u2014 registering commands");
       await registerCommands(token, clientId, guildId);
     }
   });
-  client.on(import_discord9.Events.InteractionCreate, async (interaction) => {
+  client.on(import_discord10.Events.InteractionCreate, async (interaction) => {
     try {
       if (interaction.isChatInputCommand()) {
         if (interaction.commandName === "filing") {
@@ -77493,6 +77771,8 @@ async function startBot() {
           await handleSearchCommand(interaction);
         } else if (interaction.commandName === "panel") {
           await handlePanelCommand(interaction);
+        } else if (interaction.commandName === "flock") {
+          await handleFlockCommand(interaction);
         }
       } else if (interaction.isButton()) {
         if (interaction.customId === PANEL_BUTTON_ID) {

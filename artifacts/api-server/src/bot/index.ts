@@ -22,6 +22,7 @@ import { robloxCommand, handleRobloxCommand } from "./commands/roblox";
 import { groupsCommand, handleGroupsCommand } from "./commands/groups";
 import { searchCommand, handleSearchCommand } from "./commands/search";
 import { panelCommand, handlePanelCommand, handlePanelButton, PANEL_BUTTON_ID } from "./commands/panel";
+import { flockCommand, handleFlockCommand } from "./commands/flock";
 import { getFilings } from "./sheets";
 import { seedWindow } from "./spike-detector";
 
@@ -33,6 +34,7 @@ const commands = [
   groupsCommand.toJSON(),
   searchCommand.toJSON(),
   panelCommand.toJSON(),
+  flockCommand.toJSON(),
 ];
 
 function buildInviteUrl(clientId: string): string {
@@ -134,6 +136,8 @@ export async function startBot(): Promise<void> {
           await handleSearchCommand(interaction);
         } else if (interaction.commandName === "panel") {
           await handlePanelCommand(interaction);
+        } else if (interaction.commandName === "flock") {
+          await handleFlockCommand(interaction);
         }
       } else if (interaction.isButton()) {
         if (interaction.customId === PANEL_BUTTON_ID) {
