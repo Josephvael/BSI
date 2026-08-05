@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { recordAndDetect, _resetForTest } from "./spike-detector";
+import { recordAndDetect, seedWindow, _resetForTest } from "./spike-detector";
 
 // The module reads env vars at load time; defaults are threshold=3, window=1h, cooldown=2h.
 // We control "now" with vitest fake timers so we can move time forward without sleeping.
@@ -226,5 +226,160 @@ describe("multiple different items tracked independently", () => {
     expect(spikes).toHaveLength(1);
     expect(spikes[0].itemName).toBe("Taser Cartridge");
     expect(spikes[0].count).toBe(3);
+  });
+});
+
+// ─── seedWindow() behaviour ───────────────────────────────────────────────────
+
+describe("seedWindow: entries outside the window are ignored", () => {
+  it("does not load entries older than WINDOW_MS", () => {
+    const now = new Date("2025-06-01T10:00:00Z").getTime();
+    vi.setSystemTime(now);
+
+    // Provide THRESHOLD entries, all expired
+    const staleTs = now - WINDOW_MS - 1;
+    seedWindow([
+      { itemName: "Old Rifle", ts: staleTs },
+      { itemName: "Old Rifle", ts: staleTs },
+      { itemName: "Old Rifle", ts: staleTs },
+    ]);
+
+    // recordAndDetect with 0 new filings — stale entries must not count
+    const spikes = recordAndDetect(items("Old Rifle"));
+    // Only 1 entry added now, far below threshold
+    expect(spikes).toHaveLength(0);
+  });
+
+  it("loads entries right at the window boundary (ts === cutoff is included)", () => {
+    const now = new Date("2025-06-01T10:00:00Z").getTime();
+    vi.setSystemTime(now);
+
+    // Use distinct timestamps at and just after the cutoff so dedup doesn't collapse them
+    const cutoff = now - WINDOW_MS;
+    seedWindow([
+      { itemName: "Edge Case Gun", ts: cutoff },
+      { itemName: "Edge Case Gun", ts: cutoff + 1 }, // distinct ts
+    ]);
+
+    // 2 seeded + 1 new = 3 = threshold
+    const spikes = recordAndDetect(items("Edge Case Gun"));
+    expect(spikes).toHaveLength(1);
+    expect(spikes[0].itemName).toBe("Edge Case Gun");
+    expect(spikes[0].count).toBe(THRESHOLD);
+  });
+});
+
+describe("seedWindow: entries inside the window are loaded", () => {
+  it("seeded entries count toward the spike threshold", () => {
+    const now = new Date("2025-06-01T10:00:00Z").getTime();
+    vi.setSystemTime(now);
+
+    // Seed THRESHOLD-1 entries — not enough to spike on their own
+    const recentTs = now - WINDOW_MS / 2;
+    seedWindow([
+      { itemName: "Blocker Grenade", ts: recentTs },
+      { itemName: "Blocker Grenade", ts: recentTs + 1 }, // distinct ts to avoid dedup
+    ]);
+
+    // One new filing pushes it over
+    const spikes = recordAndDetect(items("Blocker Grenade"));
+    expect(spikes).toHaveLength(1);
+    expect(spikes[0].itemName).toBe("Blocker Grenade");
+  });
+
+  it("seeded entries alone do NOT fire an alert — only recordAndDetect does", () => {
+    const now = new Date("2025-06-01T10:00:00Z").getTime();
+    vi.setSystemTime(now);
+
+    const recentTs = now - WINDOW_MS / 4;
+    // Seed more than threshold entries — no alert should fire from seed alone
+    seedWindow([
+      { itemName: "Silent Gun", ts: recentTs },
+      { itemName: "Silent Gun", ts: recentTs },
+      { itemName: "Silent Gun", ts: recentTs },
+      { itemName: "Silent Gun", ts: recentTs },
+    ]);
+
+    // No recordAndDetect call yet — nothing fires
+    // Verify by calling recordAndDetect with a different item
+    const spikes = recordAndDetect(items("Different Item"));
+    expect(spikes).toHaveLength(0); // Silent Gun not in this filing, Different Item below threshold
+  });
+});
+
+describe("seedWindow: duplicate calls don't double-count entries", () => {
+  it("calling seedWindow twice with the same entries does not inflate the count", () => {
+    const now = new Date("2025-06-01T10:00:00Z").getTime();
+    vi.setSystemTime(now);
+
+    const recentTs = now - WINDOW_MS / 2;
+    const entry = { itemName: "Dupe Pistol", ts: recentTs };
+
+    // Seed THRESHOLD-1 entries twice — should not double
+    seedWindow([entry, entry]); // 2 unique by ts+name — actually same key, so only 1 inserted
+    seedWindow([entry, entry]); // second call: already present, skip
+
+    // With only 1 entry in the window, need 2 more to reach threshold
+    recordAndDetect(items("Dupe Pistol")); // count = 2
+    const spikes = recordAndDetect(items("Dupe Pistol")); // count = 3 = threshold
+    expect(spikes).toHaveLength(1);
+    expect(spikes[0].count).toBe(THRESHOLD);
+  });
+
+  it("seeding distinct timestamps for the same item adds each one exactly once", () => {
+    const now = new Date("2025-06-01T10:00:00Z").getTime();
+    vi.setSystemTime(now);
+
+    const ts1 = now - 30 * 60_000; // 30 min ago
+    const ts2 = now - 20 * 60_000; // 20 min ago
+
+    // Two genuinely distinct entries
+    seedWindow([{ itemName: "Sniper X", ts: ts1 }, { itemName: "Sniper X", ts: ts2 }]);
+    // Seed same two again — should not add duplicates
+    seedWindow([{ itemName: "Sniper X", ts: ts1 }, { itemName: "Sniper X", ts: ts2 }]);
+
+    // 2 seeded (not 4) + 1 new = 3 = threshold
+    const spikes = recordAndDetect(items("Sniper X"));
+    expect(spikes).toHaveLength(1);
+    expect(spikes[0].count).toBe(THRESHOLD);
+  });
+});
+
+describe("seedWindow: cooldowns remain cleared after seeding", () => {
+  it("does not set cooldowns — next filing can trigger an alert immediately", () => {
+    const now = new Date("2025-06-01T10:00:00Z").getTime();
+    vi.setSystemTime(now);
+
+    // Seed exactly threshold entries
+    const ts = now - 10 * 60_000; // 10 min ago
+    seedWindow([
+      { itemName: "Revolver", ts },
+      { itemName: "Revolver", ts: ts + 1 },
+      { itemName: "Revolver", ts: ts + 2 },
+    ]);
+
+    // If seedWindow had set a cooldown, this would return no spikes
+    const spikes = recordAndDetect(items("Revolver")); // count = 4, no cooldown set → fires
+    expect(spikes).toHaveLength(1);
+    expect(spikes[0].itemName).toBe("Revolver");
+  });
+
+  it("seed + one new filing fires immediately after a simulated restart", () => {
+    // This is the core restart scenario:
+    // Bot restarted mid-spike; history has THRESHOLD-1 entries; next filing must trigger alert.
+    const now = new Date("2025-06-01T10:00:00Z").getTime();
+    vi.setSystemTime(now);
+
+    const recentTs = now - 15 * 60_000;
+    seedWindow([
+      { itemName: "Combat Knife", ts: recentTs },
+      { itemName: "Combat Knife", ts: recentTs + 60_000 },
+    ]); // 2 entries — THRESHOLD-1
+
+    // First new filing after restart — should cross threshold and alert
+    const spikes = recordAndDetect(items("Combat Knife"));
+    expect(spikes).toHaveLength(1);
+    expect(spikes[0].itemName).toBe("Combat Knife");
+    expect(spikes[0].count).toBe(THRESHOLD);
   });
 });
